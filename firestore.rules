@@ -1,0 +1,126 @@
+rules_version = '2';
+
+// Reglas de seguridad de Firestore para Consorcio Transparente.
+// Se suben desde la consola de Firebase (Firestore Database > Reglas) o con
+// `firebase deploy --only firestore:rules` una vez configurado el Firebase CLI.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function myRole() {
+      return isSignedIn() ? myProfile().role : "";
+    }
+
+    function myBuildingId() {
+      return isSignedIn() ? myProfile().buildingId : "";
+    }
+
+    function isAdmin() {
+      return myRole() == "ADMINISTRADOR";
+    }
+
+    function isEncargadoOrAdmin() {
+      return myRole() == "ADMINISTRADOR" || myRole() == "ENCARGADO";
+    }
+
+    function belongsToBuilding(buildingId) {
+      return isSignedIn() && myBuildingId() == buildingId;
+    }
+
+    // users/{uid}: cada usuario lee y edita sólo su propio perfil.
+    // El cambio de rol (INQUILINO -> ADMINISTRADOR/ENCARGADO) normalmente sólo lo hace
+    // otro Administrador, con una excepción de "bootstrap": un INQUILINO sin edificio
+    // asignado puede autopromoverse a ADMINISTRADOR en el mismo momento en que se le
+    // asigna el buildingId de un edificio recién creado por él (ver HU-09 / BuildingRepository).
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        (request.auth.uid == uid && request.resource.data.role == resource.data.role) ||
+        (request.auth.uid == uid && resource.data.buildingId == "" && resource.data.role == "INQUILINO"
+          && request.resource.data.role == "ADMINISTRADOR" && request.resource.data.buildingId != "")
+      );
+    }
+
+    match /buildings/{buildingId} {
+      allow read: if belongsToBuilding(buildingId);
+      // Bootstrap: un usuario sin edificio puede crear uno nuevo declarándose su admin.
+      allow create: if isSignedIn() && myBuildingId() == "" && request.resource.data.adminUid == request.auth.uid;
+      allow update: if isAdmin() && belongsToBuilding(buildingId);
+
+      // HU-01: un gasto sólo puede quedar VERIFICADO si tiene receiptUrl cargado.
+      // Sin foto, sólo puede grabarse como BLOQUEADO (equivalente al HTTP 400 de la historia).
+      match /expenses/{expenseId} {
+        allow read: if belongsToBuilding(buildingId);
+        allow create: if belongsToBuilding(buildingId) &&
+          (request.resource.data.status != "VERIFICADO" || request.resource.data.receiptUrl.size() > 0);
+        allow update, delete: if isEncargadoOrAdmin() && belongsToBuilding(buildingId);
+      }
+
+      // HU-02: sólo el Administrador crea votaciones, y sólo con 2+ opciones.
+      match /votes/{voteId} {
+        allow read: if belongsToBuilding(buildingId);
+        allow create: if isAdmin() && belongsToBuilding(buildingId) &&
+          request.resource.data.options.size() >= 2;
+        allow update: if isAdmin() && belongsToBuilding(buildingId);
+
+        // Un voto por usuario: el id del documento es su propio uid, así Firestore
+        // rechaza un segundo intento de "create" sobre el mismo documento.
+        match /responses/{voterUid} {
+          allow read: if belongsToBuilding(buildingId);
+          allow create: if belongsToBuilding(buildingId) && request.auth.uid == voterUid;
+          allow update, delete: if false;
+        }
+      }
+
+      // HU-05: toda publicación nace PENDIENTE; sólo el Administrador puede aprobarla
+      // (moderación previa) o borrarla.
+      match /posts/{postId} {
+        allow read: if belongsToBuilding(buildingId);
+        allow create: if belongsToBuilding(buildingId) && request.resource.data.status == "PENDIENTE";
+        allow update, delete: if isAdmin() && belongsToBuilding(buildingId);
+      }
+
+      match /reservations/{reservationId} {
+        allow read: if belongsToBuilding(buildingId);
+        allow create: if belongsToBuilding(buildingId) && request.resource.data.reservedByUid == request.auth.uid;
+        // HU-06: el propio usuario edita/cancela su reserva; el Administrador, cualquiera.
+        allow update, delete: if belongsToBuilding(buildingId) &&
+          (resource.data.reservedByUid == request.auth.uid || isAdmin());
+      }
+
+      // HU-10: el Encargado/Administrador gestiona el ciclo del ticket (presupuesto,
+      // comprobante de compra); el propio inquilino que lo reportó también puede subir
+      // el comprobante de pago cuando el ticket ya está en estado A_COBRAR (Escenario 3:
+      // "permite que tanto el Encargado como el inquilino suban el comprobante de pago").
+      match /tickets/{ticketId} {
+        allow read: if belongsToBuilding(buildingId);
+        allow create: if belongsToBuilding(buildingId) && request.resource.data.reportedByUid == request.auth.uid;
+        allow update: if belongsToBuilding(buildingId) && (
+          isEncargadoOrAdmin() ||
+          (resource.data.reportedByUid == request.auth.uid && resource.data.status == "A_COBRAR")
+        );
+      }
+    }
+
+    // Directorio global de proveedores (HU-08): sólo el Administrador da de alta/edita/borra.
+    match /providers/{providerId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+
+      match /reviews/{reviewId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && request.resource.data.authorUid == request.auth.uid;
+        allow update, delete: if isAdmin();
+      }
+    }
+  }
+}

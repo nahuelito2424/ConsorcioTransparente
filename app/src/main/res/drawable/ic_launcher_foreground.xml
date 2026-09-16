@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Silueta simple de edificio, en blanco, dentro de la zona segura del icono adaptativo -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,30 L74,30 L74,84 L34,84 Z" />
+    <path
+        android:fillColor="#1A3A6B"
+        android:pathData="M42,40 L50,40 L50,48 L42,48 Z" />
+    <path
+        android:fillColor="#1A3A6B"
+        android:pathData="M58,40 L66,40 L66,48 L58,48 Z" />
+    <path
+        android:fillColor="#1A3A6B"
+        android:pathData="M42,56 L50,56 L50,64 L42,64 Z" />
+    <path
+        android:fillColor="#1A3A6B"
+        android:pathData="M58,56 L66,56 L66,64 L58,64 Z" />
+    <path
+        android:fillColor="#1A3A6B"
+        android:pathData="M46,70 L62,70 L62,84 L46,84 Z" />
+</vector>

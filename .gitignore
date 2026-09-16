@@ -1,0 +1,14 @@
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+build/
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+node_modules/
+
+# Reemplazá el google-services.json de plantilla por el real y NO lo subas a un repo público
+# (si el repo es privado no hay problema en versionarlo).

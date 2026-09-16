@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Alias para dispositivos API 24-25 (los adaptive icons de mipmap-anydpi-v26
+      requieren API 26+). Reutiliza el mismo layer-list como ícono de fallback.
+    -->
+    <item name="ic_launcher" type="mipmap">@drawable/ic_launcher_fallback</item>
+    <item name="ic_launcher_round" type="mipmap">@drawable/ic_launcher_fallback</item>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Paleta tomada del wireframe consorcio_transparente_wireframes.html -->
+    <color name="navy">#1A3A6B</color>
+    <color name="navy_dark">#0F2647</color>
+    <color name="blue_accent">#3B82F6</color>
+    <color name="blue_light">#93C5FD</color>
+
+    <color name="background">#F5F6F8</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_secondary">#F1F3F5</color>
+    <color name="border">#E5E7EB</color>
+
+    <color name="text_primary">#111827</color>
+    <color name="text_secondary">#6B7280</color>
+
+    <color name="tag_green_bg">#D1FAE5</color>
+    <color name="tag_green_fg">#065F46</color>
+    <color name="tag_blue_bg">#DBEAFE</color>
+    <color name="tag_blue_fg">#1E40AF</color>
+    <color name="tag_orange_bg">#FFEDD5</color>
+    <color name="tag_orange_fg">#9A3412</color>
+    <color name="tag_red_bg">#FEE2E2</color>
+    <color name="tag_red_fg">#991B1B</color>
+    <color name="tag_yellow_bg">#FEF9C3</color>
+    <color name="tag_yellow_fg">#854D0E</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>

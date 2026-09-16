@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/dashboardFragment"
+        android:icon="@drawable/ic_nav_home"
+        android:title="@string/nav_home" />
+    <item
+        android:id="@+id/facturasFragment"
+        android:icon="@drawable/ic_nav_facturas"
+        android:title="@string/nav_facturas" />
+    <item
+        android:id="@+id/votacionesFragment"
+        android:icon="@drawable/ic_nav_votar"
+        android:title="@string/nav_votar" />
+    <item
+        android:id="@+id/muroFragment"
+        android:icon="@drawable/ic_nav_muro"
+        android:title="@string/nav_muro" />
+    <item
+        android:id="@+id/masFragment"
+        android:icon="@drawable/ic_nav_mas"
+        android:title="@string/nav_mas" />
+</menu>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Consorcio Transparente</string>
+
+    <string name="login_title">Consorcio Transparente</string>
+    <string name="login_subtitle">Iniciá sesión para ver el estado de tu edificio</string>
+    <string name="email_hint">Correo electrónico</string>
+    <string name="password_hint">Contraseña</string>
+    <string name="login_button">Ingresar</string>
+    <string name="no_account">¿No tenés cuenta? Registrate</string>
+
+    <string name="register_title">Crear cuenta</string>
+    <string name="name_hint">Nombre y apellido</string>
+    <string name="register_button">Crear cuenta</string>
+    <string name="have_account">Ya tengo cuenta, iniciar sesión</string>
+
+    <string name="nav_home">Inicio</string>
+    <string name="nav_facturas">Facturas</string>
+    <string name="nav_votar">Votar</string>
+    <string name="nav_muro">Muro</string>
+    <string name="nav_mas">Más</string>
+
+    <string name="al_dia">Al día</string>
+    <string name="quick_actions">Acciones rápidas</string>
+    <string name="building_news">Novedades del edificio</string>
+
+    <string name="facturas_title">Facturas del mes</string>
+    <string name="add_expense">Cargar gasto</string>
+    <string name="add_expense_title">Nuevo gasto</string>
+    <string name="category_hint">Categoría (ej. Plomería, Ascensor)</string>
+    <string name="provider_hint">Proveedor / responsable</string>
+    <string name="amount_hint">Monto</string>
+    <string name="attach_photo">Adjuntar foto de la factura</string>
+    <string name="photo_required">El comprobante es obligatorio: no se puede guardar un gasto sin foto de la factura.</string>
+    <string name="save">Guardar</string>
+
+    <string name="coming_soon_title">Próximamente</string>
+    <string name="coming_soon_body">Esta función está en desarrollo. Va a estar disponible en una próxima entrega del proyecto.</string>
+
+    <string name="logout">Cerrar sesión</string>
+
+    <string name="votaciones_title">Votaciones</string>
+    <string name="vote_active">Activa</string>
+    <string name="vote_closed">Cerrada</string>
+    <string name="vote_already_voted">Ya votaste</string>
+    <string name="vote_no_votes">Todavía no hay votaciones cargadas para tu edificio.</string>
+    <string name="vote_new">Nueva votación</string>
+    <string name="vote_submit">Emitir voto</string>
+    <string name="vote_title_hint">Tema de la votación</string>
+    <string name="vote_description_hint">Descripción / contexto</string>
+    <string name="vote_option_hint">Opción %1$d</string>
+    <string name="vote_add_option">+ Agregar opción</string>
+    <string name="vote_pick_deadline">Elegir fecha de cierre</string>
+    <string name="vote_create">Crear votación</string>
+    <string name="vote_total_votes">%1$d votos emitidos</string>
+
+    <string name="muro_title">Muro</string>
+    <string name="muro_empty">Todavía no hay publicaciones aprobadas en el muro.</string>
+    <string name="muro_new_post">Publicar</string>
+    <string name="muro_moderation_banner">🕓 %1$d publicación(es) esperando tu aprobación</string>
+    <string name="post_title_hint">Título</string>
+    <string name="post_body_hint">Texto de la publicación</string>
+    <string name="post_attach_image">Adjuntar imagen (opcional)</string>
+    <string name="post_publish">Enviar a moderación</string>
+    <string name="post_pending_notice">Tu publicación se envió al Administrador y va a aparecer en el muro apenas la apruebe.</string>
+    <string name="moderation_title">Moderación del muro</string>
+    <string name="moderation_empty">No hay publicaciones pendientes.</string>
+    <string name="approve">Aprobar</string>
+    <string name="reject">Rechazar</string>
+
+    <string name="reservas_title">Reserva de espacios comunes</string>
+    <string name="reservas_pick_date">Elegir fecha</string>
+    <string name="reservas_slot_free">Libre</string>
+    <string name="reservas_slot_taken">Ocupado</string>
+    <string name="reservas_slot_mine">Tu reserva</string>
+    <string name="reservas_my_reservations">Mis próximas reservas</string>
+    <string name="reservas_none">Todavía no tenés reservas.</string>
+    <string name="reservas_confirm_title">Confirmar reserva</string>
+    <string name="reservas_confirm_message">%1$s el %2$s de %3$s. ¿Confirmás?</string>
+    <string name="reservas_cancel">Cancelar</string>
+    <string name="reservas_edit">Editar</string>
+    <string name="reservas_cancel_too_late">Sólo podés cancelar o editar con al menos 24 horas de anticipación.</string>
+    <string name="reservas_editing_notice">Elegí el nuevo día y horario para tu reserva de %1$s.</string>
+
+    <string name="building_config_title_new">Creá tu edificio</string>
+    <string name="building_config_title_edit">Configuración del edificio</string>
+    <string name="building_name_hint">Nombre del edificio</string>
+    <string name="building_address_hint">Dirección</string>
+    <string name="building_charges_rent">Cobra alquiler</string>
+    <string name="building_charges_expenses">Cobra expensas</string>
+    <string name="building_rent_due_day">Día de vencimiento del alquiler (1-28)</string>
+    <string name="building_expenses_due_day">Día de vencimiento de expensas (1-28)</string>
+    <string name="building_reminder_days">Días de anticipación para la notificación</string>
+    <string name="building_has_encargado">El edificio tiene Encargado</string>
+    <string name="building_amenities_hint">Espacios comunes, separados por coma (ej. SUM, Parrilla)</string>
+    <string name="building_save_new">Crear edificio</string>
+    <string name="building_save_edit">Guardar cambios</string>
+    <string name="building_config_error_no_concept">Elegí al menos un concepto para cobrar (alquiler y/o expensas).</string>
+    <string name="building_config_menu_item">⚙️ Configuración del edificio</string>
+
+    <string name="tickets_menu_item">🔧 Tickets de mantenimiento</string>
+    <string name="tickets_title">Tickets de mantenimiento</string>
+    <string name="tickets_empty">Todavía no hay tickets cargados.</string>
+    <string name="tickets_new">Reportar problema</string>
+    <string name="ticket_category_hint">Categoría (Plomería, Electricidad, Gas, Albañilería, Otro)</string>
+    <string name="ticket_description_hint">Describí el problema</string>
+    <string name="ticket_attach_photo">Adjuntar foto del problema (opcional)</string>
+    <string name="ticket_report">Reportar</string>
+    <string name="ticket_status_reportado">Reportado</string>
+    <string name="ticket_status_en_presupuesto">En presupuesto</string>
+    <string name="ticket_status_a_cobrar">A cobrar</string>
+    <string name="ticket_status_resuelto">Resuelto</string>
+    <string name="ticket_budget_hint">Monto estimado (dejalo en 0 para \"a cotizar\")</string>
+    <string name="ticket_save_budget">Guardar presupuesto</string>
+    <string name="ticket_real_amount_hint">Monto real de la compra</string>
+    <string name="ticket_attach_purchase_receipt">Adjuntar comprobante de compra</string>
+    <string name="ticket_confirm_purchase">Confirmar compra y pasar a cobrar</string>
+    <string name="ticket_amount_to_pay">Monto a pagar: %1$s</string>
+    <string name="ticket_mark_paid">Adjuntar comprobante de pago</string>
+    <string name="ticket_resolved_notice">Este ticket está resuelto y archivado para auditoría.</string>
+    <string name="ticket_to_quote">A cotizar</string>
+</resources>
