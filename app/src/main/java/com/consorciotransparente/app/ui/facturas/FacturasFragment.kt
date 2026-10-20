@@ -38,7 +38,7 @@ class FacturasFragment : Fragment() {
         binding.recyclerExpenses.adapter = adapter
 
         binding.swipeRefresh.setOnRefreshListener { viewModel.load() }
-        binding.fabAddExpense.setOnClickListener {
+        binding.buttonAddExpense.setOnClickListener {
             startActivity(Intent(requireContext(), AddExpenseActivity::class.java))
         }
 

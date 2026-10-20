@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Consorcio Transparente</string>
+    <string name="back">Volver</string>
 
     <string name="login_title">Consorcio Transparente</string>
     <string name="login_subtitle">Iniciá sesión para ver el estado de tu edificio</string>
@@ -99,6 +100,10 @@
     <string name="building_config_menu_item">⚙️ Configuración del edificio</string>
 
     <string name="tickets_menu_item">🔧 Tickets de mantenimiento</string>
+    <string name="simple_mode_item">🔎 Modo simple (letra más grande)</string>
+    <string name="dashboard_simple_expenses">Ver mis facturas</string>
+    <string name="dashboard_simple_ticket">Reclamar un problema</string>
+    <string name="dashboard_simple_news">Ver avisos</string>
     <string name="tickets_title">Tickets de mantenimiento</string>
     <string name="tickets_empty">Todavía no hay tickets cargados.</string>
     <string name="tickets_new">Reportar problema</string>

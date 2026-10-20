@@ -18,6 +18,21 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Flavor "mock": permite probar toda la app sin un proyecto Firebase real (ver
+    // RepositoryProvider y data/repository/mock/). "prod" es el comportamiento de
+    // siempre, contra Firebase real.
+    flavorDimensions += "environment"
+    productFlavors {
+        create("mock") {
+            dimension = "environment"
+            buildConfigField("boolean", "USE_MOCK_DATA", "true")
+        }
+        create("prod") {
+            dimension = "environment"
+            buildConfigField("boolean", "USE_MOCK_DATA", "false")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -36,6 +51,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 

@@ -24,6 +24,7 @@
         android:background="@color/surface"
         app:itemIconTint="@color/navy"
         app:itemTextColor="@color/navy"
+        app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -30,7 +30,7 @@
             android:layout_marginTop="2dp"
             android:maxLines="2"
             android:ellipsize="end"
-            android:textColor="@color/text_secondary"
+            android:textColor="?attr/colorTextSecondary"
             android:textSize="11sp"
             tools:text="Pérdida de agua en la cañería del piso 3" />
     </LinearLayout>

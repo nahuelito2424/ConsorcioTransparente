@@ -3,14 +3,14 @@ package com.consorciotransparente.app.ui.tickets
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.consorciotransparente.app.databinding.ActivityTicketsBinding
 import com.consorciotransparente.app.util.Resource
 
 /** HU-10: cola de tickets (Encargado/Administrador) o mis reportes (Inquilino). */
-class TicketsActivity : AppCompatActivity() {
+class TicketsActivity : BaseActivity() {
 
     private lateinit var binding: ActivityTicketsBinding
     private val viewModel: TicketsViewModel by lazy {
@@ -33,8 +33,9 @@ class TicketsActivity : AppCompatActivity() {
         binding.recyclerTickets.layoutManager = LinearLayoutManager(this)
         binding.recyclerTickets.adapter = adapter
 
+        binding.buttonBack.setOnClickListener { finish() }
         binding.swipeRefresh.setOnRefreshListener { viewModel.load() }
-        binding.fabNewTicket.setOnClickListener {
+        binding.buttonNewTicket.setOnClickListener {
             startActivity(Intent(this, CreateTicketActivity::class.java))
         }
 

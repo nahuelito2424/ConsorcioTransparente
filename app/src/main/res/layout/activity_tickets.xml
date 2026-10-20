@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipeRefresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
-
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefresh"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="16dp">
+
+            <ImageButton
+                android:id="@+id/buttonBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="start"
+                android:layout_marginBottom="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/back"
+                android:src="@drawable/ic_back"
+                android:tint="@color/navy" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -33,7 +40,7 @@
                 android:background="@drawable/bg_card"
                 android:padding="14dp"
                 android:text="@string/tickets_empty"
-                android:textColor="@color/text_secondary"
+                android:textColor="?attr/colorTextSecondary"
                 android:textSize="12sp"
                 android:visibility="gone" />
 
@@ -44,18 +51,17 @@
                 android:layout_weight="1"
                 android:clipToPadding="false"
                 tools:listitem="@layout/item_ticket" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonNewTicket"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/navy"
+                android:paddingVertical="12dp"
+                android:text="@string/tickets_new"
+                android:textAllCaps="false"
+                app:icon="@drawable/ic_nav_mas"
+                app:iconTint="@color/white" />
         </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabNewTicket"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="20dp"
-        android:backgroundTint="@color/navy"
-        android:contentDescription="@string/tickets_new"
-        android:src="@drawable/ic_nav_mas"
-        app:tint="@color/white" />
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>

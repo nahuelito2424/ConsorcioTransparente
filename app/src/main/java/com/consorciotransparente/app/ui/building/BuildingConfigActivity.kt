@@ -2,7 +2,7 @@ package com.consorciotransparente.app.ui.building
 
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.R
 import com.consorciotransparente.app.data.model.Building
@@ -14,7 +14,7 @@ import com.consorciotransparente.app.util.Resource
  * edificio: si el usuario todavía no tiene buildingId, esta misma pantalla lo crea
  * y lo promueve a Administrador (ver BuildingRepository.createBuilding).
  */
-class BuildingConfigActivity : AppCompatActivity() {
+class BuildingConfigActivity : BaseActivity() {
 
     private lateinit var binding: ActivityBuildingConfigBinding
     private val viewModel: BuildingConfigViewModel by lazy {
@@ -53,6 +53,7 @@ class BuildingConfigActivity : AppCompatActivity() {
             }
         }
 
+        binding.buttonBack.setOnClickListener { finish() }
         binding.buttonSave.setOnClickListener { onSaveClicked() }
 
         viewModel.load()

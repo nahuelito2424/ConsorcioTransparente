@@ -8,14 +8,15 @@ import com.consorciotransparente.app.data.model.User
 import com.consorciotransparente.app.data.repository.AuthRepository
 import com.consorciotransparente.app.data.repository.DashboardRepository
 import com.consorciotransparente.app.data.repository.DashboardSummary
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.util.Resource
 import kotlinx.coroutines.launch
 
 data class DashboardUiState(val user: User?, val summary: DashboardSummary)
 
 class DashboardViewModel(
-    private val authRepo: AuthRepository = AuthRepository(),
-    private val dashboardRepo: DashboardRepository = DashboardRepository()
+    private val authRepo: AuthRepository = RepositoryProvider.auth,
+    private val dashboardRepo: DashboardRepository = RepositoryProvider.dashboard
 ) : ViewModel() {
 
     private val _state = MutableLiveData<Resource<DashboardUiState>>()

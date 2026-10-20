@@ -2,7 +2,7 @@ package com.consorciotransparente.app.ui.muro
 
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.consorciotransparente.app.databinding.ActivityModerationBinding
@@ -14,7 +14,7 @@ import com.consorciotransparente.app.util.Resource
  * y las reglas de Firestore además rechazan approvePost/rejectPost si quien llama no
  * tiene rol ADMINISTRADOR — así que aunque alguien fuerce el Intent, no puede aprobar nada.
  */
-class ModerationActivity : AppCompatActivity() {
+class ModerationActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_BUILDING_ID = "buildingId"
@@ -32,6 +32,8 @@ class ModerationActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         buildingId = intent.getStringExtra(EXTRA_BUILDING_ID).orEmpty()
+
+        binding.buttonBack.setOnClickListener { finish() }
 
         val adapter = ModerationAdapter(
             onApprove = { post -> viewModel.approve(buildingId, post.id) },

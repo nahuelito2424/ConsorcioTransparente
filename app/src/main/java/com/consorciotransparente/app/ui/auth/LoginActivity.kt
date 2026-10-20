@@ -2,14 +2,14 @@ package com.consorciotransparente.app.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.MainActivity
-import com.consorciotransparente.app.data.repository.AuthRepository
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.databinding.ActivityLoginBinding
 import com.consorciotransparente.app.util.Resource
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : BaseActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private val viewModel: LoginViewModel by lazy {
@@ -22,7 +22,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Si ya hay una sesión activa, saltamos directo al dashboard.
-        if (AuthRepository().currentUid != null) {
+        if (RepositoryProvider.auth.currentUid != null) {
             goToMain()
             return
         }

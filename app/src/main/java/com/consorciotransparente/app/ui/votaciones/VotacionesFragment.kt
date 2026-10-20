@@ -43,7 +43,7 @@ class VotacionesFragment : Fragment() {
         binding.recyclerVotes.adapter = adapter
 
         binding.swipeRefresh.setOnRefreshListener { viewModel.load() }
-        binding.fabCreateVote.setOnClickListener {
+        binding.buttonCreateVote.setOnClickListener {
             startActivity(Intent(requireContext(), CreateVoteActivity::class.java).putExtra(
                 CreateVoteActivity.EXTRA_BUILDING_ID, currentBuildingId
             ))
@@ -55,7 +55,7 @@ class VotacionesFragment : Fragment() {
                 currentBuildingId = state.data.buildingId
                 adapter.submitList(state.data.items)
                 binding.textEmpty.visibility = if (state.data.items.isEmpty()) View.VISIBLE else View.GONE
-                binding.fabCreateVote.visibility = if (state.data.isAdmin) View.VISIBLE else View.GONE
+                binding.buttonCreateVote.visibility = if (state.data.isAdmin) View.VISIBLE else View.GONE
             }
         }
     }

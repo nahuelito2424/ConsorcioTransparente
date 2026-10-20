@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.R
 import com.consorciotransparente.app.data.model.Reservation
@@ -20,7 +20,7 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /** HU-06: disponibilidad por franja, reserva, edición y cancelación (con margen de 24hs). */
-class ReservasActivity : AppCompatActivity() {
+class ReservasActivity : BaseActivity() {
 
     private lateinit var binding: ActivityReservasBinding
     private val viewModel: ReservasViewModel by lazy {
@@ -37,6 +37,7 @@ class ReservasActivity : AppCompatActivity() {
         binding = ActivityReservasBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.buttonBack.setOnClickListener { finish() }
         binding.buttonPickDate.setOnClickListener { showDatePicker() }
 
         viewModel.state.observe(this) { state ->

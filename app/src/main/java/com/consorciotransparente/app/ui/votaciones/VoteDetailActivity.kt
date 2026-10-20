@@ -6,13 +6,13 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.databinding.ActivityVoteDetailBinding
 import com.consorciotransparente.app.util.Resource
 
 /** HU-02: emitir un voto (Escenario 1) o ver los resultados (Escenario 3) si ya cerró o ya votaste. */
-class VoteDetailActivity : AppCompatActivity() {
+class VoteDetailActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_BUILDING_ID = "buildingId"
@@ -33,6 +33,8 @@ class VoteDetailActivity : AppCompatActivity() {
 
         buildingId = intent.getStringExtra(EXTRA_BUILDING_ID).orEmpty()
         voteId = intent.getStringExtra(EXTRA_VOTE_ID).orEmpty()
+
+        binding.buttonBack.setOnClickListener { finish() }
 
         binding.buttonSubmit.setOnClickListener {
             val selectedId = binding.radioGroupOptions.checkedRadioButtonId

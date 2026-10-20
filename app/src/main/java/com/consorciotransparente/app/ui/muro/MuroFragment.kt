@@ -38,7 +38,7 @@ class MuroFragment : Fragment() {
         binding.recyclerPosts.adapter = adapter
 
         binding.swipeRefresh.setOnRefreshListener { viewModel.load() }
-        binding.fabNewPost.setOnClickListener {
+        binding.buttonNewPost.setOnClickListener {
             startActivity(
                 Intent(requireContext(), CreatePostActivity::class.java)
                     .putExtra(CreatePostActivity.EXTRA_BUILDING_ID, currentBuildingId)

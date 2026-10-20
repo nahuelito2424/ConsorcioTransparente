@@ -7,12 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.consorciotransparente.app.data.repository.AuthRepository
 import com.consorciotransparente.app.data.repository.MuroRepository
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.util.Resource
 import kotlinx.coroutines.launch
 
 class CreatePostViewModel(
-    private val muroRepo: MuroRepository = MuroRepository(),
-    private val authRepo: AuthRepository = AuthRepository()
+    private val muroRepo: MuroRepository = RepositoryProvider.muro,
+    private val authRepo: AuthRepository = RepositoryProvider.auth
 ) : ViewModel() {
 
     private val _state = MutableLiveData<Resource<Unit>>()

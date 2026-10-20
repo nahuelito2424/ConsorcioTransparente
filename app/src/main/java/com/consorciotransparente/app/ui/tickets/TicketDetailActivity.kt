@@ -4,7 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.consorciotransparente.app.R
@@ -16,7 +16,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 /** HU-10: una sola pantalla que muestra las acciones que corresponden según el estado del ticket. */
-class TicketDetailActivity : AppCompatActivity() {
+class TicketDetailActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_BUILDING_ID = "buildingId"
@@ -55,6 +55,8 @@ class TicketDetailActivity : AppCompatActivity() {
 
         buildingId = intent.getStringExtra(EXTRA_BUILDING_ID).orEmpty()
         ticketId = intent.getStringExtra(EXTRA_TICKET_ID).orEmpty()
+
+        binding.buttonBack.setOnClickListener { finish() }
 
         binding.buttonSaveBudget.setOnClickListener {
             val amount = binding.inputBudget.text?.toString()?.replace(",", ".")?.toDoubleOrNull() ?: 0.0

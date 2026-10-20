@@ -68,6 +68,32 @@ El resto de las historias (HU-03, HU-04) tienen sus modelos de datos en
 (Mercado Pago) es además la pieza que falta para que el pago del ticket en
 HU-10 sea automático en vez de un comprobante manual.
 
+## Probar la app sin crear un proyecto Firebase (flavor mock)
+
+Para instalar la app y navegarla sin pasar por el paso de Firebase de abajo, compilá el
+flavor **mock** en vez de **prod**:
+
+```bash
+./gradlew installMockDebug
+```
+
+Se loguea con una de estas 3 credenciales fijas (cualquier contraseña, no se valida),
+una por rol:
+
+| Email | Rol |
+|---|---|
+| `admin@mock.com` | Administrador |
+| `encargado@mock.com` | Encargado |
+| `inquilino@mock.com` | Inquilino |
+
+Todos comparten un mismo edificio de ejemplo con datos precargados (gastos, votación,
+publicaciones, ticket, reserva). Los tres roles no hablan con Firebase para nada — los
+datos viven en memoria mientras la app esté abierta (se reinician al matar el proceso).
+Ver `RepositoryProvider` y `data/repository/mock/` para el detalle.
+
+El flavor **prod** (el de siempre) sí necesita el proyecto Firebase real de la sección
+siguiente.
+
 ## Antes de compilar: crear el proyecto de Firebase
 
 El archivo `app/google-services.json` que está en el repo es una **plantilla con
@@ -106,11 +132,13 @@ reemplazarlo, la app compila pero ningún llamado a Firebase va a funcionar.
 ## Compilar
 
 ```bash
-./gradlew assembleDebug
+./gradlew assembleProdDebug   # contra Firebase real
+./gradlew assembleMockDebug   # sin Firebase, ver sección de arriba
 ```
 
-o abrí la carpeta directamente en Android Studio (File → Open) y corré la app
-con el botón ▶ sobre un emulador o un dispositivo conectado.
+o abrí la carpeta directamente en Android Studio (File → Open), elegí la variante
+(`prodDebug`/`mockDebug`) en el panel **Build Variants** y corré la app con el botón ▶
+sobre un emulador o un dispositivo conectado.
 
 `gradle.properties` apunta `org.gradle.java.home` al JBR de Android Studio
 instalado en esta máquina (AGP 8.11 necesita Java 17+). Si compilás desde otra

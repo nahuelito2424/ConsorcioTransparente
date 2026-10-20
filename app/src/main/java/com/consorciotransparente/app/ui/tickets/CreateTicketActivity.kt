@@ -4,12 +4,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.databinding.ActivityCreateTicketBinding
 import com.consorciotransparente.app.util.Resource
 
-class CreateTicketActivity : AppCompatActivity() {
+class CreateTicketActivity : BaseActivity() {
 
     private lateinit var binding: ActivityCreateTicketBinding
     private val viewModel: CreateTicketViewModel by lazy {
@@ -31,6 +31,7 @@ class CreateTicketActivity : AppCompatActivity() {
         binding = ActivityCreateTicketBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.buttonBack.setOnClickListener { finish() }
         binding.buttonAttachPhoto.setOnClickListener { pickImage.launch("image/*") }
 
         binding.buttonReport.setOnClickListener {

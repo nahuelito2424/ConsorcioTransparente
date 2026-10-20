@@ -4,14 +4,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.consorciotransparente.app.data.model.Building
 import com.consorciotransparente.app.data.model.Reservation
 import com.consorciotransparente.app.data.repository.AuthRepository
+import com.consorciotransparente.app.data.repository.BuildingRepository
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.data.repository.ReservationRepository
 import com.consorciotransparente.app.util.Resource
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -32,9 +31,9 @@ data class ReservasScreenState(
 )
 
 class ReservasViewModel(
-    private val reservationRepo: ReservationRepository = ReservationRepository(),
-    private val authRepo: AuthRepository = AuthRepository(),
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val reservationRepo: ReservationRepository = RepositoryProvider.reservation,
+    private val authRepo: AuthRepository = RepositoryProvider.auth,
+    private val buildingRepo: BuildingRepository = RepositoryProvider.building
 ) : ViewModel() {
 
     private val _state = MutableLiveData<Resource<ReservasScreenState>>()
@@ -63,8 +62,7 @@ class ReservasViewModel(
                     _state.value = Resource.Error("Tu usuario todavía no está asignado a un edificio.")
                     return@launch
                 }
-                val buildingSnap = db.collection("buildings").document(buildingId).get().await()
-                val building = buildingSnap.toObject(Building::class.java)
+                val building = buildingRepo.getBuilding(buildingId)
                 spaces = building?.amenities?.takeIf { it.isNotEmpty() } ?: listOf("SUM")
                 selectedSpace = spaces.first()
                 refresh()

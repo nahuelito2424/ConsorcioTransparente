@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.consorciotransparente.app.data.model.Role
 import com.consorciotransparente.app.data.model.Ticket
 import com.consorciotransparente.app.data.repository.AuthRepository
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.data.repository.TicketRepository
 import com.consorciotransparente.app.util.Resource
 import kotlinx.coroutines.launch
@@ -15,8 +16,8 @@ import kotlinx.coroutines.launch
 data class TicketDetailUiState(val ticket: Ticket, val uid: String, val canManage: Boolean)
 
 class TicketDetailViewModel(
-    private val ticketRepo: TicketRepository = TicketRepository(),
-    private val authRepo: AuthRepository = AuthRepository()
+    private val ticketRepo: TicketRepository = RepositoryProvider.ticket,
+    private val authRepo: AuthRepository = RepositoryProvider.auth
 ) : ViewModel() {
 
     private val _state = MutableLiveData<Resource<TicketDetailUiState>>()

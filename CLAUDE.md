@@ -35,11 +35,28 @@ alquiler/expensas), HU-04 (integración Mercado Pago), HU-07 (protocolos PDF), H
 
 - Kotlin, Views + ViewBinding (sin Compose), Navigation Component, MVVM con
   `ViewModel` + `LiveData`, corrutinas. Sin capa de dominio ni inyección de
-  dependencias — los `Repository` se instancian con valores por defecto de Firebase.
+  dependencias (Hilt/Koin).
+- Cada `XRepository` es una interfaz en `data/repository/` con dos implementaciones:
+  `FirebaseXRepository` (real) y `MockXRepository` en `data/repository/mock/` (datos en
+  memoria, sin Firebase). `RepositoryProvider` elige cuál instanciar según
+  `BuildConfig.USE_MOCK_DATA`, que fija el product flavor (`prod`/`mock`, ver
+  `app/build.gradle.kts`). Cada `ViewModel` sigue tomando el repo como default value en
+  su constructor (`= RepositoryProvider.foo`), no un contenedor de DI. El flavor `mock`
+  se loguea con `admin@mock.com` / `encargado@mock.com` / `inquilino@mock.com`
+  (cualquier contraseña) — ver README para el detalle.
+- **Modo simple** (accesibilidad): toggle en Más que guarda `SimpleModePrefs`
+  (`SharedPreferences` del dispositivo). Todas las Activity heredan de `ui/BaseActivity`
+  en vez de `AppCompatActivity` directo; cuando el modo está prendido, aplica letra más
+  grande app-wide (`Configuration.fontScale` en `attachBaseContext`) y cambia el texto
+  secundario a negro pleno (tema `Theme.ConsorcioTransparente.Simple`, atributo
+  `?attr/colorTextSecondary` — no usar `@color/text_secondary` directo en layouts
+  nuevos). `DashboardFragment`/`fragment_dashboard.xml` además muestra 3 botones
+  gigantes en vez de las tarjetas de métricas cuando el modo está prendido.
 - Firebase: Auth, Firestore, Storage, Cloud Messaging, Cloud Functions (Node.js,
-  `functions/index.js`, solo `onSchedule`, sin endpoints HTTP).
-- Un `Repository` por feature en `data/repository/`, un `data class` por colección en
-  `data/model/`, una pantalla por carpeta en `ui/<feature>/`. Estado async siempre con
+  `functions/index.js`, solo `onSchedule`, sin endpoints HTTP). Sólo las implementaciones
+  `FirebaseXRepository` hablan con esto; las `MockXRepository` no.
+- Un `Repository` (interfaz + Firebase/Mock) por feature, un `data class` por colección
+  en `data/model/`, una pantalla por carpeta en `ui/<feature>/`. Estado async siempre con
   el sealed class `util/Resource.kt` (`Loading`/`Success`/`Error`) — no introducir otro
   patrón de estado sin que el usuario lo pida.
 - **Idioma**: comentarios de código y strings de UI en español (Argentina); nombres de
@@ -54,11 +71,13 @@ alquiler/expensas), HU-04 (integración Mercado Pago), HU-07 (protocolos PDF), H
 
 `app/google-services.json` en el repo es una plantilla con valores falsos. Sin
 reemplazarlo por uno real de un proyecto de Firebase propio, la app compila pero ningún
-llamado a Firebase funciona. Pasos completos en
+llamado a Firebase funciona — salvo que uses el flavor `mock` (ver abajo), que no lo
+necesita. Pasos completos para el proyecto real en
 [`README.md`](./README.md#antes-de-compilar-crear-el-proyecto-de-firebase).
 
 ```bash
-./gradlew assembleDebug
+./gradlew assembleProdDebug   # contra Firebase real
+./gradlew assembleMockDebug   # sin Firebase, con datos de prueba en memoria
 ```
 
 `gradle.properties` fija `org.gradle.java.home` al JBR de Android Studio de esta
@@ -69,8 +88,10 @@ No hay tests automatizados todavía (carpetas `test`/`androidTest` vacías del t
 
 ## Cómo trabajar en este repo
 
-- El repo **no tiene git inicializado todavía** (`git init` si el usuario pide empezar
-  a versionar).
+- El repo ya tiene git inicializado, con commit inicial hecho. Dos ramas principales:
+  `main` (producción, estable) y `develop` (integración de desarrollo). El trabajo del
+  día a día se hace en `develop` (o en ramas de feature sobre `develop`) y se mergea a
+  `main` para lo que esté listo para producción.
 - Al implementar una historia pendiente, actualizar la tabla de estado en
   `docs/roadmap.md` y el comentario de clase correspondiente (mismo estilo que las HU
   ya implementadas), no solo el código.

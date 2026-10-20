@@ -6,12 +6,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.consorciotransparente.app.data.model.Post
 import com.consorciotransparente.app.data.repository.MuroRepository
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.util.Resource
 import kotlinx.coroutines.launch
 
 /** Cola de moderación del Administrador (HU-05 Escenario 3). */
 class ModerationViewModel(
-    private val muroRepo: MuroRepository = MuroRepository()
+    private val muroRepo: MuroRepository = RepositoryProvider.muro
 ) : ViewModel() {
 
     private val _state = MutableLiveData<Resource<List<Post>>>()

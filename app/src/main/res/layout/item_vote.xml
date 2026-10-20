@@ -41,7 +41,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:textColor="@color/text_secondary"
+        android:textColor="?attr/colorTextSecondary"
         android:textSize="10sp"
         tools:text="Cierra en 2 días · 18 votos emitidos" />
 

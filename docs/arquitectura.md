@@ -17,24 +17,59 @@
 - **Imágenes**: Glide.
 - **`applicationId` / `namespace`**: `com.consorciotransparente.app`.
 - **SDK**: `minSdk 24`, `compileSdk`/`targetSdk 36`, AGP 8.11, Kotlin 2.0.21.
+- **Product flavors**: `prod` (Firebase real) y `mock` (datos en memoria, sin Firebase;
+  ver sección 2 y el README para cómo instalarlo). Mismo `applicationId` en los dos.
 
 ## 2. Patrón de capas
 
 ```
-ui/<feature>/        Activity o Fragment (View) + ViewModel + (a veces) Adapter
-data/repository/      un Repository por feature, habla directo con Firebase (sin capa de "use cases")
-data/model/           data classes que mapean 1:1 con documentos de Firestore
-util/Resource.kt      sealed class Loading/Success/Error para exponer estado async a la UI
+ui/<feature>/                Activity o Fragment (View) + ViewModel + (a veces) Adapter
+data/repository/             una interfaz por feature (contrato) + su Firebase*Repository
+data/repository/mock/        Mock*Repository: misma interfaz, datos en memoria (flavor "mock")
+data/model/                  data classes que mapean 1:1 con documentos de Firestore
+util/Resource.kt             sealed class Loading/Success/Error para exponer estado async a la UI
 ```
 
-No hay capa de dominio ni inyección de dependencias (Hilt/Koin): los `Repository` se
-instancian con valor por defecto (`FirebaseFirestore.getInstance()`) directamente en el
-constructor del `ViewModel`. Es una decisión consciente de alcance de MVP/tesis, no un
-olvido — mantenerla así salvo que el usuario pida explícitamente introducir DI.
+No hay capa de dominio ni inyección de dependencias (Hilt/Koin). Cada `XRepository` es
+una interfaz chica con dos implementaciones: `FirebaseXRepository` (habla con Firebase,
+la de siempre) y `MockXRepository` (datos en memoria, para poder probar la app sin un
+proyecto Firebase real). `RepositoryProvider` (`data/repository/RepositoryProvider.kt`)
+es un objeto con un val perezoso por repo que elige cuál instanciar según
+`BuildConfig.USE_MOCK_DATA` — un `product flavor` (`mock`/`prod`, ver
+`app/build.gradle.kts`), no un contenedor de DI. Cada `ViewModel` sigue tomando el
+repo como default value en su constructor, ahora resuelto vía `RepositoryProvider`
+en vez de instanciado directo:
+
+```kotlin
+class FooViewModel(private val repo: FooRepository = RepositoryProvider.foo) : ViewModel()
+```
+
+Es una decisión consciente de alcance de MVP/tesis, no un olvido — mantenerla así
+salvo que el usuario pida explícitamente introducir DI (Hilt/Koin) o una capa de
+dominio de verdad.
 
 Cada pantalla sigue el mismo esqueleto: el `ViewModel` expone `LiveData<Resource<T>>`,
 la `Activity`/`Fragment` observa y resuelve `Loading` (spinner) / `Success` (pinta datos)
 / `Error` (mensaje). Ver `util/Resource.kt`.
+
+### 2.1 Modo simple (accesibilidad)
+
+Todas las `Activity` heredan de `ui/BaseActivity` (nunca de `AppCompatActivity`
+directo). `BaseActivity` lee `util/SimpleModePrefs` (un booleano en
+`SharedPreferences`, por dispositivo, prendido/apagado desde un switch en Más) y, si
+está prendido:
+
+- Aplica `fontScale = 1.3` vía `Configuration` en `attachBaseContext` — el mecanismo
+  nativo de Android para escalar texto, no hay que tocar cada layout.
+- Cambia el tema a `Theme.ConsorcioTransparente.Simple` (`setTheme()` antes de
+  `super.onCreate()`), que redefine el atributo `?attr/colorTextSecondary` igual a
+  `text_primary` (negro pleno) en vez del gris de siempre.
+
+Por eso los layouts usan `android:textColor="?attr/colorTextSecondary"` para texto
+secundario, nunca `@color/text_secondary` directo — si un layout nuevo necesita texto
+secundario, seguir ese mismo atributo. `DashboardFragment` además switchea entre el
+bloque de métricas de siempre (`normalModeContent`) y 3 botones grandes
+(`simpleModeContent`) leyendo el mismo flag.
 
 ## 3. Modelo de datos (Firestore)
 

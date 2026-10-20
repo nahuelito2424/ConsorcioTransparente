@@ -4,13 +4,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.databinding.ActivityCreatePostBinding
 import com.consorciotransparente.app.util.Resource
 
 /** HU-05 Escenario 1: cualquier usuario puede proponer una publicación (queda pendiente de aprobación). */
-class CreatePostActivity : AppCompatActivity() {
+class CreatePostActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_BUILDING_ID = "buildingId"
@@ -37,6 +37,7 @@ class CreatePostActivity : AppCompatActivity() {
         binding = ActivityCreatePostBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.buttonBack.setOnClickListener { finish() }
         binding.buttonAttachImage.setOnClickListener { pickImage.launch("image/*") }
 
         binding.buttonPublish.setOnClickListener {

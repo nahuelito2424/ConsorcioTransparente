@@ -4,7 +4,7 @@ import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.databinding.ActivityCreateVoteBinding
 import com.consorciotransparente.app.util.Resource
@@ -13,7 +13,7 @@ import java.util.Calendar
 import java.util.Locale
 
 /** HU-02 Escenario 4: sólo el Administrador ve esta pantalla (el FAB de la lista se oculta para los demás roles). */
-class CreateVoteActivity : AppCompatActivity() {
+class CreateVoteActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_BUILDING_ID = "buildingId"
@@ -31,6 +31,8 @@ class CreateVoteActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityCreateVoteBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.buttonBack.setOnClickListener { finish() }
 
         addOptionInput()
         addOptionInput()

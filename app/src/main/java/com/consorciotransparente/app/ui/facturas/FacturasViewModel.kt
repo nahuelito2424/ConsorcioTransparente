@@ -7,12 +7,13 @@ import androidx.lifecycle.viewModelScope
 import com.consorciotransparente.app.data.model.Expense
 import com.consorciotransparente.app.data.repository.AuthRepository
 import com.consorciotransparente.app.data.repository.ExpenseRepository
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.util.Resource
 import kotlinx.coroutines.launch
 
 class FacturasViewModel(
-    private val expenseRepo: ExpenseRepository = ExpenseRepository(),
-    private val authRepo: AuthRepository = AuthRepository()
+    private val expenseRepo: ExpenseRepository = RepositoryProvider.expense,
+    private val authRepo: AuthRepository = RepositoryProvider.auth
 ) : ViewModel() {
 
     private val _state = MutableLiveData<Resource<List<Expense>>>()

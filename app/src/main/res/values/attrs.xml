@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Color de texto secundario (subtítulos, ayudas). Gris en el tema normal; en
+         Theme.ConsorcioTransparente.Simple se redefine igual a text_primary (negro
+         pleno) para el "modo simple" de accesibilidad — ver BaseActivity. -->
+    <attr name="colorTextSecondary" format="color" />
+</resources>

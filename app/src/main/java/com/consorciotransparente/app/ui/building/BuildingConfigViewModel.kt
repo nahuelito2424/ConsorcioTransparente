@@ -7,14 +7,15 @@ import androidx.lifecycle.viewModelScope
 import com.consorciotransparente.app.data.model.Building
 import com.consorciotransparente.app.data.repository.AuthRepository
 import com.consorciotransparente.app.data.repository.BuildingRepository
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.util.Resource
 import kotlinx.coroutines.launch
 
 data class BuildingConfigLoadState(val building: Building?, val isNew: Boolean)
 
 class BuildingConfigViewModel(
-    private val buildingRepo: BuildingRepository = BuildingRepository(),
-    private val authRepo: AuthRepository = AuthRepository()
+    private val buildingRepo: BuildingRepository = RepositoryProvider.building,
+    private val authRepo: AuthRepository = RepositoryProvider.auth
 ) : ViewModel() {
 
     private val _loadState = MutableLiveData<Resource<BuildingConfigLoadState>>()

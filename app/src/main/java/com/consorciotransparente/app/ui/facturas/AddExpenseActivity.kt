@@ -4,13 +4,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.databinding.ActivityAddExpenseBinding
 import com.consorciotransparente.app.util.Resource
 
 /** Alta de gasto (HU-01): el botón Guardar queda deshabilitado hasta adjuntar la foto. */
-class AddExpenseActivity : AppCompatActivity() {
+class AddExpenseActivity : BaseActivity() {
 
     private lateinit var binding: ActivityAddExpenseBinding
     private val viewModel: AddExpenseViewModel by lazy {
@@ -34,6 +34,7 @@ class AddExpenseActivity : AppCompatActivity() {
         binding = ActivityAddExpenseBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.buttonBack.setOnClickListener { finish() }
         binding.buttonAttachPhoto.setOnClickListener { pickImage.launch("image/*") }
 
         binding.buttonSave.setOnClickListener {

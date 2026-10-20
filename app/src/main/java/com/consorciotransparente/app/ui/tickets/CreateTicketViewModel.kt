@@ -6,14 +6,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.consorciotransparente.app.data.repository.AuthRepository
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.data.repository.TicketRepository
 import com.consorciotransparente.app.util.Resource
 import kotlinx.coroutines.launch
 
 /** HU-10 Escenario 1: reporte con categoría, descripción y foto opcional. */
 class CreateTicketViewModel(
-    private val ticketRepo: TicketRepository = TicketRepository(),
-    private val authRepo: AuthRepository = AuthRepository()
+    private val ticketRepo: TicketRepository = RepositoryProvider.ticket,
+    private val authRepo: AuthRepository = RepositoryProvider.auth
 ) : ViewModel() {
 
     private val _state = MutableLiveData<Resource<Unit>>()

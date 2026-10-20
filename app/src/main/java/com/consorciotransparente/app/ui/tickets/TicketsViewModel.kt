@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.consorciotransparente.app.data.model.Role
 import com.consorciotransparente.app.data.model.Ticket
 import com.consorciotransparente.app.data.repository.AuthRepository
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.data.repository.TicketRepository
 import com.consorciotransparente.app.util.Resource
 import kotlinx.coroutines.launch
@@ -15,8 +16,8 @@ data class TicketsUiState(val tickets: List<Ticket>, val buildingId: String, val
 
 /** El Encargado/Administrador ven la cola completa; el Inquilino, sólo sus propios reportes. */
 class TicketsViewModel(
-    private val ticketRepo: TicketRepository = TicketRepository(),
-    private val authRepo: AuthRepository = AuthRepository()
+    private val ticketRepo: TicketRepository = RepositoryProvider.ticket,
+    private val authRepo: AuthRepository = RepositoryProvider.auth
 ) : ViewModel() {
 
     private val _state = MutableLiveData<Resource<TicketsUiState>>()

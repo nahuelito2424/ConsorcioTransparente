@@ -2,13 +2,13 @@ package com.consorciotransparente.app.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.MainActivity
 import com.consorciotransparente.app.databinding.ActivityRegisterBinding
 import com.consorciotransparente.app.util.Resource
 
-class RegisterActivity : AppCompatActivity() {
+class RegisterActivity : BaseActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private val viewModel: RegisterViewModel by lazy {
@@ -28,6 +28,7 @@ class RegisterActivity : AppCompatActivity() {
             )
         }
 
+        binding.buttonBack.setOnClickListener { finish() }
         binding.textGoLogin.setOnClickListener { finish() }
 
         viewModel.state.observe(this) { state ->

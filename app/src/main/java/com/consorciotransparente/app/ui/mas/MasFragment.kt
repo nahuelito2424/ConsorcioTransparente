@@ -8,12 +8,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.consorciotransparente.app.data.model.Role
-import com.consorciotransparente.app.data.repository.AuthRepository
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.databinding.FragmentMasBinding
 import com.consorciotransparente.app.ui.auth.LoginActivity
 import com.consorciotransparente.app.ui.building.BuildingConfigActivity
 import com.consorciotransparente.app.ui.reservas.ReservasActivity
 import com.consorciotransparente.app.ui.tickets.TicketsActivity
+import com.consorciotransparente.app.util.SimpleModePrefs
 import kotlinx.coroutines.launch
 
 /**
@@ -45,8 +46,17 @@ class MasFragment : Fragment() {
         binding.itemReservas.setOnClickListener {
             startActivity(Intent(requireContext(), ReservasActivity::class.java))
         }
+
+        // Se fija el estado actual antes de escuchar cambios, para no disparar el
+        // listener (y un recreate() innecesario) al sólo inflar la pantalla.
+        binding.switchSimpleMode.isChecked = SimpleModePrefs.isEnabled(requireContext())
+        binding.switchSimpleMode.setOnCheckedChangeListener { _, isChecked ->
+            SimpleModePrefs.setEnabled(requireContext(), isChecked)
+            requireActivity().recreate()
+        }
+
         binding.buttonLogout.setOnClickListener {
-            AuthRepository().logout()
+            RepositoryProvider.auth.logout()
             startActivity(
                 Intent(requireContext(), LoginActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
@@ -59,7 +69,7 @@ class MasFragment : Fragment() {
         // La visibilidad puede cambiar (ej. justo se creó el edificio), así que se
         // recalcula cada vez que se vuelve a esta pantalla, no sólo en onViewCreated.
         viewLifecycleOwner.lifecycleScope.launch {
-            val user = AuthRepository().fetchCurrentUserProfile()
+            val user = RepositoryProvider.auth.fetchCurrentUserProfile()
             val showBuildingConfig = user != null && (user.buildingId.isBlank() || user.roleEnum() == Role.ADMINISTRADOR)
             binding.itemBuildingConfig.visibility = if (showBuildingConfig) View.VISIBLE else View.GONE
         }

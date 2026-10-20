@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.consorciotransparente.app.data.model.VoteTopic
 import com.consorciotransparente.app.data.repository.AuthRepository
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.data.repository.VoteRepository
 import com.consorciotransparente.app.util.Resource
 import kotlinx.coroutines.launch
@@ -18,8 +19,8 @@ data class VoteDetailUiState(
 )
 
 class VoteDetailViewModel(
-    private val voteRepo: VoteRepository = VoteRepository(),
-    private val authRepo: AuthRepository = AuthRepository()
+    private val voteRepo: VoteRepository = RepositoryProvider.vote,
+    private val authRepo: AuthRepository = RepositoryProvider.auth
 ) : ViewModel() {
 
     private val _state = MutableLiveData<Resource<VoteDetailUiState>>()
