@@ -117,13 +117,33 @@ service cloud.firestore {
       // sólo el Administrador (o la Cloud Function del webhook de Mercado Pago, que
       // usa el Admin SDK y no pasa por estas reglas) lo aprueba, rechaza, o crea un
       // pago por Mercado Pago.
+      //
+      // El id del documento es siempre "{uid}_{period}" (ver FirebasePaymentRepository):
+      // se valida contra request.resource.data para que un inquilino no pueda crear o
+      // pisar el pago de otro, ni declarar un monto distinto al que le asignó el Admin.
       match /payments/{paymentId} {
+        // `resource` es null cuando el documento todavía no existe (caso normal: el
+        // inquilino no pagó este período todavía). Sin el chequeo, `resource.data.uid`
+        // sobre un resource nulo es un error y Firestore deniega la lectura.
         allow read: if belongsToBuilding(buildingId) &&
-          (resource.data.uid == request.auth.uid || isEncargadoOrAdmin());
-        allow create, update: if belongsToBuilding(buildingId) &&
+          (resource == null || resource.data.uid == request.auth.uid || isEncargadoOrAdmin());
+
+        allow create: if belongsToBuilding(buildingId) &&
+          paymentId == request.auth.uid + "_" + request.resource.data.period &&
           request.resource.data.uid == request.auth.uid &&
           request.resource.data.method == "TRANSFERENCIA" &&
-          request.resource.data.status == "A_VERIFICAR";
+          request.resource.data.status == "A_VERIFICAR" &&
+          request.resource.data.amount == myProfile().rentAmount + myProfile().expensesAmount;
+
+        // Re-subida tras un RECHAZADO: sólo el dueño del pago, y sólo si el documento
+        // ya estaba rechazado (nunca pisa uno A_VERIFICAR o PAGADO).
+        allow update: if belongsToBuilding(buildingId) &&
+          resource.data.uid == request.auth.uid && resource.data.status == "RECHAZADO" &&
+          request.resource.data.uid == request.auth.uid &&
+          request.resource.data.method == "TRANSFERENCIA" &&
+          request.resource.data.status == "A_VERIFICAR" &&
+          request.resource.data.amount == myProfile().rentAmount + myProfile().expensesAmount;
+
         allow update: if isAdmin() && belongsToBuilding(buildingId) &&
           (request.resource.data.status == "PAGADO" || request.resource.data.status == "RECHAZADO");
       }

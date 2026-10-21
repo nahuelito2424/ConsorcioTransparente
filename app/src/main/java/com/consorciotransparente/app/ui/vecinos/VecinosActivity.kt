@@ -32,14 +32,20 @@ class VecinosActivity : BaseActivity() {
 
         viewModel.state.observe(this) { state ->
             binding.swipeRefresh.isRefreshing = state is Resource.Loading
-            if (state is Resource.Success) {
-                adapter.submitList(state.data)
-                binding.textEmpty.visibility = if (state.data.isEmpty()) View.VISIBLE else View.GONE
+            when (state) {
+                is Resource.Success -> {
+                    adapter.submitList(state.data)
+                    binding.textEmpty.visibility = if (state.data.isEmpty()) View.VISIBLE else View.GONE
+                }
+                is Resource.Error -> Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
+                else -> Unit
             }
         }
         viewModel.saveState.observe(this) { state ->
-            if (state is Resource.Success) {
-                Toast.makeText(this, R.string.vecinos_saved, Toast.LENGTH_SHORT).show()
+            when (state) {
+                is Resource.Success -> Toast.makeText(this, R.string.vecinos_saved, Toast.LENGTH_SHORT).show()
+                is Resource.Error -> Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
+                else -> Unit
             }
         }
 

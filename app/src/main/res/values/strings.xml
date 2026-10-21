@@ -112,10 +112,15 @@
     <string name="pagar_attach_receipt">Adjuntar comprobante de transferencia</string>
     <string name="pagar_pending_review">Tu comprobante está en revisión por el Administrador.</string>
     <string name="pagar_rejected">Tu comprobante fue rechazado: %1$s. Subí uno nuevo.</string>
-    <string name="pagar_paid_on">Pagado el %1$s por %2$s.</string>
+    <string name="pagar_paid_on">Pagado el %1$s por %2$s. Método: %3$s.</string>
+    <string name="pagar_method_transferencia">Transferencia</string>
+    <string name="pagar_method_mercado_pago">Mercado Pago</string>
+    <string name="pagar_status_paid">Pagado</string>
+    <string name="pagar_status_reviewing">En revisión</string>
+    <string name="pagar_status_rejected">Rechazado</string>
     <string name="pagar_history">Ver historial de meses anteriores</string>
     <string name="pagar_history_empty">Todavía no tenés pagos de meses anteriores.</string>
-    <string name="pagar_history_row">%1$s — %2$s</string>
+    <string name="pagar_history_row">%1$s — %2$s — %3$s</string>
 
     <string name="cobros_menu_item">📋 Panel de cobros</string>
     <string name="cobros_title">Cobros de este mes</string>
@@ -126,6 +131,8 @@
     <string name="cobros_approve">Aprobar</string>
     <string name="cobros_reject">Rechazar</string>
     <string name="cobros_reject_reason_hint">Motivo del rechazo</string>
+    <string name="cobros_dialog_amount">Comprobante por %1$s</string>
+    <string name="cobros_dialog_amount_mismatch">Comprobante por %1$s (el monto asignado hoy es %2$s)</string>
     <string name="building_charges_rent">Cobra alquiler</string>
     <string name="building_charges_expenses">Cobra expensas</string>
     <string name="building_rent_due_day">Día de vencimiento del alquiler (1-28)</string>

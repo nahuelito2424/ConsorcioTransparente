@@ -36,13 +36,21 @@ class VecinoAdapter(
         binding.layoutRent.visibility = if (row.showRent) View.VISIBLE else View.GONE
         binding.layoutExpenses.visibility = if (row.showExpenses) View.VISIBLE else View.GONE
 
-        binding.inputRent.setText(if (row.user.rentAmount > 0.0) row.user.rentAmount.toString() else "")
-        binding.inputExpenses.setText(if (row.user.expensesAmount > 0.0) row.user.expensesAmount.toString() else "")
+        binding.inputRent.setText(formatAmountInput(row.user.rentAmount))
+        binding.inputExpenses.setText(formatAmountInput(row.user.expensesAmount))
 
         binding.buttonSave.setOnClickListener {
-            val rentAmount = binding.inputRent.text?.toString()?.toDoubleOrNull() ?: 0.0
-            val expensesAmount = binding.inputExpenses.text?.toString()?.toDoubleOrNull() ?: 0.0
+            // Mismo criterio que AddExpenseActivity/TicketDetailActivity: acepta "," como
+            // separador decimal (es-AR) antes de parsear.
+            val rentAmount = binding.inputRent.text?.toString()?.replace(",", ".")?.toDoubleOrNull() ?: 0.0
+            val expensesAmount = binding.inputExpenses.text?.toString()?.replace(",", ".")?.toDoubleOrNull() ?: 0.0
             onSave(row.user.uid, rentAmount, expensesAmount)
         }
+    }
+
+    // Evita notación científica ("1.5E7") y el ".0" final que deja Double.toString().
+    private fun formatAmountInput(amount: Double): String {
+        if (amount <= 0.0) return ""
+        return java.math.BigDecimal(amount.toString()).stripTrailingZeros().toPlainString()
     }
 }
