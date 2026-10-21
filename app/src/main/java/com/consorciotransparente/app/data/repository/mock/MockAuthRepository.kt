@@ -19,7 +19,7 @@ class MockAuthRepository : AuthRepository {
         MockDataStore.currentUser = user
     }
 
-    override suspend fun register(fullName: String, email: String, password: String) {
+    override suspend fun register(fullName: String, email: String, password: String, buildingCode: String) {
         error("El alta de usuarios no está disponible en el flavor mock; usá una de las 3 credenciales fijas.")
     }
 

@@ -74,6 +74,19 @@
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputBuildingCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/building_code_hint" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"

@@ -22,22 +22,25 @@
 
 ## Próximos pasos (orden sugerido)
 
-1. **Pantalla de alta/invitación de vecinos y unidades.** Hoy solo el creador del
-   edificio se auto-asigna como Administrador; para agregar un segundo usuario a un
-   edificio hay que editarle el campo `buildingId` a mano en Firestore. (La pantalla
-   "Vecinos" nueva de HU-03 solo le asigna un monto a quien ya tiene `buildingId` — no
-   reemplaza esta invitación.)
-2. **HU-04 — SDK/Checkout de Mercado Pago**: completa HU-03 (botón de pago dinámico vía
+1. **HU-04 — SDK/Checkout de Mercado Pago**: completa HU-03 (botón de pago dinámico vía
    Cloud Function + webhook, ver `docs/superpowers/specs/2026-10-20-pago-expensas-design.md`)
    y, después, reemplaza el comprobante de pago manual de HU-10 (`markPaid` en
    `TicketRepository.kt`) por la confirmación real del pago.
-3. **Notificar al Encargado/Administrador cuando se reporta un ticket nuevo**, y al
+2. **Notificar al Encargado/Administrador cuando se reporta un ticket nuevo**, y al
    inquilino cuando cambia de estado — hoy hay que entrar a la app para enterarse.
-4. **HU-08 — UI del directorio de proveedores**: listado, alta/edición/borrado
+3. **HU-08 — UI del directorio de proveedores**: listado, alta/edición/borrado
    (Administrador), ficha con reseñas y estrellas. El modelo (`Provider`,
    `ProviderReview`) y las reglas de Firestore ya están listos.
-5. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
+4. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
    está habilitada (`ConsorcioApp.kt`) para que funcionen sin conexión.
+
+✅ **Pantalla de alta/invitación de vecinos** resuelta: en Registrarse hay un campo
+"Código del edificio" opcional (el id del edificio, sin un código corto propio), y
+`BuildingConfigActivity` se lo muestra al Administrador con un botón de copiar para
+pasárselo a cada vecino. `AuthRepository.register` valida que el código corresponda a
+un edificio existente (y si no, deja al usuario sin edificio asignado, igual que
+antes). La pantalla "Vecinos" de HU-03 sigue siendo sólo para asignar montos, no para
+el alta en sí.
 
 ✅ **Suscripción a tópicos FCM** (`building_{buildingId}`) resuelta: `MainActivity`
 suscribe al tópico del edificio del usuario en cada `onResume` (así cubre también el

@@ -12,6 +12,7 @@
 
     <string name="register_title">Crear cuenta</string>
     <string name="name_hint">Nombre y apellido</string>
+    <string name="building_code_hint">Código del edificio (opcional, te lo pasa tu Administrador)</string>
     <string name="register_button">Crear cuenta</string>
     <string name="have_account">Ya tengo cuenta, iniciar sesión</string>
 
@@ -89,6 +90,8 @@
     <string name="building_address_hint">Dirección</string>
     <string name="building_cbu_hint">CBU para transferencias</string>
     <string name="building_alias_hint">Alias para transferencias</string>
+    <string name="building_invite_code">Código para invitar vecinos: %1$s</string>
+    <string name="building_copy_invite_code">Copiar código</string>
 
     <string name="vecinos_menu_item">👥 Vecinos</string>
     <string name="vecinos_title">Vecinos y montos</string>

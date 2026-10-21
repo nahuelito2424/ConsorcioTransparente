@@ -1,7 +1,11 @@
 package com.consorciotransparente.app.ui.building
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.R
@@ -12,7 +16,9 @@ import com.consorciotransparente.app.util.Resource
 /**
  * HU-09 (Configuración de Cobros y Vencimientos). También cumple el rol de alta de
  * edificio: si el usuario todavía no tiene buildingId, esta misma pantalla lo crea
- * y lo promueve a Administrador (ver BuildingRepository.createBuilding).
+ * y lo promueve a Administrador (ver BuildingRepository.createBuilding). Una vez
+ * creado, muestra su id como "código para invitar vecinos" (ver
+ * AuthRepository.register): no hay un código corto propio, se comparte el id tal cual.
  */
 class BuildingConfigActivity : BaseActivity() {
 
@@ -55,6 +61,11 @@ class BuildingConfigActivity : BaseActivity() {
 
         binding.buttonBack.setOnClickListener { finish() }
         binding.buttonSave.setOnClickListener { onSaveClicked() }
+        binding.buttonCopyInviteCode.setOnClickListener {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipboard.setPrimaryClip(ClipData.newPlainText("Código del edificio", existingBuildingId))
+            Toast.makeText(this, R.string.pagar_copied, Toast.LENGTH_SHORT).show()
+        }
 
         viewModel.load()
     }
@@ -70,6 +81,10 @@ class BuildingConfigActivity : BaseActivity() {
         binding.buttonSave.text = getString(
             if (isNew) R.string.building_save_new else R.string.building_save_edit
         )
+
+        // El código recién existe una vez creado el edificio (su id es el propio código).
+        binding.sectionInviteCode.visibility = if (isNew) View.GONE else View.VISIBLE
+        binding.textInviteCode.text = getString(R.string.building_invite_code, existingBuildingId)
 
         binding.inputName.setText(building.name)
         binding.inputAddress.setText(building.address)

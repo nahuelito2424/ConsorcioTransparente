@@ -19,8 +19,15 @@ interface AuthRepository {
      * Crea la cuenta y su perfil. El rol por defecto es INQUILINO; subir a
      * ADMINISTRADOR o ENCARGADO es una acción que hace otro Administrador
      * (no algo que uno se auto-asigne en el alta).
+     *
+     * [buildingCode] es el "código para invitar vecinos" que un Administrador comparte
+     * desde BuildingConfigActivity — hoy es directamente el id del edificio, sin un
+     * código corto propio. Si viene en blanco, el usuario queda sin edificio (puede
+     * crear el suyo desde BuildingConfigActivity, igual que antes). Si no corresponde a
+     * ningún edificio existente, la implementación debe lanzar una excepción con un
+     * mensaje legible para mostrar en el formulario.
      */
-    suspend fun register(fullName: String, email: String, password: String)
+    suspend fun register(fullName: String, email: String, password: String, buildingCode: String = "")
 
     suspend fun fetchCurrentUserProfile(): User?
 

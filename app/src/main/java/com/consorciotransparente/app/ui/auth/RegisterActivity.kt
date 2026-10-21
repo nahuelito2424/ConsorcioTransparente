@@ -24,7 +24,8 @@ class RegisterActivity : BaseActivity() {
             viewModel.register(
                 binding.inputName.text?.toString().orEmpty(),
                 binding.inputEmail.text?.toString().orEmpty(),
-                binding.inputPassword.text?.toString().orEmpty()
+                binding.inputPassword.text?.toString().orEmpty(),
+                binding.inputBuildingCode.text?.toString().orEmpty()
             )
         }
 
