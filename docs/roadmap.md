@@ -22,27 +22,29 @@
 
 ## Próximos pasos (orden sugerido)
 
-1. **Suscripción a tópicos FCM** (`building_{buildingId}`) al iniciar sesión. Las Cloud
-   Functions (`closeExpiredVotes`, `sendDueDateReminders`) ya envían notificaciones a
-   ese tópico, pero como ningún cliente Android se suscribe todavía, hoy no le llegan a
-   nadie. Es la pieza más barata de resolver con más impacto (desbloquea dos historias
-   ya "implementadas" del lado función).
-2. **Pantalla de alta/invitación de vecinos y unidades.** Hoy solo el creador del
+1. **Pantalla de alta/invitación de vecinos y unidades.** Hoy solo el creador del
    edificio se auto-asigna como Administrador; para agregar un segundo usuario a un
    edificio hay que editarle el campo `buildingId` a mano en Firestore. (La pantalla
    "Vecinos" nueva de HU-03 solo le asigna un monto a quien ya tiene `buildingId` — no
    reemplaza esta invitación.)
-3. **HU-04 — SDK/Checkout de Mercado Pago**: completa HU-03 (botón de pago dinámico vía
+2. **HU-04 — SDK/Checkout de Mercado Pago**: completa HU-03 (botón de pago dinámico vía
    Cloud Function + webhook, ver `docs/superpowers/specs/2026-10-20-pago-expensas-design.md`)
    y, después, reemplaza el comprobante de pago manual de HU-10 (`markPaid` en
    `TicketRepository.kt`) por la confirmación real del pago.
-4. **Notificar al Encargado/Administrador cuando se reporta un ticket nuevo**, y al
+3. **Notificar al Encargado/Administrador cuando se reporta un ticket nuevo**, y al
    inquilino cuando cambia de estado — hoy hay que entrar a la app para enterarse.
-5. **HU-08 — UI del directorio de proveedores**: listado, alta/edición/borrado
+4. **HU-08 — UI del directorio de proveedores**: listado, alta/edición/borrado
    (Administrador), ficha con reseñas y estrellas. El modelo (`Provider`,
    `ProviderReview`) y las reglas de Firestore ya están listos.
-6. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
+5. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
    está habilitada (`ConsorcioApp.kt`) para que funcionen sin conexión.
+
+✅ **Suscripción a tópicos FCM** (`building_{buildingId}`) resuelta: `MainActivity`
+suscribe al tópico del edificio del usuario en cada `onResume` (así cubre también el
+caso de recién crear el edificio), pide el permiso `POST_NOTIFICATIONS` en tiempo de
+ejecución (API 33+), y `MasFragment` desuscribe antes del logout. El flavor mock usa un
+`MockNotificationRepository` sin operación — no hay forma de probar la llegada real de
+la notificación sin un proyecto de Firebase real.
 
 ## Backlog / ideas a más largo plazo
 

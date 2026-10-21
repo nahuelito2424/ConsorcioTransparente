@@ -68,11 +68,15 @@ class MasFragment : Fragment() {
         }
 
         binding.buttonLogout.setOnClickListener {
-            RepositoryProvider.auth.logout()
-            startActivity(
-                Intent(requireContext(), LoginActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            )
+            viewLifecycleOwner.lifecycleScope.launch {
+                val buildingId = RepositoryProvider.auth.fetchCurrentUserProfile()?.buildingId.orEmpty()
+                RepositoryProvider.notification.unsubscribeFromBuilding(buildingId)
+                RepositoryProvider.auth.logout()
+                startActivity(
+                    Intent(requireContext(), LoginActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                )
+            }
         }
     }
 

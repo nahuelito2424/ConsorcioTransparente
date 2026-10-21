@@ -6,6 +6,7 @@ import com.consorciotransparente.app.data.repository.mock.MockBuildingRepository
 import com.consorciotransparente.app.data.repository.mock.MockDashboardRepository
 import com.consorciotransparente.app.data.repository.mock.MockExpenseRepository
 import com.consorciotransparente.app.data.repository.mock.MockMuroRepository
+import com.consorciotransparente.app.data.repository.mock.MockNotificationRepository
 import com.consorciotransparente.app.data.repository.mock.MockPaymentRepository
 import com.consorciotransparente.app.data.repository.mock.MockReservationRepository
 import com.consorciotransparente.app.data.repository.mock.MockResidentRepository
@@ -34,6 +35,9 @@ object RepositoryProvider {
     }
     val muro: MuroRepository by lazy {
         if (BuildConfig.USE_MOCK_DATA) MockMuroRepository() else FirebaseMuroRepository()
+    }
+    val notification: NotificationRepository by lazy {
+        if (BuildConfig.USE_MOCK_DATA) MockNotificationRepository() else FirebaseNotificationRepository()
     }
     val reservation: ReservationRepository by lazy {
         if (BuildConfig.USE_MOCK_DATA) MockReservationRepository() else FirebaseReservationRepository()
