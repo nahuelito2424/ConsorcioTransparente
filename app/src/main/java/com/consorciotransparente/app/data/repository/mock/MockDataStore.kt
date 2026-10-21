@@ -49,9 +49,17 @@ object MockDataStore {
         unitId = "4B"
     )
 
-    val users = listOf(adminUser, encargadoUser, inquilinoUser)
+    val users = mutableListOf(adminUser, encargadoUser, inquilinoUser)
 
     var currentUser: User? = null
+
+    fun updateUserAmounts(uid: String, rentAmount: Double, expensesAmount: Double) {
+        val index = users.indexOfFirst { it.uid == uid }
+        if (index < 0) return
+        val updated = users[index].copy(rentAmount = rentAmount, expensesAmount = expensesAmount)
+        users[index] = updated
+        if (currentUser?.uid == uid) currentUser = updated
+    }
 
     var building = Building(
         id = BUILDING_ID,
