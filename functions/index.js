@@ -228,3 +228,74 @@ exports.createMercadoPagoPreference = onCall(
     return { initPoint: preference.sandbox_init_point || preference.init_point };
   }
 );
+
+/**
+ * HU-04: recibe la notificación de Mercado Pago cuando un pago se confirma. Público
+ * (Mercado Pago lo llama directo, sin pasar por Firebase Auth) — por eso valida la
+ * firma con el validador que trae el propio SDK antes de hacer nada. Siempre responde
+ * 200 salvo firma inválida (401): Mercado Pago reintenta agresivamente ante timeouts o
+ * 5xx, así que un error de nuestro lado queda logueado, no como reintento infinito.
+ */
+exports.mercadoPagoWebhook = onRequest(
+  { secrets: [mercadoPagoAccessToken, mercadoPagoWebhookSecret] },
+  async (req, res) => {
+    const dataId = req.query["data.id"] || req.body?.data?.id;
+    try {
+      WebhookSignatureValidator.validate({
+        xSignature: req.headers["x-signature"],
+        xRequestId: req.headers["x-request-id"],
+        dataId: String(dataId || ""),
+        secret: mercadoPagoWebhookSecret.value(),
+      });
+    } catch (err) {
+      console.warn("Firma de webhook de Mercado Pago inválida:", err.message);
+      res.status(401).send("invalid signature");
+      return;
+    }
+
+    if (req.body?.type !== "payment" || !dataId) {
+      res.status(200).send("ignored");
+      return;
+    }
+
+    try {
+      const client = new MercadoPagoConfig({ accessToken: mercadoPagoAccessToken.value() });
+      const mpPayment = await new Payment(client).get({ id: dataId });
+
+      if (mpPayment.status !== "approved") {
+        res.status(200).send("not approved yet");
+        return;
+      }
+
+      // external_reference = "{buildingId}_{uid}_{period}" (ver createMercadoPagoPreference).
+      // uid y period nunca se infieren de otra forma — si no matchea este formato o el
+      // documento no existe, se loguea y no se escribe nada.
+      const parts = (mpPayment.external_reference || "").split("_");
+      if (parts.length < 3) {
+        console.warn("external_reference con formato inesperado:", mpPayment.external_reference);
+        res.status(200).send("unrecognized reference");
+        return;
+      }
+      const [buildingId, uid, period] = [parts[0], parts[1], parts.slice(2).join("_")];
+      const paymentRef = getFirestore()
+        .collection("buildings").doc(buildingId)
+        .collection("payments").doc(`${uid}_${period}`);
+      const paymentSnap = await paymentRef.get();
+      if (!paymentSnap.exists) {
+        console.warn(`Webhook de Mercado Pago sin Payment existente: ${buildingId}_${uid}_${period}`);
+        res.status(200).send("payment not found");
+        return;
+      }
+
+      await paymentRef.update({
+        status: "PAGADO",
+        mercadoPagoPaymentId: String(mpPayment.id),
+        verifiedAt: new Date(),
+      });
+      res.status(200).send("ok");
+    } catch (err) {
+      console.error("Error procesando webhook de Mercado Pago:", err.message);
+      res.status(200).send("error logged");
+    }
+  }
+);
