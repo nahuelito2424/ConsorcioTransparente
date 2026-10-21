@@ -26,12 +26,10 @@
    Cloud Function + webhook, ver `docs/superpowers/specs/2026-10-20-pago-expensas-design.md`)
    y, después, reemplaza el comprobante de pago manual de HU-10 (`markPaid` en
    `TicketRepository.kt`) por la confirmación real del pago.
-2. **Notificar al Encargado/Administrador cuando se reporta un ticket nuevo**, y al
-   inquilino cuando cambia de estado — hoy hay que entrar a la app para enterarse.
-3. **HU-08 — UI del directorio de proveedores**: listado, alta/edición/borrado
+2. **HU-08 — UI del directorio de proveedores**: listado, alta/edición/borrado
    (Administrador), ficha con reseñas y estrellas. El modelo (`Provider`,
    `ProviderReview`) y las reglas de Firestore ya están listos.
-4. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
+3. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
    está habilitada (`ConsorcioApp.kt`) para que funcionen sin conexión.
 
 ✅ **Pantalla de alta/invitación de vecinos** resuelta: en Registrarse hay un campo
@@ -41,6 +39,16 @@ pasárselo a cada vecino. `AuthRepository.register` valida que el código corres
 un edificio existente (y si no, deja al usuario sin edificio asignado, igual que
 antes). La pantalla "Vecinos" de HU-03 sigue siendo sólo para asignar montos, no para
 el alta en sí.
+
+✅ **Notificaciones de tickets** resuelta: `functions/index.js` suma
+`onTicketCreated` (avisa a `building_{buildingId}_staff`, tópico sólo para
+Encargado/Administrador) y `onTicketStatusChanged` (avisa a `user_{uid}`, tópico
+personal del inquilino que reportó el ticket) cuando cambia `status`. La app se
+suscribe a ambos tópicos (además del general `building_{buildingId}`) en
+`MainActivity.onResume`, según el rol del usuario, y se desuscribe en el logout de
+`MasFragment`. Sin un proyecto de Firebase real no hay forma de desplegar ni probar
+estas dos funciones nuevas — sólo se validó que `index.js` tiene sintaxis válida y que
+sus imports resuelven (`node --check` + `require` local).
 
 ✅ **Suscripción a tópicos FCM** (`building_{buildingId}`) resuelta: `MainActivity`
 suscribe al tópico del edificio del usuario en cada `onResume` (así cubre también el

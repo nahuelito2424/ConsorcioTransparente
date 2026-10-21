@@ -6,4 +6,8 @@ import com.consorciotransparente.app.data.repository.NotificationRepository
 class MockNotificationRepository : NotificationRepository {
     override suspend fun subscribeToBuilding(buildingId: String) {}
     override suspend fun unsubscribeFromBuilding(buildingId: String) {}
+    override suspend fun subscribeToBuildingStaff(buildingId: String) {}
+    override suspend fun unsubscribeFromBuildingStaff(buildingId: String) {}
+    override suspend fun subscribeToUser(uid: String) {}
+    override suspend fun unsubscribeFromUser(uid: String) {}
 }

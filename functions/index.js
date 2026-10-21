@@ -17,11 +17,19 @@
  * en un mes más corto que el día de vencimiento configurado, ese mes no
  * dispara el recordatorio (queda anotado como mejora futura).
  *
+ * onTicketCreated/onTicketStatusChanged implementan HU-10: avisan a Encargado/
+ * Administrador cuando se reporta un ticket nuevo, y al inquilino que lo reportó
+ * cuando cambia de estado. Usan dos tópicos nuevos que la app suscribe en
+ * MainActivity.onResume: "building_{buildingId}_staff" (sólo Encargado/Admin) y
+ * "user_{uid}" (un único usuario) — separados del tópico general
+ * "building_{buildingId}" porque estas notificaciones no son para todo el edificio.
+ *
  * No se despliegan solas: hay que correr `firebase deploy --only functions` una
  * vez configurado el proyecto de Firebase (ver README.md de la raíz).
  */
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
@@ -106,3 +114,51 @@ exports.sendDueDateReminders = onSchedule("every day 09:00", async () => {
     }
   }
 });
+
+exports.onTicketCreated = onDocumentCreated(
+  "buildings/{buildingId}/tickets/{ticketId}",
+  async (event) => {
+    const ticket = event.data?.data();
+    if (!ticket) return;
+
+    try {
+      await getMessaging().send({
+        topic: `building_${event.params.buildingId}_staff`,
+        notification: {
+          title: "Nuevo ticket de mantenimiento",
+          body: `${ticket.category || "Incidente"}: ${ticket.description || ""}`.trim(),
+        },
+      });
+    } catch (err) {
+      console.warn(`No se pudo notificar el ticket nuevo ${event.params.ticketId}:`, err.message);
+    }
+  }
+);
+
+exports.onTicketStatusChanged = onDocumentUpdated(
+  "buildings/{buildingId}/tickets/{ticketId}",
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (!before || !after || before.status === after.status || !after.reportedByUid) return;
+
+    const statusLabels = {
+      REPORTADO: "Reportado",
+      EN_PRESUPUESTO: "En presupuesto",
+      A_COBRAR: "A cobrar",
+      RESUELTO: "Resuelto",
+    };
+
+    try {
+      await getMessaging().send({
+        topic: `user_${after.reportedByUid}`,
+        notification: {
+          title: "Tu ticket cambió de estado",
+          body: `Ahora está "${statusLabels[after.status] || after.status}".`,
+        },
+      });
+    } catch (err) {
+      console.warn(`No se pudo notificar el cambio de estado del ticket ${event.params.ticketId}:`, err.message);
+    }
+  }
+);

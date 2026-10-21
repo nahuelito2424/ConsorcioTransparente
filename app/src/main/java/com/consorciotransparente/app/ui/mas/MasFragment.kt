@@ -69,8 +69,13 @@ class MasFragment : Fragment() {
 
         binding.buttonLogout.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                val buildingId = RepositoryProvider.auth.fetchCurrentUserProfile()?.buildingId.orEmpty()
+                val user = RepositoryProvider.auth.fetchCurrentUserProfile()
+                val buildingId = user?.buildingId.orEmpty()
                 RepositoryProvider.notification.unsubscribeFromBuilding(buildingId)
+                RepositoryProvider.notification.unsubscribeFromUser(user?.uid.orEmpty())
+                if (user?.roleEnum() == Role.ADMINISTRADOR || user?.roleEnum() == Role.ENCARGADO) {
+                    RepositoryProvider.notification.unsubscribeFromBuildingStaff(buildingId)
+                }
                 RepositoryProvider.auth.logout()
                 startActivity(
                     Intent(requireContext(), LoginActivity::class.java)

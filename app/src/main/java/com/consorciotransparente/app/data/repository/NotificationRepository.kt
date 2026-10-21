@@ -1,13 +1,19 @@
 package com.consorciotransparente.app.data.repository
 
 /**
- * Suscripción del dispositivo al tópico de notificaciones push de un edificio. Las
- * Cloud Functions (closeExpiredVotes de HU-02, sendDueDateReminders de HU-09) ya le
- * mandan notificaciones al tópico "building_{buildingId}" (ver functions/index.js);
- * esto es lo que faltaba del lado de la app para que alguien las reciba sin tener que
- * tener la app abierta en ese momento.
+ * Suscripción del dispositivo a los tópicos de notificaciones push (ver
+ * functions/index.js, que es quien publica en cada uno):
+ * - "building_{buildingId}": todos los miembros del edificio (cierre de votación,
+ *   vencimiento próximo — HU-02/HU-09).
+ * - "building_{buildingId}_staff": sólo Encargado/Administrador (ticket nuevo —
+ *   HU-10).
+ * - "user_{uid}": un único usuario (cambio de estado de SU ticket — HU-10).
  */
 interface NotificationRepository {
     suspend fun subscribeToBuilding(buildingId: String)
     suspend fun unsubscribeFromBuilding(buildingId: String)
+    suspend fun subscribeToBuildingStaff(buildingId: String)
+    suspend fun unsubscribeFromBuildingStaff(buildingId: String)
+    suspend fun subscribeToUser(uid: String)
+    suspend fun unsubscribeFromUser(uid: String)
 }
