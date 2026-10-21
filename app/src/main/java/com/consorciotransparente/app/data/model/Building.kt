@@ -14,7 +14,9 @@ data class Building(
     val reminderDaysBefore: Int = 5, // HU-09 Escenario 2: anticipación de la notificación de vencimiento
     val hasEncargado: Boolean = false,
     val amenities: List<String> = emptyList(), // ej. "SUM", "Parrilla", "Pileta"
-    val adminUid: String = ""
+    val adminUid: String = "",
+    val cbu: String = "",
+    val alias: String = ""
 )
 
 /**

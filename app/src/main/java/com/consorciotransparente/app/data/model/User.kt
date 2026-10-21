@@ -11,7 +11,11 @@ data class User(
     val role: String = Role.INQUILINO.name,
     val buildingId: String = "",
     val unitId: String = "",
-    val phone: String = ""
+    val phone: String = "",
+    // HU-03: monto fijo mensual que le asigna el Administrador (ver ResidentRepository
+    // y firestore.rules) — nunca lo escribe el propio usuario.
+    val rentAmount: Double = 0.0,
+    val expensesAmount: Double = 0.0
 ) {
     fun roleEnum(): Role = Role.fromString(role)
 }

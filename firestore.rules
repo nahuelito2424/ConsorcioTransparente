@@ -43,8 +43,10 @@ service cloud.firestore {
       allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
       allow create: if isSignedIn() && request.auth.uid == uid;
       allow update: if isSignedIn() && (
-        isAdmin() ||
-        (request.auth.uid == uid && request.resource.data.role == resource.data.role) ||
+        (isAdmin() && belongsToBuilding(resource.data.buildingId)) ||
+        (request.auth.uid == uid && request.resource.data.role == resource.data.role &&
+          request.resource.data.rentAmount == resource.data.rentAmount &&
+          request.resource.data.expensesAmount == resource.data.expensesAmount) ||
         (request.auth.uid == uid && resource.data.buildingId == "" && resource.data.role == "INQUILINO"
           && request.resource.data.role == "ADMINISTRADOR" && request.resource.data.buildingId != "")
       );
@@ -108,6 +110,22 @@ service cloud.firestore {
           isEncargadoOrAdmin() ||
           (resource.data.reportedByUid == request.auth.uid && resource.data.status == "A_COBRAR")
         );
+      }
+
+      // HU-03: pago de alquiler/expensas. El monto queda congelado al crearse (no se
+      // recalcula). El propio inquilino crea/re-sube su comprobante de transferencia;
+      // sólo el Administrador (o la Cloud Function del webhook de Mercado Pago, que
+      // usa el Admin SDK y no pasa por estas reglas) lo aprueba, rechaza, o crea un
+      // pago por Mercado Pago.
+      match /payments/{paymentId} {
+        allow read: if belongsToBuilding(buildingId) &&
+          (resource.data.uid == request.auth.uid || isEncargadoOrAdmin());
+        allow create, update: if belongsToBuilding(buildingId) &&
+          request.resource.data.uid == request.auth.uid &&
+          request.resource.data.method == "TRANSFERENCIA" &&
+          request.resource.data.status == "A_VERIFICAR";
+        allow update: if isAdmin() && belongsToBuilding(buildingId) &&
+          (request.resource.data.status == "PAGADO" || request.resource.data.status == "RECHAZADO");
       }
     }
 
