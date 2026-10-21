@@ -122,7 +122,8 @@ forma análoga, scopeada por `buildingId`.
 
 ## 5. Cloud Functions (`functions/index.js`)
 
-Dos funciones programadas (Firebase Functions Gen 2, `onSchedule`), sin funciones HTTP:
+Firebase Functions Gen 2 (Node.js). Dos programadas (`onSchedule`) y dos disparadas por
+Firestore (`onDocumentCreated`/`onDocumentUpdated`):
 
 - `closeExpiredVotes` — corre cada 15 minutos, cierra votaciones vencidas
   (`isClosed = true`), tabula `finalCounts` y notifica por FCM al tópico
@@ -131,15 +132,18 @@ Dos funciones programadas (Firebase Functions Gen 2, `onSchedule`), sin funcione
   contra `rentDueDay`/`expensesDueDay` de cada edificio y notifica cuando falten
   exactamente `reminderDaysBefore` días. Simplificación consciente: compara solo el
   número de día del mes, sin ajustar meses de 28-31 días (ver comentario en el archivo).
+- `onTicketCreated` — notifica al tópico `building_{buildingId}_staff` (sólo
+  Encargado/Administrador) cuando se reporta un ticket nuevo (HU-10).
+- `onTicketStatusChanged` — notifica al tópico `user_{uid}` (el inquilino que lo
+  reportó) cuando cambia el `status` de su ticket.
 
-Ambas dependen de que los clientes estén suscriptos al tópico FCM
-`building_{buildingId}` — **todavía no implementado del lado Android** (ver
-`roadmap.md`), así que hoy las notificaciones push no le llegan a nadie aunque las
-Cloud Functions ya las disparen.
+Los clientes Android se suscriben a estos tópicos en `MainActivity.onResume` (ver
+`NotificationRepository`), según buildingId/rol/uid del usuario, y se desuscriben en el
+logout (`MasFragment`).
 
 Requieren plan Blaze en el proyecto de Firebase para desplegarse; el resto de la app
-funciona sin ellas (solo no hay cierre automático de votación ni recordatorio de
-vencimiento).
+funciona sin ellas (solo no hay cierre automático de votación, recordatorio de
+vencimiento, ni notificación de tickets).
 
 ## 6. Setup de un proyecto de Firebase nuevo
 
