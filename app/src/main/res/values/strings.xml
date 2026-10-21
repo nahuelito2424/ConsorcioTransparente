@@ -116,6 +116,16 @@
     <string name="pagar_history">Ver historial de meses anteriores</string>
     <string name="pagar_history_empty">Todavía no tenés pagos de meses anteriores.</string>
     <string name="pagar_history_row">%1$s — %2$s</string>
+
+    <string name="cobros_menu_item">📋 Panel de cobros</string>
+    <string name="cobros_title">Cobros de este mes</string>
+    <string name="cobros_empty">Todavía no hay vecinos con monto asignado.</string>
+    <string name="cobros_status_paid">Pagado</string>
+    <string name="cobros_status_reviewing">A verificar</string>
+    <string name="cobros_status_pending">Pendiente</string>
+    <string name="cobros_approve">Aprobar</string>
+    <string name="cobros_reject">Rechazar</string>
+    <string name="cobros_reject_reason_hint">Motivo del rechazo</string>
     <string name="building_charges_rent">Cobra alquiler</string>
     <string name="building_charges_expenses">Cobra expensas</string>
     <string name="building_rent_due_day">Día de vencimiento del alquiler (1-28)</string>

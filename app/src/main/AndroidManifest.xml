@@ -84,6 +84,10 @@
             android:name=".ui.pagos.PagarActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.pagos.CobrosActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
