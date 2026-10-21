@@ -4,11 +4,13 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.R
 import com.consorciotransparente.app.data.model.Payment
@@ -39,6 +41,7 @@ class PagarActivity : BaseActivity() {
 
         binding.buttonBack.setOnClickListener { finish() }
         binding.buttonAttachReceipt.setOnClickListener { pickReceipt.launch("image/*") }
+        binding.buttonPayMercadoPago.setOnClickListener { viewModel.payWithMercadoPago() }
         binding.buttonCopyCbu.setOnClickListener { copyToClipboard(binding.textCbu.text.toString().substringAfter(": ")) }
         binding.buttonCopyAlias.setOnClickListener { copyToClipboard(binding.textAlias.text.toString().substringAfter(": ")) }
         binding.buttonHistory.setOnClickListener { viewModel.loadHistory() }
@@ -65,7 +68,26 @@ class PagarActivity : BaseActivity() {
                 binding.textError.visibility = View.VISIBLE
             }
         }
+        viewModel.mercadoPagoUrl.observe(this) { state ->
+            binding.buttonPayMercadoPago.isEnabled = state !is Resource.Loading
+            when (state) {
+                is Resource.Success -> if (state.data.isNotBlank()) {
+                    CustomTabsIntent.Builder().build().launchUrl(this, Uri.parse(state.data))
+                }
+                is Resource.Error -> {
+                    binding.textError.text = state.message
+                    binding.textError.visibility = View.VISIBLE
+                }
+                else -> Unit
+            }
+        }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        // Al volver del checkout web de Mercado Pago (Custom Tab), la Activity nunca se
+        // destruye, sólo pasa a segundo plano — hay que recargar acá para reflejar si el
+        // webhook ya confirmó el pago.
         viewModel.load()
     }
 

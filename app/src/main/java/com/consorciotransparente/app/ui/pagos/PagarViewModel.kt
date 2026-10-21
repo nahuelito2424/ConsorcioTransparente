@@ -38,6 +38,9 @@ class PagarViewModel(
     private val _history = MutableLiveData<Resource<List<Payment>>>()
     val history: LiveData<Resource<List<Payment>>> = _history
 
+    private val _mercadoPagoUrl = MutableLiveData<Resource<String>>()
+    val mercadoPagoUrl: LiveData<Resource<String>> = _mercadoPagoUrl
+
     private var buildingId = ""
     private var uid = ""
     private val period = currentPeriod()
@@ -84,6 +87,19 @@ class PagarViewModel(
                 load()
             } catch (e: Exception) {
                 _uploadState.value = Resource.Error(e.message ?: "No se pudo subir el comprobante.")
+            }
+        }
+    }
+
+    fun payWithMercadoPago() {
+        _mercadoPagoUrl.value = Resource.Loading
+        viewModelScope.launch {
+            try {
+                val url = paymentRepo.createMercadoPagoPreference(buildingId, period)
+                _mercadoPagoUrl.value = Resource.Success(url)
+                load() // refresca el estado (mock: ya quedó PAGADO al volver a cargar)
+            } catch (e: Exception) {
+                _mercadoPagoUrl.value = Resource.Error(e.message ?: "No se pudo iniciar el pago con Mercado Pago.")
             }
         }
     }

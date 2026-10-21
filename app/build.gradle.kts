@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.firebase.functions.ktx)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.glide)
+    implementation(libs.androidx.browser)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
