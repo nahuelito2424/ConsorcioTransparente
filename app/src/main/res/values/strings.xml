@@ -87,6 +87,8 @@
     <string name="building_config_title_edit">Configuración del edificio</string>
     <string name="building_name_hint">Nombre del edificio</string>
     <string name="building_address_hint">Dirección</string>
+    <string name="building_cbu_hint">CBU para transferencias</string>
+    <string name="building_alias_hint">Alias para transferencias</string>
     <string name="building_charges_rent">Cobra alquiler</string>
     <string name="building_charges_expenses">Cobra expensas</string>
     <string name="building_rent_due_day">Día de vencimiento del alquiler (1-28)</string>

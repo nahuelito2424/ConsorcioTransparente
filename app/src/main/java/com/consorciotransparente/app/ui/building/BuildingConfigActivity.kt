@@ -73,6 +73,8 @@ class BuildingConfigActivity : BaseActivity() {
 
         binding.inputName.setText(building.name)
         binding.inputAddress.setText(building.address)
+        binding.inputCbu.setText(building.cbu)
+        binding.inputAlias.setText(building.alias)
         binding.switchChargesRent.isChecked = building.chargesRent
         binding.switchChargesExpenses.isChecked = building.chargesExpenses
         binding.inputRentDueDay.setText(building.rentDueDay.toString())
@@ -87,6 +89,8 @@ class BuildingConfigActivity : BaseActivity() {
             id = existingBuildingId,
             name = binding.inputName.text?.toString()?.trim().orEmpty(),
             address = binding.inputAddress.text?.toString()?.trim().orEmpty(),
+            cbu = binding.inputCbu.text?.toString()?.trim().orEmpty(),
+            alias = binding.inputAlias.text?.toString()?.trim().orEmpty(),
             chargesRent = binding.switchChargesRent.isChecked,
             chargesExpenses = binding.switchChargesExpenses.isChecked,
             rentDueDay = binding.inputRentDueDay.text?.toString()?.toIntOrNull()?.coerceIn(1, 28) ?: 10,
