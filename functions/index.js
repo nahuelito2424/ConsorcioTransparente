@@ -30,11 +30,17 @@
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
+const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
+const { MercadoPagoConfig, Preference, Payment, WebhookSignatureValidator } = require("mercadopago");
 
 initializeApp();
+
+const mercadoPagoAccessToken = defineSecret("MERCADO_PAGO_ACCESS_TOKEN");
+const mercadoPagoWebhookSecret = defineSecret("MERCADO_PAGO_WEBHOOK_SECRET");
 
 exports.closeExpiredVotes = onSchedule("every 15 minutes", async () => {
   const db = getFirestore();
@@ -160,5 +166,65 @@ exports.onTicketStatusChanged = onDocumentUpdated(
     } catch (err) {
       console.warn(`No se pudo notificar el cambio de estado del ticket ${event.params.ticketId}:`, err.message);
     }
+  }
+);
+
+/**
+ * HU-04: genera una preferencia de Checkout Pro para que el inquilino pague por
+ * Mercado Pago. El monto se calcula acá (server-side) a partir de lo que el
+ * Administrador le asignó al usuario en Firestore — nunca se confía en un monto
+ * mandado por el cliente (mismo criterio que "monto congelado" ya usa la
+ * transferencia). external_reference = "{buildingId}_{uid}_{period}": es lo único
+ * que mercadoPagoWebhook usa después para encontrar este Payment.
+ */
+exports.createMercadoPagoPreference = onCall(
+  { secrets: [mercadoPagoAccessToken] },
+  async (request) => {
+    if (!request.auth) throw new HttpsError("unauthenticated", "Tenés que iniciar sesión.");
+    const { buildingId, period } = request.data || {};
+    if (!buildingId || !period) throw new HttpsError("invalid-argument", "Falta buildingId o period.");
+
+    const uid = request.auth.uid;
+    const db = getFirestore();
+
+    const [userSnap, buildingSnap] = await Promise.all([
+      db.collection("users").doc(uid).get(),
+      db.collection("buildings").doc(buildingId).get(),
+    ]);
+    if (!userSnap.exists || !buildingSnap.exists) {
+      throw new HttpsError("failed-precondition", "No se encontró tu perfil o tu edificio.");
+    }
+    const user = userSnap.data();
+    const building = buildingSnap.data();
+    const breakdown = {};
+    if (building.chargesRent && user.rentAmount > 0) breakdown.alquiler = user.rentAmount;
+    if (building.chargesExpenses && user.expensesAmount > 0) breakdown.expensas = user.expensesAmount;
+    const amount = Object.values(breakdown).reduce((a, b) => a + b, 0);
+    if (amount <= 0) throw new HttpsError("failed-precondition", "No tenés un monto asignado.");
+
+    const paymentId = `${uid}_${period}`;
+    const paymentRef = db.collection("buildings").doc(buildingId)
+      .collection("payments").doc(paymentId);
+
+    const client = new MercadoPagoConfig({ accessToken: mercadoPagoAccessToken.value() });
+    const preference = await new Preference(client).create({
+      body: {
+        items: [{ title: "Expensas/alquiler", quantity: 1, unit_price: amount }],
+        external_reference: `${buildingId}_${uid}_${period}`,
+        notification_url: process.env.MERCADO_PAGO_WEBHOOK_URL || undefined,
+      },
+    });
+
+    await paymentRef.set({
+      uid,
+      period,
+      breakdown,
+      amount,
+      method: "MERCADO_PAGO",
+      status: "A_VERIFICAR",
+      createdAt: new Date(),
+    });
+
+    return { initPoint: preference.sandbox_init_point || preference.init_point };
   }
 );
