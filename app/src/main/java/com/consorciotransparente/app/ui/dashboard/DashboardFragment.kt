@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.consorciotransparente.app.R
 import com.consorciotransparente.app.databinding.FragmentDashboardBinding
+import com.consorciotransparente.app.ui.pagos.PagarActivity
 import com.consorciotransparente.app.ui.tickets.CreateTicketActivity
 import com.consorciotransparente.app.util.Resource
 import com.consorciotransparente.app.util.SimpleModePrefs
@@ -48,6 +49,9 @@ class DashboardFragment : Fragment() {
         }
         binding.buttonSimpleNews.setOnClickListener {
             findNavController().navigate(R.id.muroFragment)
+        }
+        binding.cardExpenses.setOnClickListener {
+            startActivity(Intent(requireContext(), PagarActivity::class.java))
         }
 
         viewModel.state.observe(viewLifecycleOwner) { state ->

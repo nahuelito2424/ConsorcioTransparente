@@ -11,7 +11,7 @@
 |---|---|---|---|
 | HU-01 | Auditoría Documental Obligatoria | ✅ Implementada | Facturas |
 | HU-02 | Votaciones Vinculantes | ✅ Implementada | Votar |
-| HU-03 | Pago de Alquiler y/o Expensas | 🕗 Pendiente | — |
+| HU-03 | Pago de Alquiler y/o Expensas | 🟡 Parcial (transferencia + comprobante; falta Mercado Pago) | Más → Pagar / Vecinos / Panel de cobros |
 | HU-04 | Integración con pasarela de pago (Mercado Pago) | 🕗 Pendiente | — |
 | HU-05 | Muro con moderación previa | ✅ Implementada | Muro |
 | HU-06 | Reserva de Espacios Comunes | ✅ Implementada | Más → Reservas |
@@ -29,19 +29,19 @@
    ya "implementadas" del lado función).
 2. **Pantalla de alta/invitación de vecinos y unidades.** Hoy solo el creador del
    edificio se auto-asigna como Administrador; para agregar un segundo usuario a un
-   edificio hay que editarle el campo `buildingId` a mano en Firestore.
-3. **HU-04 — SDK/Checkout de Mercado Pago**, primero para HU-03 (alquiler/expensas),
-   después reemplazando el comprobante de pago manual de HU-10 (`markPaid` en
+   edificio hay que editarle el campo `buildingId` a mano en Firestore. (La pantalla
+   "Vecinos" nueva de HU-03 solo le asigna un monto a quien ya tiene `buildingId` — no
+   reemplaza esta invitación.)
+3. **HU-04 — SDK/Checkout de Mercado Pago**: completa HU-03 (botón de pago dinámico vía
+   Cloud Function + webhook, ver `docs/superpowers/specs/2026-10-20-pago-expensas-design.md`)
+   y, después, reemplaza el comprobante de pago manual de HU-10 (`markPaid` en
    `TicketRepository.kt`) por la confirmación real del pago.
-4. **HU-03 — pantalla de pago de alquiler/expensas**, una vez que exista HU-04:
-   mostrar vencimiento próximo (ya configurado en HU-09), botón de pago, descarga del
-   comprobante.
-5. **Notificar al Encargado/Administrador cuando se reporta un ticket nuevo**, y al
+4. **Notificar al Encargado/Administrador cuando se reporta un ticket nuevo**, y al
    inquilino cuando cambia de estado — hoy hay que entrar a la app para enterarse.
-6. **HU-08 — UI del directorio de proveedores**: listado, alta/edición/borrado
+5. **HU-08 — UI del directorio de proveedores**: listado, alta/edición/borrado
    (Administrador), ficha con reseñas y estrellas. El modelo (`Provider`,
    `ProviderReview`) y las reglas de Firestore ya están listos.
-7. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
+6. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
    está habilitada (`ConsorcioApp.kt`) para que funcionen sin conexión.
 
 ## Backlog / ideas a más largo plazo

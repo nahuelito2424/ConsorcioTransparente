@@ -12,8 +12,11 @@ import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.databinding.FragmentMasBinding
 import com.consorciotransparente.app.ui.auth.LoginActivity
 import com.consorciotransparente.app.ui.building.BuildingConfigActivity
+import com.consorciotransparente.app.ui.pagos.CobrosActivity
+import com.consorciotransparente.app.ui.pagos.PagarActivity
 import com.consorciotransparente.app.ui.reservas.ReservasActivity
 import com.consorciotransparente.app.ui.tickets.TicketsActivity
+import com.consorciotransparente.app.ui.vecinos.VecinosActivity
 import com.consorciotransparente.app.util.SimpleModePrefs
 import kotlinx.coroutines.launch
 
@@ -46,6 +49,15 @@ class MasFragment : Fragment() {
         binding.itemReservas.setOnClickListener {
             startActivity(Intent(requireContext(), ReservasActivity::class.java))
         }
+        binding.itemVecinos.setOnClickListener {
+            startActivity(Intent(requireContext(), VecinosActivity::class.java))
+        }
+        binding.itemPagar.setOnClickListener {
+            startActivity(Intent(requireContext(), PagarActivity::class.java))
+        }
+        binding.itemCobros.setOnClickListener {
+            startActivity(Intent(requireContext(), CobrosActivity::class.java))
+        }
 
         // Se fija el estado actual antes de escuchar cambios, para no disparar el
         // listener (y un recreate() innecesario) al sólo inflar la pantalla.
@@ -72,6 +84,10 @@ class MasFragment : Fragment() {
             val user = RepositoryProvider.auth.fetchCurrentUserProfile()
             val showBuildingConfig = user != null && (user.buildingId.isBlank() || user.roleEnum() == Role.ADMINISTRADOR)
             binding.itemBuildingConfig.visibility = if (showBuildingConfig) View.VISIBLE else View.GONE
+
+            val isAdmin = user?.roleEnum() == Role.ADMINISTRADOR
+            binding.itemVecinos.visibility = if (isAdmin) View.VISIBLE else View.GONE
+            binding.itemCobros.visibility = if (isAdmin) View.VISIBLE else View.GONE
         }
     }
 
