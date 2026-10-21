@@ -88,6 +88,18 @@
             android:name=".ui.pagos.CobrosActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.proveedores.ProveedoresActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.proveedores.ProviderDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.proveedores.AddEditProviderActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

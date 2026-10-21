@@ -173,4 +173,29 @@
     <string name="ticket_mark_paid">Adjuntar comprobante de pago</string>
     <string name="ticket_resolved_notice">Este ticket está resuelto y archivado para auditoría.</string>
     <string name="ticket_to_quote">A cotizar</string>
+
+    <string name="providers_menu_item">🛠️ Directorio de proveedores</string>
+    <string name="providers_title">Directorio de proveedores</string>
+    <string name="providers_empty">Todavía no hay proveedores cargados.</string>
+    <string name="providers_new">+ Agregar proveedor</string>
+    <string name="providers_title_new">Nuevo proveedor</string>
+    <string name="providers_title_edit">Editar proveedor</string>
+    <string name="providers_name_hint">Nombre</string>
+    <string name="providers_category_hint">Categoría (Plomería, Electricidad, Gas, Albañilería)</string>
+    <string name="providers_phone_hint">Teléfono</string>
+    <string name="providers_save">Guardar</string>
+    <string name="providers_fields_required">Completá nombre, categoría y teléfono.</string>
+    <string name="providers_edit">Editar</string>
+    <string name="providers_delete">Eliminar</string>
+    <string name="providers_delete_confirm">¿Eliminar este proveedor? También se pierden sus reseñas.</string>
+    <string name="providers_reviews_title">Reseñas</string>
+    <string name="providers_no_reviews">Todavía no tiene reseñas.</string>
+    <string name="providers_add_review_title">Dejar una reseña</string>
+    <string name="providers_review_comment_hint">Contá cómo te fue con el servicio</string>
+    <string name="providers_review_comment_required">Escribí un comentario antes de enviar la reseña.</string>
+    <string name="providers_add_review">Enviar reseña</string>
+    <plurals name="providers_review_count">
+        <item quantity="one">%1$d reseña</item>
+        <item quantity="other">%1$d reseñas</item>
+    </plurals>
 </resources>

@@ -98,13 +98,12 @@ que las lecturas sobrevivan sin conexión (de ahí que la app ya habilite caché
 de Firestore en `ConsorcioApp.kt`, anotado como RNF-07) — un protocolo de emergencia que
 solo funciona con internet no cumple su propósito.
 
-### HU-08 — Directorio de Proveedores ✅ modelo listo / pantalla pendiente
+### HU-08 — Directorio de Proveedores ✅ implementada
 Ficha de proveedor con cinco datos: teléfono, nombre/perfil, categoría (Plomería,
 Electricidad, Gas, Albañilería), comentarios y calificación (estrellas) de vecinos que
 ya usaron el servicio. El Administrador da de alta, edita o elimina proveedores —
 incluyendo eliminar perfiles con malos comentarios reiterados. Los vecinos consultan el
-listado y agregan reseñas después de usar el servicio. `Provider.kt` y
-`ProviderReview.kt` ya existen; falta la UI de listado/alta/reseña.
+listado y agregan reseñas después de usar el servicio.
 
 ### HU-09 — Configuración de Cobros y Vencimientos ✅ implementada
 El Administrador define si el edificio cobra alquiler, expensas o ambos, el día de

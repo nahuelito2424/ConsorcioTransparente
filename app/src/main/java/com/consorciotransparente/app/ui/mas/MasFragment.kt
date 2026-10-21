@@ -14,6 +14,7 @@ import com.consorciotransparente.app.ui.auth.LoginActivity
 import com.consorciotransparente.app.ui.building.BuildingConfigActivity
 import com.consorciotransparente.app.ui.pagos.CobrosActivity
 import com.consorciotransparente.app.ui.pagos.PagarActivity
+import com.consorciotransparente.app.ui.proveedores.ProveedoresActivity
 import com.consorciotransparente.app.ui.reservas.ReservasActivity
 import com.consorciotransparente.app.ui.tickets.TicketsActivity
 import com.consorciotransparente.app.ui.vecinos.VecinosActivity
@@ -21,9 +22,9 @@ import com.consorciotransparente.app.util.SimpleModePrefs
 import kotlinx.coroutines.launch
 
 /**
- * Menú "Más": acceso a Reservas (HU-06) y a la configuración del edificio (HU-09,
- * también sirve para crear el edificio si el usuario todavía no tiene uno asignado).
- * Proveedores/Protocolos quedan como stubs para próximas iteraciones (HU-08, HU-07).
+ * Menú "Más": acceso a Reservas (HU-06), proveedores (HU-08) y a la configuración del
+ * edificio (HU-09, también sirve para crear el edificio si el usuario todavía no tiene
+ * uno asignado). Protocolos queda como stub para una próxima iteración (HU-07).
  */
 class MasFragment : Fragment() {
 
@@ -57,6 +58,9 @@ class MasFragment : Fragment() {
         }
         binding.itemCobros.setOnClickListener {
             startActivity(Intent(requireContext(), CobrosActivity::class.java))
+        }
+        binding.itemProveedores.setOnClickListener {
+            startActivity(Intent(requireContext(), ProveedoresActivity::class.java))
         }
 
         // Se fija el estado actual antes de escuchar cambios, para no disparar el

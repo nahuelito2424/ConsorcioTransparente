@@ -16,7 +16,7 @@
 | HU-05 | Muro con moderación previa | ✅ Implementada | Muro |
 | HU-06 | Reserva de Espacios Comunes | ✅ Implementada | Más → Reservas |
 | HU-07 | Protocolos de emergencia (PDF) | 🕗 Pendiente — "Próximamente" | Más → Protocolos (stub) |
-| HU-08 | Directorio de Proveedores | 🟡 Modelo listo, falta UI | Más → Proveedores (stub) |
+| HU-08 | Directorio de Proveedores | ✅ Implementada | Más → Directorio de proveedores |
 | HU-09 | Configuración de Cobros y Vencimientos | ✅ Implementada | Más → Configuración del edificio |
 | HU-10 | Gestión de Incidentes de Mantenimiento | ✅ Implementada (pago manual, ver HU-04) | Más → Tickets |
 
@@ -26,10 +26,7 @@
    Cloud Function + webhook, ver `docs/superpowers/specs/2026-10-20-pago-expensas-design.md`)
    y, después, reemplaza el comprobante de pago manual de HU-10 (`markPaid` en
    `TicketRepository.kt`) por la confirmación real del pago.
-2. **HU-08 — UI del directorio de proveedores**: listado, alta/edición/borrado
-   (Administrador), ficha con reseñas y estrellas. El modelo (`Provider`,
-   `ProviderReview`) y las reglas de Firestore ya están listos.
-3. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
+2. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
    está habilitada (`ConsorcioApp.kt`) para que funcionen sin conexión.
 
 ✅ **Pantalla de alta/invitación de vecinos** resuelta: en Registrarse hay un campo
@@ -56,6 +53,14 @@ caso de recién crear el edificio), pide el permiso `POST_NOTIFICATIONS` en tiem
 ejecución (API 33+), y `MasFragment` desuscribe antes del logout. El flavor mock usa un
 `MockNotificationRepository` sin operación — no hay forma de probar la llegada real de
 la notificación sin un proyecto de Firebase real.
+
+✅ **HU-08 — Directorio de Proveedores** resuelta: pantalla de listado (`ProveedoresActivity`),
+ficha con promedio de estrellas y reseñas (`ProviderDetailActivity`) y alta/edición
+(`AddEditProviderActivity`, sólo Administrador). El promedio se calcula en el momento a
+partir de las reseñas (`ProviderDetailViewModel`), no se denormaliza en
+`Provider.averageRating`/`ratingCount` — ver el comentario de `ProviderRepository` por
+qué. Probado a mano en el emulador (mock): alta, edición, borrado, y dejar una reseña
+como Admin e Inquilino.
 
 ## Backlog / ideas a más largo plazo
 

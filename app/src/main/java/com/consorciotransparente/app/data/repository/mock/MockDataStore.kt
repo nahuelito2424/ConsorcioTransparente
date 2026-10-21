@@ -7,6 +7,8 @@ import com.consorciotransparente.app.data.model.ExpenseStatus
 import com.consorciotransparente.app.data.model.Payment
 import com.consorciotransparente.app.data.model.Post
 import com.consorciotransparente.app.data.model.PostStatus
+import com.consorciotransparente.app.data.model.Provider
+import com.consorciotransparente.app.data.model.ProviderReview
 import com.consorciotransparente.app.data.model.Reservation
 import com.consorciotransparente.app.data.model.Role
 import com.consorciotransparente.app.data.model.Ticket
@@ -142,6 +144,18 @@ object MockDataStore {
     )
 
     val payments = mutableListOf<Payment>()
+
+    val providers = mutableListOf(
+        Provider(id = "provider-1", name = "Plomería del Sur", category = "Plomería", phone = "11-4444-5555"),
+        Provider(id = "provider-2", name = "Electricidad Fernández", category = "Electricidad", phone = "11-2222-3333")
+    )
+
+    /** providerId -> sus reseñas. */
+    val providerReviews = mutableMapOf<String, MutableList<ProviderReview>>(
+        "provider-1" to mutableListOf(
+            ProviderReview(id = "review-1", authorUid = adminUser.uid, comment = "Vino rápido y arregló la bomba.", stars = 5)
+        )
+    )
 
     fun findUserByEmail(email: String): User? = users.firstOrNull { it.email.equals(email, ignoreCase = true) }
 
