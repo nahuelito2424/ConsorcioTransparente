@@ -80,6 +80,10 @@
             android:name=".ui.vecinos.VecinosActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.pagos.PagarActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

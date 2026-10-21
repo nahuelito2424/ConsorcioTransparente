@@ -97,6 +97,25 @@
     <string name="vecinos_expenses_hint">Monto de expensas</string>
     <string name="vecinos_save">Guardar</string>
     <string name="vecinos_saved">Monto actualizado.</string>
+
+    <string name="pagar_menu_item">💳 Pagar alquiler/expensas</string>
+    <string name="pagar_title">Pagar este mes</string>
+    <string name="pagar_no_amount">Todavía no tenés un monto asignado. Consultá a tu Administrador.</string>
+    <string name="pagar_concept_rent">Alquiler</string>
+    <string name="pagar_concept_expenses">Expensas</string>
+    <string name="pagar_total">Total a pagar</string>
+    <string name="pagar_cbu">CBU: %1$s</string>
+    <string name="pagar_alias">Alias: %1$s</string>
+    <string name="pagar_copy_cbu">Copiar CBU</string>
+    <string name="pagar_copy_alias">Copiar alias</string>
+    <string name="pagar_copied">Copiado al portapapeles.</string>
+    <string name="pagar_attach_receipt">Adjuntar comprobante de transferencia</string>
+    <string name="pagar_pending_review">Tu comprobante está en revisión por el Administrador.</string>
+    <string name="pagar_rejected">Tu comprobante fue rechazado: %1$s. Subí uno nuevo.</string>
+    <string name="pagar_paid_on">Pagado el %1$s por %2$s.</string>
+    <string name="pagar_history">Ver historial de meses anteriores</string>
+    <string name="pagar_history_empty">Todavía no tenés pagos de meses anteriores.</string>
+    <string name="pagar_history_row">%1$s — %2$s</string>
     <string name="building_charges_rent">Cobra alquiler</string>
     <string name="building_charges_expenses">Cobra expensas</string>
     <string name="building_rent_due_day">Día de vencimiento del alquiler (1-28)</string>
