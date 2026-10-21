@@ -4,6 +4,7 @@ import com.consorciotransparente.app.data.model.Building
 import com.consorciotransparente.app.data.model.Expense
 import com.consorciotransparente.app.data.model.ExpenseCategory
 import com.consorciotransparente.app.data.model.ExpenseStatus
+import com.consorciotransparente.app.data.model.Payment
 import com.consorciotransparente.app.data.model.Post
 import com.consorciotransparente.app.data.model.PostStatus
 import com.consorciotransparente.app.data.model.Reservation
@@ -139,6 +140,8 @@ object MockDataStore {
             reportedByUid = inquilinoUser.uid, createdAt = Date()
         )
     )
+
+    val payments = mutableListOf<Payment>()
 
     fun findUserByEmail(email: String): User? = users.firstOrNull { it.email.equals(email, ignoreCase = true) }
 
