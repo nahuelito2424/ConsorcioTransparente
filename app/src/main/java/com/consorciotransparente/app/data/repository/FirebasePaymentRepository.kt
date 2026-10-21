@@ -6,6 +6,7 @@ import com.consorciotransparente.app.data.model.PaymentMethod
 import com.consorciotransparente.app.data.model.PaymentStatus
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import java.util.Date
@@ -13,7 +14,8 @@ import java.util.UUID
 
 class FirebasePaymentRepository(
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
+    private val storage: FirebaseStorage = FirebaseStorage.getInstance(),
+    private val functions: FirebaseFunctions = FirebaseFunctions.getInstance()
 ) : PaymentRepository {
     private fun paymentsRef(buildingId: String) =
         db.collection("buildings").document(buildingId).collection("payments")
@@ -81,5 +83,13 @@ class FirebasePaymentRepository(
                 "rejectionReason" to reason
             )
         ).await()
+    }
+
+    override suspend fun createMercadoPagoPreference(buildingId: String, period: String): String {
+        val result = functions.getHttpsCallable("createMercadoPagoPreference")
+            .call(mapOf("buildingId" to buildingId, "period" to period))
+            .await()
+        val data = result.getData() as? Map<*, *>
+        return data?.get("initPoint") as? String ?: error("Mercado Pago no devolvió una URL de pago.")
     }
 }

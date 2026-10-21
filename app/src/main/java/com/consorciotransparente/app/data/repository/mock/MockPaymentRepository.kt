@@ -54,4 +54,30 @@ class MockPaymentRepository : PaymentRepository {
         val index = MockDataStore.payments.indexOfFirst { it.id == paymentId }
         if (index >= 0) MockDataStore.payments[index] = transform(MockDataStore.payments[index])
     }
+
+    // Sin cuenta real de Mercado Pago en el flavor mock: marca el pago PAGADO al
+    // instante (ver diseño HU-04), sin red ni URL de checkout.
+    override suspend fun createMercadoPagoPreference(buildingId: String, period: String): String {
+        val user = MockDataStore.currentUser ?: error("Iniciá sesión de nuevo.")
+        val uid = user.uid
+        val building = MockDataStore.building
+        val breakdown = buildMap {
+            if (building.chargesRent && user.rentAmount > 0.0) put("alquiler", user.rentAmount)
+            if (building.chargesExpenses && user.expensesAmount > 0.0) put("expensas", user.expensesAmount)
+        }
+        val payment = Payment(
+            id = docId(uid, period),
+            uid = uid,
+            period = period,
+            breakdown = breakdown,
+            amount = breakdown.values.sum(),
+            method = PaymentMethod.MERCADO_PAGO.name,
+            status = PaymentStatus.PAGADO.name,
+            createdAt = Date(),
+            verifiedAt = Date()
+        )
+        val index = MockDataStore.payments.indexOfFirst { it.id == payment.id }
+        if (index >= 0) MockDataStore.payments[index] = payment else MockDataStore.payments.add(payment)
+        return ""
+    }
 }
