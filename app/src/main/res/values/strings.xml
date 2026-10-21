@@ -89,6 +89,14 @@
     <string name="building_address_hint">Dirección</string>
     <string name="building_cbu_hint">CBU para transferencias</string>
     <string name="building_alias_hint">Alias para transferencias</string>
+
+    <string name="vecinos_menu_item">👥 Vecinos</string>
+    <string name="vecinos_title">Vecinos y montos</string>
+    <string name="vecinos_empty">Todavía no hay inquilinos asignados a este edificio.</string>
+    <string name="vecinos_rent_hint">Monto de alquiler</string>
+    <string name="vecinos_expenses_hint">Monto de expensas</string>
+    <string name="vecinos_save">Guardar</string>
+    <string name="vecinos_saved">Monto actualizado.</string>
     <string name="building_charges_rent">Cobra alquiler</string>
     <string name="building_charges_expenses">Cobra expensas</string>
     <string name="building_rent_due_day">Día de vencimiento del alquiler (1-28)</string>

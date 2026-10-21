@@ -76,6 +76,10 @@
             android:name=".ui.tickets.TicketDetailActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.vecinos.VecinosActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
