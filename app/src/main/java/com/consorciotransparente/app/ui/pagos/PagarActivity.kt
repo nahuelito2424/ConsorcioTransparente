@@ -138,6 +138,10 @@ class PagarActivity : BaseActivity() {
         when (payment?.status) {
             PaymentStatus.A_VERIFICAR.name -> {
                 binding.textReviewing.visibility = View.VISIBLE
+                binding.textReviewing.text = getString(
+                    if (payment.method == PaymentMethod.MERCADO_PAGO.name) R.string.pagar_reviewing_mercado_pago
+                    else R.string.pagar_pending_review
+                )
             }
             PaymentStatus.PAGADO.name -> {
                 binding.sectionPaid.visibility = View.VISIBLE

@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.consorciotransparente.app.R
+import com.consorciotransparente.app.data.model.PaymentMethod
 import com.consorciotransparente.app.data.model.PaymentStatus
 import com.consorciotransparente.app.databinding.ItemCobroBinding
 
@@ -34,18 +35,25 @@ class CobroAdapter(
 
         binding.textName.text = row.user.fullName
 
-        val (label, bg, fg) = when (row.payment?.status) {
-            PaymentStatus.PAGADO.name -> Triple(R.string.cobros_status_paid, R.color.tag_green_bg, R.color.tag_green_fg)
-            PaymentStatus.A_VERIFICAR.name -> Triple(R.string.cobros_status_reviewing, R.color.tag_yellow_bg, R.color.tag_yellow_fg)
+        val isPendingTransfer = row.payment?.status == PaymentStatus.A_VERIFICAR.name &&
+            row.payment.method == PaymentMethod.TRANSFERENCIA.name
+        val isPendingMercadoPago = row.payment?.status == PaymentStatus.A_VERIFICAR.name &&
+            row.payment.method == PaymentMethod.MERCADO_PAGO.name
+
+        val (label, bg, fg) = when {
+            row.payment?.status == PaymentStatus.PAGADO.name ->
+                Triple(R.string.cobros_status_paid, R.color.tag_green_bg, R.color.tag_green_fg)
+            isPendingMercadoPago ->
+                Triple(R.string.cobros_status_mercado_pago_pending, R.color.tag_yellow_bg, R.color.tag_yellow_fg)
+            isPendingTransfer ->
+                Triple(R.string.cobros_status_reviewing, R.color.tag_yellow_bg, R.color.tag_yellow_fg)
             else -> Triple(R.string.cobros_status_pending, R.color.tag_red_bg, R.color.tag_red_fg)
         }
         binding.textStatus.setText(label)
         binding.textStatus.background.setTint(context.getColor(bg))
         binding.textStatus.setTextColor(context.getColor(fg))
 
-        binding.root.isClickable = row.payment?.status == PaymentStatus.A_VERIFICAR.name
-        binding.root.setOnClickListener {
-            if (row.payment?.status == PaymentStatus.A_VERIFICAR.name) onRowClick(row)
-        }
+        binding.root.isClickable = isPendingTransfer
+        binding.root.setOnClickListener { if (isPendingTransfer) onRowClick(row) }
     }
 }

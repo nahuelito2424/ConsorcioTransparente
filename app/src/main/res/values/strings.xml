@@ -114,6 +114,7 @@
     <string name="pagar_copied">Copiado al portapapeles.</string>
     <string name="pagar_attach_receipt">Adjuntar comprobante de transferencia</string>
     <string name="pagar_mercado_pago">Pagar con Mercado Pago</string>
+    <string name="pagar_reviewing_mercado_pago">Tu pago por Mercado Pago está siendo confirmado. Esto puede tardar unos minutos.</string>
     <string name="pagar_pending_review">Tu comprobante está en revisión por el Administrador.</string>
     <string name="pagar_rejected">Tu comprobante fue rechazado: %1$s. Subí uno nuevo.</string>
     <string name="pagar_paid_on">Pagado el %1$s por %2$s. Método: %3$s.</string>
@@ -132,6 +133,7 @@
     <string name="cobros_status_paid">Pagado</string>
     <string name="cobros_status_reviewing">A verificar</string>
     <string name="cobros_status_pending">Pendiente</string>
+    <string name="cobros_status_mercado_pago_pending">Mercado Pago (pendiente)</string>
     <string name="cobros_approve">Aprobar</string>
     <string name="cobros_reject">Rechazar</string>
     <string name="cobros_reject_reason_hint">Motivo del rechazo</string>
