@@ -107,8 +107,20 @@ reemplazarlo, la app compila pero ningún llamado a Firebase va a funcionar.
    - **Authentication** → método "Correo electrónico/contraseña".
    - **Firestore Database** → crear base de datos (modo producción).
    - **Storage** → crear bucket (modo producción).
-   - **Cloud Functions** → requiere pasar el proyecto al plan Blaze (pago por uso; el nivel gratuito de invocaciones alcanza de sobra para un TP). Si preferís no activarlo todavía, la app funciona igual — sólo no vas a tener el cierre automático de votaciones ni los recordatorios de vencimiento hasta que despliegues las functions.
-5. Subí las reglas y (opcionalmente) las functions con el Firebase CLI:
+   - **Cloud Functions** → requiere pasar el proyecto al plan Blaze (pago por uso; el nivel gratuito de invocaciones alcanza de sobra para un TP). Si preferís no activarlo todavía, la app funciona igual — sólo no vas a tener el cierre automático de votaciones, los recordatorios de vencimiento, las notificaciones de tickets, ni el pago por Mercado Pago (queda sólo transferencia) hasta que despliegues las functions.
+5. Para el pago por Mercado Pago (HU-04), seteá los dos secrets que usan las Cloud
+   Functions `createMercadoPagoPreference`/`mercadoPagoWebhook` (nunca van en el repo
+   ni en el cliente Android):
+   ```bash
+   firebase functions:secrets:set MERCADO_PAGO_ACCESS_TOKEN
+   firebase functions:secrets:set MERCADO_PAGO_WEBHOOK_SECRET
+   ```
+   El access token sale de tu cuenta de Mercado Pago (de prueba o real, según
+   corresponda) en *Tus integraciones → Credenciales*; el webhook secret, de
+   *Tus integraciones → Webhooks → Configurar notificaciones* (ahí mismo cargás la URL
+   pública de `mercadoPagoWebhook` una vez desplegada, para que Mercado Pago sepa a
+   dónde avisar).
+6. Subí las reglas y (opcionalmente) las functions con el Firebase CLI:
    ```bash
    npm install -g firebase-tools
    firebase login
@@ -126,8 +138,10 @@ reemplazarlo, la app compila pero ningún llamado a Firebase va a funcionar.
    de ese edificio.
 3. Con eso ya podés usar Facturas, crear votaciones, moderar el Muro y reservar
    espacios comunes. Para probar como si fueras un vecino común (no
-   Administrador), registrá una segunda cuenta y actualizale a mano el campo
-   `buildingId` en Firestore (todavía no hay una pantalla de "invitar vecino").
+   Administrador), copiá el "código para invitar vecinos" que te muestra esa misma
+   pantalla (es el id del edificio) y pegalo en el campo "Código del edificio" al
+   registrar una segunda cuenta — así ese usuario queda asignado a tu edificio sin
+   tocar Firestore a mano.
 
 ## Compilar
 
@@ -158,17 +172,22 @@ app/src/main/java/com/consorciotransparente/app/
   ui/reservas/       HU-06: franjas horarias, reservar, editar, cancelar (24hs)
   ui/building/       HU-09: alta de edificio y configuración de cobros/vencimientos
   ui/tickets/        HU-10: reportar, presupuestar, comprobante de compra y de pago
+  ui/vecinos/        HU-03: el Administrador le asigna a cada vecino su monto de alquiler/expensas
+  ui/pagos/          HU-03/HU-04: pantalla Pagar (transferencia + Mercado Pago) y Panel de cobros (admin)
+  ui/proveedores/    HU-08: directorio de proveedores, ficha con reseñas y estrellas
   ui/mas/            menú "Más" + cerrar sesión
-firestore.rules       reglas de seguridad (auditoría, un voto por usuario, moderación previa, bootstrap de edificio)
-firestore.indexes.json índice compuesto que necesita la Cloud Function de cierre de votaciones
-storage.rules          reglas de Storage para fotos de facturas, tickets y publicaciones
-functions/index.js     Cloud Functions programadas: cierre de votaciones y recordatorio de vencimientos
+firestore.rules       reglas de seguridad (auditoría, un voto por usuario, moderación previa, bootstrap de edificio, pagos)
+firestore.indexes.json índices compuestos que necesitan la Cloud Function de cierre de votaciones y el historial de pagos
+storage.rules          reglas de Storage para fotos de facturas, tickets, publicaciones y comprobantes de pago
+functions/index.js     Cloud Functions: cierre de votaciones, recordatorio de vencimientos, notificación de tickets,
+                       y la preferencia/webhook de Mercado Pago (HU-04)
 ```
 
 ## Próximos pasos sugeridos
 
-1. Suscribir a cada usuario al tópico FCM `building_{buildingId}` al iniciar sesión, para que las notificaciones que ya mandan las Cloud Functions (cierre de votación, vencimientos) le lleguen a alguien. Lo mismo serviría para avisar cuando un ticket cambia de estado.
-2. Pantalla para que el Administrador invite/dé de alta vecinos y unidades (hoy sólo él se auto-asigna al crear el edificio).
-3. HU-04: integración real con el SDK de Mercado Pago, tanto para alquiler/expensas como para reemplazar el comprobante de pago manual de HU-10 por un cobro automático.
-4. Notificar al Encargado/Administrador cuando se reporta un ticket nuevo, y al inquilino cuando cambia de estado (hoy hay que entrar a la app para enterarse).
-5. HU-08: directorio de proveedores con ficha, categorías y calificación (el modelo `Provider` ya está listo, y HU-10 ya deja el `expenseId`/ticket como referencia para vincular la reseña a un trabajo concreto).
+Ver la tabla completa de estado por historia de usuario en
+[`docs/roadmap.md`](./docs/roadmap.md). En resumen, queda pendiente:
+
+1. HU-07: protocolos de emergencia en PDF, apoyándose en la caché offline de
+   Firestore que ya está habilitada (`ConsorcioApp.kt`) para que funcionen sin
+   conexión.

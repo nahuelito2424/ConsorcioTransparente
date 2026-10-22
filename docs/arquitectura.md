@@ -122,8 +122,9 @@ forma análoga, scopeada por `buildingId`.
 
 ## 5. Cloud Functions (`functions/index.js`)
 
-Firebase Functions Gen 2 (Node.js). Dos programadas (`onSchedule`) y dos disparadas por
-Firestore (`onDocumentCreated`/`onDocumentUpdated`):
+Firebase Functions Gen 2 (Node.js). Dos programadas (`onSchedule`), dos disparadas por
+Firestore (`onDocumentCreated`/`onDocumentUpdated`), una callable (`onCall`) y una HTTP
+pública (`onRequest`):
 
 - `closeExpiredVotes` — corre cada 15 minutos, cierra votaciones vencidas
   (`isClosed = true`), tabula `finalCounts` y notifica por FCM al tópico
@@ -136,14 +137,23 @@ Firestore (`onDocumentCreated`/`onDocumentUpdated`):
   Encargado/Administrador) cuando se reporta un ticket nuevo (HU-10).
 - `onTicketStatusChanged` — notifica al tópico `user_{uid}` (el inquilino que lo
   reportó) cuando cambia el `status` de su ticket.
+- `createMercadoPagoPreference` (HU-04, callable) — el cliente Android la invoca para
+  pagar con Mercado Pago. Calcula el monto server-side (nunca confía en un monto
+  mandado por el cliente), crea el `Payment` (`method: MERCADO_PAGO`,
+  `status: A_VERIFICAR`) y devuelve la URL de Checkout Pro.
+- `mercadoPagoWebhook` (HU-04, HTTP pública) — recibe la confirmación de pago de
+  Mercado Pago, valida su firma (`WebhookSignatureValidator` del SDK `mercadopago`) y
+  marca el `Payment` correspondiente `PAGADO`. Es la primera función HTTP pública del
+  proyecto; requiere los secrets `MERCADO_PAGO_ACCESS_TOKEN` y
+  `MERCADO_PAGO_WEBHOOK_SECRET` (ver README).
 
-Los clientes Android se suscriben a estos tópicos en `MainActivity.onResume` (ver
-`NotificationRepository`), según buildingId/rol/uid del usuario, y se desuscriben en el
-logout (`MasFragment`).
+Los clientes Android se suscriben a los tópicos de notificación en
+`MainActivity.onResume` (ver `NotificationRepository`), según buildingId/rol/uid del
+usuario, y se desuscriben en el logout (`MasFragment`).
 
 Requieren plan Blaze en el proyecto de Firebase para desplegarse; el resto de la app
-funciona sin ellas (solo no hay cierre automático de votación, recordatorio de
-vencimiento, ni notificación de tickets).
+funciona sin ellas (sin cierre automático de votación, recordatorio de vencimiento,
+notificación de tickets, ni pago por Mercado Pago — queda sólo transferencia).
 
 ## 6. Setup de un proyecto de Firebase nuevo
 

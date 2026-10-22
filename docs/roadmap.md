@@ -11,23 +11,22 @@
 |---|---|---|---|
 | HU-01 | Auditoría Documental Obligatoria | ✅ Implementada | Facturas |
 | HU-02 | Votaciones Vinculantes | ✅ Implementada | Votar |
-| HU-03 | Pago de Alquiler y/o Expensas | 🟡 Parcial (transferencia + comprobante; falta Mercado Pago) | Más → Pagar / Vecinos / Panel de cobros |
-| HU-04 | Integración con pasarela de pago (Mercado Pago) | 🕗 Pendiente | — |
+| HU-03 | Pago de Alquiler y/o Expensas | ✅ Implementada (transferencia + Mercado Pago) | Más → Pagar / Vecinos / Panel de cobros |
+| HU-04 | Integración con pasarela de pago (Mercado Pago) | ✅ Implementada (sólo HU-03; HU-10 Escenario 3 sigue con pago manual) | Más → Pagar |
 | HU-05 | Muro con moderación previa | ✅ Implementada | Muro |
 | HU-06 | Reserva de Espacios Comunes | ✅ Implementada | Más → Reservas |
 | HU-07 | Protocolos de emergencia (PDF) | 🕗 Pendiente — "Próximamente" | Más → Protocolos (stub) |
 | HU-08 | Directorio de Proveedores | ✅ Implementada | Más → Directorio de proveedores |
 | HU-09 | Configuración de Cobros y Vencimientos | ✅ Implementada | Más → Configuración del edificio |
-| HU-10 | Gestión de Incidentes de Mantenimiento | ✅ Implementada (pago manual, ver HU-04) | Más → Tickets |
+| HU-10 | Gestión de Incidentes de Mantenimiento | ✅ Implementada (cobro de reparaciones con pago manual; todavía no usa Mercado Pago) | Más → Tickets |
 
 ## Próximos pasos (orden sugerido)
 
-1. **HU-04 — SDK/Checkout de Mercado Pago**: completa HU-03 (botón de pago dinámico vía
-   Cloud Function + webhook, ver `docs/superpowers/specs/2026-10-20-pago-expensas-design.md`)
-   y, después, reemplaza el comprobante de pago manual de HU-10 (`markPaid` en
-   `TicketRepository.kt`) por la confirmación real del pago.
-2. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
+1. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
    está habilitada (`ConsorcioApp.kt`) para que funcionen sin conexión.
+2. **Reemplazar el pago manual de HU-10** (`markPaid` en `TicketRepository.kt`) por el
+   cobro real de reparaciones vía Mercado Pago, reusando la misma integración de HU-04
+   (Cloud Function + webhook) ya hecha para HU-03.
 
 ✅ **Pantalla de alta/invitación de vecinos** resuelta: en Registrarse hay un campo
 "Código del edificio" opcional (el id del edificio, sin un código corto propio), y
@@ -61,6 +60,18 @@ partir de las reseñas (`ProviderDetailViewModel`), no se denormaliza en
 `Provider.averageRating`/`ratingCount` — ver el comentario de `ProviderRepository` por
 qué. Probado a mano en el emulador (mock): alta, edición, borrado, y dejar una reseña
 como Admin e Inquilino.
+
+✅ **HU-04 — Mercado Pago (sólo HU-03)** resuelta: `createMercadoPagoPreference`
+(callable) calcula el monto server-side y genera la preferencia de Checkout Pro;
+`mercadoPagoWebhook` (HTTP pública, primera del proyecto) valida la firma con el
+validador del propio SDK `mercadopago` y marca el pago `PAGADO` sin intervención del
+Administrador. El cliente abre la URL de checkout en una Custom Tab
+(`androidx.browser`), sin SDK nativo de pagos. El flavor mock marca el pago `PAGADO`
+al instante (sin red) para poder demostrar el flujo sin cuenta real. Sin un proyecto de
+Firebase real ni credenciales de Mercado Pago en este entorno, las dos Cloud Functions
+nuevas sólo se validaron con `node --check` + `require` local — el webhook en sí
+(firma inválida, `external_reference` desconocida) se verificó leyendo el código, no
+en runtime. Ver `docs/superpowers/plans/2026-10-21-mercado-pago.md` para el detalle.
 
 ## Backlog / ideas a más largo plazo
 

@@ -66,13 +66,15 @@ genera la pasarela de pago al finalizar. El pago puede ser de uno de los dos con
 o de los dos juntos, según cómo esté configurado el edificio. Depende de HU-04 para el
 cobro real.
 
-### HU-04 — Integración con Pasarela de Pago (Mercado Pago) 🕗 pendiente
-Pieza de infraestructura de pagos compartida por HU-03 (alquiler/expensas) y por el
-Escenario 3 de HU-10 (cobro de reparaciones de mantenimiento). Se integra el SDK/Checkout
-de Mercado Pago; al confirmarse el pago se genera un comprobante descargable y
-adjuntable a la app. Hasta que esté lista, HU-10 usa como reemplazo temporal la carga
-manual de un comprobante de pago (documentado como punto de reemplazo único en
-`TicketRepository.kt`).
+### HU-04 — Integración con Pasarela de Pago (Mercado Pago) ✅ implementada (sólo HU-03)
+El inquilino puede pagar alquiler/expensas con Mercado Pago (botón "Pagar con Mercado
+Pago" en la pantalla Pagar, HU-03): una Cloud Function genera la preferencia de
+Checkout Pro con el monto calculado server-side, y otra recibe el webhook que confirma
+el pago sin intervención del Administrador. El "comprobante" es un registro dentro de
+la app (fecha, monto, método) — no un PDF descargable, eso queda para HU-07. El
+Escenario 3 de HU-10 (cobro de reparaciones de mantenimiento) **todavía no** usa esta
+integración: sigue con la carga manual de un comprobante de pago (documentado como
+punto de reemplazo único en `TicketRepository.kt`).
 
 ### HU-05 — Muro con moderación previa ✅ implementada
 Cualquier vecino puede proponer una publicación (texto + imagen opcional), pero nace en

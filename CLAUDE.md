@@ -53,9 +53,10 @@ alquiler/expensas), HU-04 (integración Mercado Pago), HU-07 (protocolos PDF), H
   nuevos). `DashboardFragment`/`fragment_dashboard.xml` además muestra 3 botones
   gigantes en vez de las tarjetas de métricas cuando el modo está prendido.
 - Firebase: Auth, Firestore, Storage, Cloud Messaging, Cloud Functions (Node.js,
-  `functions/index.js`: `onSchedule` y triggers de Firestore `onDocumentCreated`/
-  `onDocumentUpdated`, sin endpoints HTTP todavía). Sólo las implementaciones
-  `FirebaseXRepository` hablan con esto; las `MockXRepository` no.
+  `functions/index.js`: `onSchedule`, triggers de Firestore `onDocumentCreated`/
+  `onDocumentUpdated`, una función callable (`onCall`) y una HTTP pública (`onRequest`,
+  el webhook de Mercado Pago). Sólo las implementaciones `FirebaseXRepository` hablan
+  con esto; las `MockXRepository` no.
 - Un `Repository` (interfaz + Firebase/Mock) por feature, un `data class` por colección
   en `data/model/`, una pantalla por carpeta en `ui/<feature>/`. Estado async siempre con
   el sealed class `util/Resource.kt` (`Loading`/`Success`/`Error`) — no introducir otro
