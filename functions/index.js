@@ -182,7 +182,9 @@ exports.createMercadoPagoPreference = onCall(
   async (request) => {
     if (!request.auth) throw new HttpsError("unauthenticated", "Tenés que iniciar sesión.");
     const { buildingId, period } = request.data || {};
-    if (!buildingId || !period) throw new HttpsError("invalid-argument", "Falta buildingId o period.");
+    if (!buildingId || !period || !/^\d{4}-\d{2}$/.test(period)) {
+      throw new HttpsError("invalid-argument", "Falta buildingId o period, o period no tiene el formato yyyy-MM.");
+    }
 
     const uid = request.auth.uid;
     const db = getFirestore();
@@ -195,6 +197,11 @@ exports.createMercadoPagoPreference = onCall(
       throw new HttpsError("failed-precondition", "No se encontró tu perfil o tu edificio.");
     }
     const user = userSnap.data();
+    // El usuario tiene que pertenecer a este edificio — si no, un llamado directo a
+    // esta función (fuera de la UI) podría escribir un Payment bajo un edificio ajeno.
+    if (user.buildingId !== buildingId) {
+      throw new HttpsError("permission-denied", "No pertenecés a ese edificio.");
+    }
     const building = buildingSnap.data();
     const breakdown = {};
     if (building.chargesRent && user.rentAmount > 0) breakdown.alquiler = user.rentAmount;
@@ -206,26 +213,51 @@ exports.createMercadoPagoPreference = onCall(
     const paymentRef = db.collection("buildings").doc(buildingId)
       .collection("payments").doc(paymentId);
 
-    const client = new MercadoPagoConfig({ accessToken: mercadoPagoAccessToken.value() });
-    const preference = await new Preference(client).create({
-      body: {
-        items: [{ title: "Expensas/alquiler", quantity: 1, unit_price: amount }],
-        external_reference: `${buildingId}_${uid}_${period}`,
-        notification_url: process.env.MERCADO_PAGO_WEBHOOK_URL || undefined,
-      },
+    // No pisar un pago ya resuelto (PAGADO) ni uno de transferencia en curso — sólo se
+    // puede crear una preferencia nueva si no hay Payment todavía, o si el que hay es
+    // un intento de Mercado Pago anterior que nunca se confirmó (reintento tras cerrar
+    // el checkout sin pagar: ver PagarActivity.render()).
+    await db.runTransaction(async (tx) => {
+      const existingSnap = await tx.get(paymentRef);
+      if (existingSnap.exists) {
+        const existing = existingSnap.data();
+        const canOverwrite = existing.status === "A_VERIFICAR" && existing.method === "MERCADO_PAGO";
+        if (!canOverwrite) {
+          throw new HttpsError("failed-precondition", "Ya tenés un pago registrado para este período.");
+        }
+      }
+      tx.set(paymentRef, {
+        uid,
+        period,
+        breakdown,
+        amount,
+        method: "MERCADO_PAGO",
+        status: "A_VERIFICAR",
+        createdAt: new Date(),
+      });
     });
 
-    await paymentRef.set({
-      uid,
-      period,
-      breakdown,
-      amount,
-      method: "MERCADO_PAGO",
-      status: "A_VERIFICAR",
-      createdAt: new Date(),
-    });
+    let preference;
+    try {
+      const client = new MercadoPagoConfig({ accessToken: mercadoPagoAccessToken.value() });
+      preference = await new Preference(client).create({
+        body: {
+          items: [{ title: "Expensas/alquiler", quantity: 1, unit_price: amount }],
+          external_reference: `${buildingId}_${uid}_${period}`,
+          notification_url: process.env.MERCADO_PAGO_WEBHOOK_URL || undefined,
+        },
+      });
+    } catch (err) {
+      console.error("Error creando la preferencia de Mercado Pago:", err.message);
+      throw new HttpsError("unavailable", "No se pudo conectar con Mercado Pago. Probá de nuevo en un rato.");
+    }
 
-    return { initPoint: preference.sandbox_init_point || preference.init_point };
+    // sandbox_init_point sólo viene poblado cuando se usan credenciales de prueba de
+    // Mercado Pago; con credenciales de producción, init_point ya es la URL correcta.
+    // Nunca preferir sandbox "si existe": con cuenta real, Mercado Pago puede devolver
+    // ambos campos y el fallback dejaría a todo el mundo pagando en el ambiente de
+    // prueba (ver revisión final del plan de HU-04).
+    return { initPoint: preference.init_point };
   }
 );
 
@@ -287,6 +319,28 @@ exports.mercadoPagoWebhook = onRequest(
         return;
       }
 
+      // Cruza el pago de Mercado Pago contra el Payment antes de marcarlo PAGADO: una
+      // preferencia vieja que se paga tarde, o una notificación para un pago que ya se
+      // resolvió por otro medio, no debe pisar nada.
+      const existing = paymentSnap.data();
+      if (existing.status === "PAGADO") {
+        res.status(200).send("already paid");
+        return;
+      }
+      if (existing.method !== "MERCADO_PAGO") {
+        console.warn(`Webhook de Mercado Pago para un Payment de otro método: ${buildingId}_${uid}_${period}`);
+        res.status(200).send("method mismatch");
+        return;
+      }
+      if (
+        typeof mpPayment.transaction_amount === "number" &&
+        Math.abs(mpPayment.transaction_amount - existing.amount) > 0.01
+      ) {
+        console.warn(`Monto del pago de Mercado Pago no coincide con el Payment: ${buildingId}_${uid}_${period}`);
+        res.status(200).send("amount mismatch");
+        return;
+      }
+
       await paymentRef.update({
         status: "PAGADO",
         mercadoPagoPaymentId: String(mpPayment.id),
@@ -294,8 +348,12 @@ exports.mercadoPagoWebhook = onRequest(
       });
       res.status(200).send("ok");
     } catch (err) {
+      // 500 (no 200): la escritura de arriba es idempotente, así que un reintento de
+      // Mercado Pago ante un error transitorio (timeout de su propia API, un hiccup de
+      // Firestore) es seguro. Si devolviéramos 200 acá, un inquilino que ya pagó podría
+      // quedar en A_VERIFICAR para siempre sin que nada lo reintente.
       console.error("Error procesando webhook de Mercado Pago:", err.message);
-      res.status(200).send("error logged");
+      res.status(500).send("error logged");
     }
   }
 );

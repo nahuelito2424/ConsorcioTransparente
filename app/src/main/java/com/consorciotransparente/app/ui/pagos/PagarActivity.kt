@@ -124,6 +124,7 @@ class PagarActivity : BaseActivity() {
         binding.textNoAmount.visibility = View.GONE
         binding.sectionPending.visibility = View.GONE
         binding.textReviewing.visibility = View.GONE
+        binding.buttonPayMercadoPago.visibility = View.GONE
         binding.sectionPaid.visibility = View.GONE
         binding.textRejected.visibility = View.GONE
 
@@ -138,10 +139,16 @@ class PagarActivity : BaseActivity() {
         when (payment?.status) {
             PaymentStatus.A_VERIFICAR.name -> {
                 binding.textReviewing.visibility = View.VISIBLE
-                binding.textReviewing.text = getString(
-                    if (payment.method == PaymentMethod.MERCADO_PAGO.name) R.string.pagar_reviewing_mercado_pago
-                    else R.string.pagar_pending_review
-                )
+                if (payment.method == PaymentMethod.MERCADO_PAGO.name) {
+                    binding.textReviewing.text = getString(R.string.pagar_reviewing_mercado_pago)
+                    // A diferencia de transferencia, acá sí se puede reintentar: si el
+                    // inquilino cerró el checkout sin pagar, nunca llega un webhook que
+                    // lo saque de A_VERIFICAR (ver revisión final del plan de HU-04) —
+                    // sin este botón quedaría sin poder pagar ese período por ningún medio.
+                    binding.buttonPayMercadoPago.visibility = View.VISIBLE
+                } else {
+                    binding.textReviewing.text = getString(R.string.pagar_pending_review)
+                }
             }
             PaymentStatus.PAGADO.name -> {
                 binding.sectionPaid.visibility = View.VISIBLE
@@ -160,6 +167,7 @@ class PagarActivity : BaseActivity() {
                     return
                 }
                 binding.sectionPending.visibility = View.VISIBLE
+                binding.buttonPayMercadoPago.visibility = View.VISIBLE
                 binding.textCbu.text = getString(R.string.pagar_cbu, data.cbu)
                 binding.textAlias.text = getString(R.string.pagar_alias, data.alias)
                 if (payment?.status == PaymentStatus.RECHAZADO.name) {
