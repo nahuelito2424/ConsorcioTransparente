@@ -21,4 +21,13 @@ interface BuildingRepository {
 
     /** Sólo el Administrador del edificio puede editar su configuración (reforzado en las reglas). */
     suspend fun updateBuilding(buildingId: String, building: Building)
+
+    /**
+     * De la liquidación de expensas más reciente (la escribe la web para
+     * Administradores, ver Liquidacion.kt), qué inquilino (uid) quedó en qué período
+     * — para que VecinosActivity pueda avisar que un monto no lo tipeó el
+     * Administrador a mano, sino que vino de ahí. Mapa vacío si todavía no se emitió
+     * ninguna liquidación.
+     */
+    suspend fun getLatestLiquidacionTenants(buildingId: String): Map<String, String>
 }

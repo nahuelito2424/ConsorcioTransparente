@@ -63,6 +63,17 @@
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/textLiquidacionHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="?attr/colorTextSecondary"
+        android:textSize="11sp"
+        android:visibility="gone"
+        tools:text="Calculado por liquidación de 2026-10."
+        tools:visibility="visible" />
+
     <Button
         android:id="@+id/buttonSave"
         android:layout_width="wrap_content"

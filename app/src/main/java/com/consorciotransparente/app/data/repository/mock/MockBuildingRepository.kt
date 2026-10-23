@@ -21,4 +21,8 @@ class MockBuildingRepository : BuildingRepository {
     override suspend fun updateBuilding(buildingId: String, building: Building) {
         MockDataStore.building = building.copy(id = buildingId)
     }
+
+    // La liquidación de expensas vive enteramente en la web — sin red, el mock no
+    // tiene forma de simularla, así que nunca hay nada que avisar en VecinosActivity.
+    override suspend fun getLatestLiquidacionTenants(buildingId: String): Map<String, String> = emptyMap()
 }

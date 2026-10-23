@@ -100,6 +100,7 @@
     <string name="vecinos_expenses_hint">Monto de expensas</string>
     <string name="vecinos_save">Guardar</string>
     <string name="vecinos_saved">Monto actualizado.</string>
+    <string name="vecinos_liquidacion_hint">Calculado por liquidación de %1$s.</string>
 
     <string name="pagar_menu_item">💳 Pagar alquiler/expensas</string>
     <string name="pagar_title">Pagar este mes</string>

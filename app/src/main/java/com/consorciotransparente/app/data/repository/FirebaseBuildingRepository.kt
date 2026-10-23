@@ -1,8 +1,10 @@
 package com.consorciotransparente.app.data.repository
 
 import com.consorciotransparente.app.data.model.Building
+import com.consorciotransparente.app.data.model.Liquidacion
 import com.consorciotransparente.app.data.model.Role
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
 
 class FirebaseBuildingRepository(
@@ -32,5 +34,18 @@ class FirebaseBuildingRepository(
 
     override suspend fun updateBuilding(buildingId: String, building: Building) {
         db.collection("buildings").document(buildingId).set(building.copy(id = buildingId)).await()
+    }
+
+    override suspend fun getLatestLiquidacionTenants(buildingId: String): Map<String, String> {
+        if (buildingId.isBlank()) return emptyMap()
+        val snapshot = db.collection("buildings").document(buildingId)
+            .collection("liquidaciones")
+            .orderBy("period", Query.Direction.DESCENDING)
+            .limit(1)
+            .get().await()
+        val liquidacion = snapshot.documents.firstOrNull()?.toObject(Liquidacion::class.java) ?: return emptyMap()
+        return liquidacion.breakdown
+            .filter { it.tenantUid.isNotBlank() }
+            .associate { it.tenantUid to liquidacion.period }
     }
 }

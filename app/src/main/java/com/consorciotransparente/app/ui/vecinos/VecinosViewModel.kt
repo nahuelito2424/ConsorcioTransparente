@@ -12,7 +12,15 @@ import com.consorciotransparente.app.data.repository.ResidentRepository
 import com.consorciotransparente.app.util.Resource
 import kotlinx.coroutines.launch
 
-data class VecinoRow(val user: User, val showRent: Boolean, val showExpenses: Boolean)
+data class VecinoRow(
+    val user: User,
+    val showRent: Boolean,
+    val showExpenses: Boolean,
+    // Si no es null, "expensesAmount" vino de esta liquidación emitida desde la web
+    // (ver BuildingRepository.getLatestLiquidacionTenants), no de que el Administrador
+    // lo haya tipeado a mano.
+    val liquidacionPeriod: String? = null
+)
 
 /** HU-03: el Administrador le asigna a cada inquilino un monto fijo de alquiler y/o expensas. */
 class VecinosViewModel(
@@ -36,7 +44,15 @@ class VecinosViewModel(
                 buildingId = user.buildingId
                 val building = buildingRepo.getBuilding(buildingId)
                 val residents = residentRepo.listResidents(buildingId)
-                val rows = residents.map { VecinoRow(it, building?.chargesRent ?: false, building?.chargesExpenses ?: false) }
+                val liquidacionTenants = buildingRepo.getLatestLiquidacionTenants(buildingId)
+                val rows = residents.map {
+                    VecinoRow(
+                        it,
+                        building?.chargesRent ?: false,
+                        building?.chargesExpenses ?: false,
+                        liquidacionTenants[it.uid]
+                    )
+                }
                 _state.value = Resource.Success(rows)
             } catch (e: Exception) {
                 _state.value = Resource.Error(e.message ?: "No se pudieron cargar los vecinos.")

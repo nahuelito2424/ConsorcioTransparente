@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.consorciotransparente.app.R
 import com.consorciotransparente.app.databinding.ItemVecinoBinding
 
 class VecinoAdapter(
@@ -38,6 +39,16 @@ class VecinoAdapter(
 
         binding.inputRent.setText(formatAmountInput(row.user.rentAmount))
         binding.inputExpenses.setText(formatAmountInput(row.user.expensesAmount))
+
+        if (row.liquidacionPeriod != null) {
+            binding.textLiquidacionHint.visibility = View.VISIBLE
+            binding.textLiquidacionHint.text = binding.root.context.getString(
+                R.string.vecinos_liquidacion_hint,
+                row.liquidacionPeriod
+            )
+        } else {
+            binding.textLiquidacionHint.visibility = View.GONE
+        }
 
         binding.buttonSave.setOnClickListener {
             // Mismo criterio que AddExpenseActivity/TicketDetailActivity: acepta "," como
