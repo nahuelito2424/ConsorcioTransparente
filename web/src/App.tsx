@@ -3,6 +3,7 @@ import { LoginPage } from "./auth/LoginPage";
 import { RequireAdmin } from "./auth/RequireAdmin";
 import { UnidadesPage } from "./pages/UnidadesPage";
 import { GastosPage } from "./pages/GastosPage";
+import { LiquidacionPage } from "./pages/LiquidacionPage";
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
           path="/liquidacion"
           element={
             <RequireAdmin>
-              <div>Liquidación (Tarea 7)</div>
+              <LiquidacionPage />
             </RequireAdmin>
           }
         />
