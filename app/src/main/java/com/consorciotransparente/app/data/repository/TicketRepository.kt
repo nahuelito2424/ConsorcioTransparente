@@ -7,12 +7,12 @@ import com.consorciotransparente.app.data.model.Ticket
  * Implementa HU-10 (Gestión de Incidentes de Mantenimiento con Presupuesto y Pago).
  * El ciclo de vida del ticket es REPORTADO -> EN_PRESUPUESTO -> A_COBRAR -> RESUELTO.
  *
- * El Escenario 3 de la historia pide "generar un cobro a través de Mercado Pago";
- * esa integración es HU-04 y todavía no está hecha (ver README). Para no bloquear
- * el resto del flujo, A_COBRAR hoy se salda subiendo un comprobante de pago manual
- * (transferencia, efectivo, etc.); el día que se integre Mercado Pago, alcanza con
- * reemplazar [markPaid] por la confirmación del webhook de pago, sin tocar el resto
- * del ciclo de vida ni la UI de las otras pantallas.
+ * El Escenario 3 ("generar un cobro a través de Mercado Pago") tiene dos caminos a
+ * A_COBRAR -> RESUELTO, no uno: [createTicketMercadoPagoPreference] para quien
+ * reportó el ticket, y [markPaid] (pago manual) para el Admin/Encargado — que sigue
+ * existiendo para reparaciones de áreas comunes que no le corresponden a un vecino
+ * puntual, y como respaldo para el propio inquilino. No se reemplazó [markPaid] como
+ * se había anticipado originalmente acá: se agregó una alternativa.
  *
  * Interfaz para permitir la implementación mock (ver RepositoryProvider).
  */
@@ -34,6 +34,13 @@ interface TicketRepository {
     /** Escenario 3: comprobante de compra de materiales y monto real a cobrar. */
     suspend fun uploadPurchaseReceipt(buildingId: String, ticketId: String, amount: Double, receipt: Uri)
 
-    /** Escenario 3/4: comprobante de pago (manual por ahora, ver comentario de clase) y cierre del ticket. */
+    /** Escenario 3/4: comprobante de pago manual (Admin/Encargado, o respaldo del inquilino) y cierre del ticket. */
     suspend fun markPaid(buildingId: String, ticketId: String, receipt: Uri)
+
+    /**
+     * Escenario 3: Mercado Pago, sólo para quien reportó el ticket. El Admin/Encargado
+     * sigue usando [markPaid] para reparaciones de áreas comunes que no le corresponden
+     * a un vecino puntual — ver el comentario de clase.
+     */
+    suspend fun createTicketMercadoPagoPreference(buildingId: String, ticketId: String): String
 }

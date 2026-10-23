@@ -5,13 +5,15 @@ import com.consorciotransparente.app.data.model.Ticket
 import com.consorciotransparente.app.data.model.TicketStatus
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
 class FirebaseTicketRepository(
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
+    private val storage: FirebaseStorage = FirebaseStorage.getInstance(),
+    private val functions: FirebaseFunctions = FirebaseFunctions.getInstance()
 ) : TicketRepository {
     private fun ticketsRef(buildingId: String) =
         db.collection("buildings").document(buildingId).collection("tickets")
@@ -69,6 +71,14 @@ class FirebaseTicketRepository(
         ticketsRef(buildingId).document(ticketId).update(
             mapOf("paymentReceiptUrl" to url, "status" to TicketStatus.RESUELTO.name)
         ).await()
+    }
+
+    override suspend fun createTicketMercadoPagoPreference(buildingId: String, ticketId: String): String {
+        val result = functions.getHttpsCallable("createTicketMercadoPagoPreference")
+            .call(mapOf("buildingId" to buildingId, "ticketId" to ticketId))
+            .await()
+        val data = result.getData() as? Map<*, *>
+        return data?.get("initPoint") as? String ?: error("Mercado Pago no devolvió una URL de pago.")
     }
 
     private suspend fun uploadImage(buildingId: String, kind: String, image: Uri): String {

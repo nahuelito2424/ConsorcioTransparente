@@ -44,6 +44,13 @@ class MockTicketRepository : TicketRepository {
         update(ticketId) { it.copy(paymentReceiptUrl = receipt.toString(), status = TicketStatus.RESUELTO.name) }
     }
 
+    override suspend fun createTicketMercadoPagoPreference(buildingId: String, ticketId: String): String {
+        update(ticketId) {
+            it.copy(status = TicketStatus.RESUELTO.name, mercadoPagoPaymentId = MockDataStore.newId("mp"))
+        }
+        return ""
+    }
+
     private fun update(ticketId: String, transform: (Ticket) -> Ticket) {
         val index = MockDataStore.tickets.indexOfFirst { it.id == ticketId }
         if (index >= 0) MockDataStore.tickets[index] = transform(MockDataStore.tickets[index])
