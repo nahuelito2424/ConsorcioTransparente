@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/* Dirección visual validada con el usuario (ver docs/superpowers/specs/
+   2026-10-23-web-admin-liquidacion-design.md): libro contable + paleta cálida. */
+@theme {
+  --color-cream: #faf6f1;
+  --color-terracota: #a85c32;
+  --color-ok: #2f6b47;
+  --color-warn: #a85c32;
+  --color-pending: #8a7e6f;
+  --color-border-dashed: #c9b990;
+  --color-border-soft: #e6dcc8;
+
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-mono: "Courier New", monospace;
+}
+
+body {
+  background-color: var(--color-cream);
+}
