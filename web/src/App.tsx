@@ -4,6 +4,7 @@ import { RequireAdmin } from "./auth/RequireAdmin";
 import { UnidadesPage } from "./pages/UnidadesPage";
 import { GastosPage } from "./pages/GastosPage";
 import { LiquidacionPage } from "./pages/LiquidacionPage";
+import { InicioPage } from "./pages/InicioPage";
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
           path="/"
           element={
             <RequireAdmin>
-              <div>Inicio (Tarea 8)</div>
+              <InicioPage />
             </RequireAdmin>
           }
         />
