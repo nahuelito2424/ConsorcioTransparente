@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./auth/LoginPage";
 import { RequireAdmin } from "./auth/RequireAdmin";
 import { UnidadesPage } from "./pages/UnidadesPage";
+import { GastosPage } from "./pages/GastosPage";
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
           path="/gastos"
           element={
             <RequireAdmin>
-              <div>Gastos (Tarea 6)</div>
+              <GastosPage />
             </RequireAdmin>
           }
         />
