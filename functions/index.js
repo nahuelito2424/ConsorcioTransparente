@@ -262,11 +262,70 @@ exports.createMercadoPagoPreference = onCall(
 );
 
 /**
- * HU-04: recibe la notificación de Mercado Pago cuando un pago se confirma. Público
- * (Mercado Pago lo llama directo, sin pasar por Firebase Auth) — por eso valida la
- * firma con el validador que trae el propio SDK antes de hacer nada. Siempre responde
- * 200 salvo firma inválida (401): Mercado Pago reintenta agresivamente ante timeouts o
- * 5xx, así que un error de nuestro lado queda logueado, no como reintento infinito.
+ * HU-10 Escenario 3: genera una preferencia de Checkout Pro para que el inquilino que
+ * reportó el ticket pague el costo de la reparación. A diferencia de
+ * createMercadoPagoPreference, no escribe nada en Firestore acá — el Ticket ya existe
+ * en A_COBRAR, y no hay estado especulativo que crear: cerrar el checkout sin pagar y
+ * reintentar más tarde es seguro porque el ticket nunca sale de A_COBRAR hasta que el
+ * webhook confirma. external_reference = "ticket_{buildingId}_{ticketId}" (prefijo
+ * "ticket_" para que mercadoPagoWebhook lo distinga de un pago de alquiler/expensas).
+ */
+exports.createTicketMercadoPagoPreference = onCall(
+  { secrets: [mercadoPagoAccessToken] },
+  async (request) => {
+    if (!request.auth) throw new HttpsError("unauthenticated", "Tenés que iniciar sesión.");
+    const { buildingId, ticketId } = request.data || {};
+    if (!buildingId || !ticketId) throw new HttpsError("invalid-argument", "Falta buildingId o ticketId.");
+
+    const ticketRef = getFirestore()
+      .collection("buildings").doc(buildingId)
+      .collection("tickets").doc(ticketId);
+    const ticketSnap = await ticketRef.get();
+    if (!ticketSnap.exists) throw new HttpsError("not-found", "No se encontró el ticket.");
+    const ticket = ticketSnap.data();
+
+    // Sólo quien reportó el ticket puede pagarlo (decisión de producto: el
+    // Admin/Encargado sigue usando el pago manual, ver TicketRepository.kt) — nunca se
+    // confía en qué botón muestra la UI, se valida de nuevo acá.
+    if (ticket.reportedByUid !== request.auth.uid) {
+      throw new HttpsError("permission-denied", "Sólo quien reportó el ticket puede pagarlo.");
+    }
+    if (ticket.status !== "A_COBRAR") {
+      throw new HttpsError("failed-precondition", "Este ticket no está listo para cobrar.");
+    }
+    const amount = ticket.budgetAmount;
+    if (!(amount > 0)) throw new HttpsError("failed-precondition", "El ticket no tiene un monto a cobrar.");
+
+    let preference;
+    try {
+      const client = new MercadoPagoConfig({ accessToken: mercadoPagoAccessToken.value() });
+      preference = await new Preference(client).create({
+        body: {
+          items: [{ title: `Reparación: ${ticket.category || "Ticket"}`, quantity: 1, unit_price: amount }],
+          external_reference: `ticket_${buildingId}_${ticketId}`,
+          notification_url: process.env.MERCADO_PAGO_WEBHOOK_URL || undefined,
+        },
+      });
+    } catch (err) {
+      console.error("Error creando la preferencia de Mercado Pago para el ticket:", err.message);
+      throw new HttpsError("unavailable", "No se pudo conectar con Mercado Pago. Probá de nuevo en un rato.");
+    }
+
+    // Ver el comentario de createMercadoPagoPreference: nunca sandbox_init_point.
+    return { initPoint: preference.init_point };
+  }
+);
+
+/**
+ * HU-04/HU-10: recibe la notificación de Mercado Pago cuando un pago se confirma.
+ * Público (Mercado Pago lo llama directo, sin pasar por Firebase Auth) — por eso
+ * valida la firma con el validador que trae el propio SDK antes de hacer nada.
+ * Resuelve dos tipos de recurso según el prefijo de external_reference: un pago de
+ * alquiler/expensas (HU-04, resolveRentPayment) o un pago de reparación de ticket
+ * (HU-10 Escenario 3, resolveTicketPayment). Responde 200 salvo firma inválida (401) o
+ * un error nuestro (500): la escritura de cada resolve* es idempotente, así que
+ * Mercado Pago reintentando ante un 500 es seguro, y evita que un pago ya hecho quede
+ * sin confirmar para siempre por un error transitorio de nuestro lado.
  */
 exports.mercadoPagoWebhook = onRequest(
   { secrets: [mercadoPagoAccessToken, mercadoPagoWebhookSecret] },
@@ -299,61 +358,110 @@ exports.mercadoPagoWebhook = onRequest(
         return;
       }
 
-      // external_reference = "{buildingId}_{uid}_{period}" (ver createMercadoPagoPreference).
-      // uid y period nunca se infieren de otra forma — si no matchea este formato o el
-      // documento no existe, se loguea y no se escribe nada.
-      const parts = (mpPayment.external_reference || "").split("_");
-      if (parts.length < 3) {
-        console.warn("external_reference con formato inesperado:", mpPayment.external_reference);
-        res.status(200).send("unrecognized reference");
-        return;
+      const externalReference = mpPayment.external_reference || "";
+      if (externalReference.startsWith("ticket_")) {
+        await resolveTicketPayment(externalReference, mpPayment);
+      } else {
+        await resolveRentPayment(externalReference, mpPayment);
       }
-      const [buildingId, uid, period] = [parts[0], parts[1], parts.slice(2).join("_")];
-      const paymentRef = getFirestore()
-        .collection("buildings").doc(buildingId)
-        .collection("payments").doc(`${uid}_${period}`);
-      const paymentSnap = await paymentRef.get();
-      if (!paymentSnap.exists) {
-        console.warn(`Webhook de Mercado Pago sin Payment existente: ${buildingId}_${uid}_${period}`);
-        res.status(200).send("payment not found");
-        return;
-      }
-
-      // Cruza el pago de Mercado Pago contra el Payment antes de marcarlo PAGADO: una
-      // preferencia vieja que se paga tarde, o una notificación para un pago que ya se
-      // resolvió por otro medio, no debe pisar nada.
-      const existing = paymentSnap.data();
-      if (existing.status === "PAGADO") {
-        res.status(200).send("already paid");
-        return;
-      }
-      if (existing.method !== "MERCADO_PAGO") {
-        console.warn(`Webhook de Mercado Pago para un Payment de otro método: ${buildingId}_${uid}_${period}`);
-        res.status(200).send("method mismatch");
-        return;
-      }
-      if (
-        typeof mpPayment.transaction_amount === "number" &&
-        Math.abs(mpPayment.transaction_amount - existing.amount) > 0.01
-      ) {
-        console.warn(`Monto del pago de Mercado Pago no coincide con el Payment: ${buildingId}_${uid}_${period}`);
-        res.status(200).send("amount mismatch");
-        return;
-      }
-
-      await paymentRef.update({
-        status: "PAGADO",
-        mercadoPagoPaymentId: String(mpPayment.id),
-        verifiedAt: new Date(),
-      });
       res.status(200).send("ok");
     } catch (err) {
-      // 500 (no 200): la escritura de arriba es idempotente, así que un reintento de
-      // Mercado Pago ante un error transitorio (timeout de su propia API, un hiccup de
-      // Firestore) es seguro. Si devolviéramos 200 acá, un inquilino que ya pagó podría
-      // quedar en A_VERIFICAR para siempre sin que nada lo reintente.
+      // 500 (no 200): las escrituras de resolveRentPayment/resolveTicketPayment son
+      // idempotentes, así que un reintento de Mercado Pago ante un error transitorio
+      // (timeout de su propia API, un hiccup de Firestore) es seguro. Si devolviéramos
+      // 200 acá, un pago ya hecho podría quedar sin confirmar para siempre sin que nada
+      // lo reintente.
       console.error("Error procesando webhook de Mercado Pago:", err.message);
       res.status(500).send("error logged");
     }
   }
 );
+
+/**
+ * HU-04: resuelve un pago de alquiler/expensas. external_reference =
+ * "{buildingId}_{uid}_{period}" (ver createMercadoPagoPreference) — uid y period nunca
+ * se infieren de otra forma; si no matchea este formato o el documento no existe, se
+ * loguea y no se escribe nada. Cruza el pago de Mercado Pago contra el Payment antes de
+ * marcarlo PAGADO: una preferencia vieja que se paga tarde, o una notificación para un
+ * pago que ya se resolvió por otro medio, no debe pisar nada.
+ */
+async function resolveRentPayment(externalReference, mpPayment) {
+  const parts = externalReference.split("_");
+  if (parts.length < 3) {
+    console.warn("external_reference con formato inesperado:", externalReference);
+    return;
+  }
+  const [buildingId, uid, period] = [parts[0], parts[1], parts.slice(2).join("_")];
+  const paymentRef = getFirestore()
+    .collection("buildings").doc(buildingId)
+    .collection("payments").doc(`${uid}_${period}`);
+  const paymentSnap = await paymentRef.get();
+  if (!paymentSnap.exists) {
+    console.warn(`Webhook de Mercado Pago sin Payment existente: ${buildingId}_${uid}_${period}`);
+    return;
+  }
+
+  const existing = paymentSnap.data();
+  if (existing.status === "PAGADO") return;
+  if (existing.method !== "MERCADO_PAGO") {
+    console.warn(`Webhook de Mercado Pago para un Payment de otro método: ${buildingId}_${uid}_${period}`);
+    return;
+  }
+  if (
+    typeof mpPayment.transaction_amount === "number" &&
+    Math.abs(mpPayment.transaction_amount - existing.amount) > 0.01
+  ) {
+    console.warn(`Monto del pago de Mercado Pago no coincide con el Payment: ${buildingId}_${uid}_${period}`);
+    return;
+  }
+
+  await paymentRef.update({
+    status: "PAGADO",
+    mercadoPagoPaymentId: String(mpPayment.id),
+    verifiedAt: new Date(),
+  });
+}
+
+/**
+ * HU-10 Escenario 3: resuelve un pago de reparación de ticket. external_reference =
+ * "ticket_{buildingId}_{ticketId}" (ver createTicketMercadoPagoPreference). Mismo
+ * criterio que resolveRentPayment: nunca sobrescribe un ticket que ya no está
+ * A_COBRAR, ni uno cuyo monto no coincide con lo que pagó el inquilino.
+ */
+async function resolveTicketPayment(externalReference, mpPayment) {
+  const rest = externalReference.slice("ticket_".length);
+  const parts = rest.split("_");
+  if (parts.length < 2) {
+    console.warn("external_reference de ticket con formato inesperado:", externalReference);
+    return;
+  }
+  const buildingId = parts[0];
+  const ticketId = parts.slice(1).join("_");
+  const ticketRef = getFirestore()
+    .collection("buildings").doc(buildingId)
+    .collection("tickets").doc(ticketId);
+  const ticketSnap = await ticketRef.get();
+  if (!ticketSnap.exists) {
+    console.warn(`Webhook de Mercado Pago sin Ticket existente: ${buildingId}/${ticketId}`);
+    return;
+  }
+
+  const ticket = ticketSnap.data();
+  if (ticket.status === "RESUELTO") return;
+  if (ticket.status !== "A_COBRAR") {
+    console.warn(`Webhook de Mercado Pago para un ticket que no está A_COBRAR: ${buildingId}/${ticketId}`);
+    return;
+  }
+  if (
+    typeof mpPayment.transaction_amount === "number" &&
+    Math.abs(mpPayment.transaction_amount - ticket.budgetAmount) > 0.01
+  ) {
+    console.warn(`Monto del pago de Mercado Pago no coincide con el ticket: ${buildingId}/${ticketId}`);
+    return;
+  }
+
+  await ticketRef.update({
+    status: "RESUELTO",
+    mercadoPagoPaymentId: String(mpPayment.id),
+  });
+}

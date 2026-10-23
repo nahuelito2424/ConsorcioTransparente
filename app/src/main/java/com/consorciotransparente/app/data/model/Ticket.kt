@@ -19,7 +19,8 @@ data class Ticket(
     val status: String = TicketStatus.REPORTADO.name,
     val budgetAmount: Double = 0.0,      // 0 = "a cotizar" (Escenario 2)
     val purchaseReceiptUrl: String = "", // comprobante de compra de materiales (Escenario 3)
-    val paymentReceiptUrl: String = "",  // comprobante de pago vía Mercado Pago (Escenario 3)
+    val paymentReceiptUrl: String = "",  // comprobante de pago manual (Escenario 3), vacío si se pagó por Mercado Pago
+    val mercadoPagoPaymentId: String = "", // id del pago en Mercado Pago (Escenario 3), vacío si se pagó a mano
     val reportedByUid: String = "",
     val assignedToUid: String = "",      // Encargado o Administrador
     @ServerTimestamp val createdAt: Date? = null
