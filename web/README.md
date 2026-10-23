@@ -21,20 +21,24 @@ Cloud Functions existentes (`firebase deploy --only hosting`).
 No hace falta un proyecto de Firebase real. Desde la raíz del repo:
 
 ```bash
-firebase emulators:start
+firebase emulators:start --project demo-consorcio-transparente
 ```
 
-Levanta Auth (puerto 9099), Firestore (8080), Storage (9199) y una UI en
-http://localhost:4000. En otra terminal, sembrá datos de prueba (ver
-`scripts/seed-emulator.ts`):
+(El `--project` tiene que ser `demo-consorcio-transparente` — es el que usa
+`scripts/seed-emulator.ts` para sembrar datos; el emulador separa los datos por
+project id, así que uno distinto arranca vacío). Levanta Auth (puerto 9099),
+Firestore (8080), Storage (9199) y una UI en http://localhost:4000. En otra
+terminal, sembrá datos de prueba:
 
 ```bash
 cd web
 npm run seed
 ```
 
-Copiá `.env.example` a `.env` — con `VITE_USE_EMULATOR=true` ya alcanza, los demás
-valores de `VITE_FIREBASE_*` pueden quedar como están (el emulador no los valida).
+Copiá `.env.example` a `.env`. Con el emulador, `VITE_FIREBASE_PROJECT_ID` tiene
+que ser también `demo-consorcio-transparente` (mismo motivo); los demás valores
+`VITE_FIREBASE_*` pueden ser cualquier texto no vacío — el emulador no los valida,
+pero el SDK necesita que estén presentes para inicializar.
 
 ### Opción B — Proyecto de Firebase real
 
