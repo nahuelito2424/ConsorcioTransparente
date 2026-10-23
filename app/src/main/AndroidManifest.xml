@@ -100,6 +100,14 @@
             android:name=".ui.proveedores.AddEditProviderActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.protocolos.ProtocolosActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.protocolos.ProtocolDetailActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

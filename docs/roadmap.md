@@ -15,18 +15,32 @@
 | HU-04 | Integración con pasarela de pago (Mercado Pago) | ✅ Implementada (sólo HU-03; HU-10 Escenario 3 sigue con pago manual) | Más → Pagar |
 | HU-05 | Muro con moderación previa | ✅ Implementada | Muro |
 | HU-06 | Reserva de Espacios Comunes | ✅ Implementada | Más → Reservas |
-| HU-07 | Protocolos de emergencia (PDF) | 🕗 Pendiente — "Próximamente" | Más → Protocolos (stub) |
+| HU-07 | Protocolos de emergencia | ✅ Implementada (guía propia, no PDFs oficiales) | Más → Protocolos de emergencia |
 | HU-08 | Directorio de Proveedores | ✅ Implementada | Más → Directorio de proveedores |
 | HU-09 | Configuración de Cobros y Vencimientos | ✅ Implementada | Más → Configuración del edificio |
 | HU-10 | Gestión de Incidentes de Mantenimiento | ✅ Implementada (cobro de reparaciones con pago manual; todavía no usa Mercado Pago) | Más → Tickets |
 
 ## Próximos pasos (orden sugerido)
 
-1. **HU-07 — protocolos en PDF**, apoyándose en la caché offline de Firestore que ya
-   está habilitada (`ConsorcioApp.kt`) para que funcionen sin conexión.
-2. **Reemplazar el pago manual de HU-10** (`markPaid` en `TicketRepository.kt`) por el
+Las 10 Historias de Usuario del TP ya están implementadas. Lo que queda es una mejora,
+no una historia nueva:
+
+1. **Reemplazar el pago manual de HU-10** (`markPaid` en `TicketRepository.kt`) por el
    cobro real de reparaciones vía Mercado Pago, reusando la misma integración de HU-04
    (Cloud Function + webhook) ya hecha para HU-03.
+
+✅ **HU-07 — Protocolos de emergencia** resuelta: `ProtocolosActivity` (listado) +
+`ProtocolDetailActivity` (pasos), con contenido fijo en `EmergencyProtocols.kt`
+(incendio, sismo, corte de luz, inundación) más teléfonos de emergencia nacionales
+(Bomberos, SAME, Policía, Defensa Civil). **No son los PDFs oficiales** de Defensa
+Civil GCBA/SAME que pedía originalmente la historia — no hay forma de descargarlos y
+verificarlos desde este entorno, y el contenido de un protocolo de emergencia no es
+algo para inventar. Decisión tomada con el usuario: en su lugar, una guía general
+redactada a partir de lineamientos de seguridad reconocidos, con el disclaimer
+explícito en la pantalla de que no reemplaza las instrucciones oficiales. Sin
+Repository/Firestore porque es contenido 100% estático, bundleado con la app (funciona
+sin conexión por definición, no por caché). Probado a mano en el emulador (mock):
+listado, detalle de un protocolo, volver.
 
 ✅ **Pantalla de alta/invitación de vecinos** resuelta: en Registrarse hay un campo
 "Código del edificio" opcional (el id del edificio, sin un código corto propio), y

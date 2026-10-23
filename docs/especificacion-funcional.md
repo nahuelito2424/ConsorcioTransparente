@@ -71,7 +71,9 @@ El inquilino puede pagar alquiler/expensas con Mercado Pago (botón "Pagar con M
 Pago" en la pantalla Pagar, HU-03): una Cloud Function genera la preferencia de
 Checkout Pro con el monto calculado server-side, y otra recibe el webhook que confirma
 el pago sin intervención del Administrador. El "comprobante" es un registro dentro de
-la app (fecha, monto, método) — no un PDF descargable, eso queda para HU-07. El
+la app (fecha, monto, método) — no un PDF descargable; HU-07 terminó siendo una guía de
+texto, no infraestructura de generación de PDFs, así que esto queda como backlog sin
+una historia que lo cubra todavía (ver "Sugerencias para versiones futuras"). El
 Escenario 3 de HU-10 (cobro de reparaciones de mantenimiento) **todavía no** usa esta
 integración: sigue con la carga manual de un comprobante de pago (documentado como
 punto de reemplazo único en `TicketRepository.kt`).
@@ -91,14 +93,18 @@ se previene solo en el cliente: el id del documento de reserva es
 contra la regla de seguridad de Firestore, no contra una validación que se pueda
 saltear.
 
-### HU-07 — Protocolos de emergencia (PDF) 🕗 pendiente — "Próximamente"
-Carpeta de descarga de protocolos del edificio ante siniestros: incendio, sismo, corte
-de luz, inundación, etc. Preferencia declarada por el autor: usar protocolos oficiales
-del Gobierno de la Ciudad (Defensa Civil GCBA, SAME) cuando existan; si no, adoptar
-protocolos estándar reconocidos internacionalmente para el tipo de siniestro. Requiere
-que las lecturas sobrevivan sin conexión (de ahí que la app ya habilite caché offline
-de Firestore en `ConsorcioApp.kt`, anotado como RNF-07) — un protocolo de emergencia que
-solo funciona con internet no cumple su propósito.
+### HU-07 — Protocolos de emergencia ✅ implementada (guía propia, no PDFs oficiales)
+Pantalla con qué hacer ante cada siniestro: incendio, sismo, corte de luz, inundación.
+La idea original era una carpeta de descarga de los protocolos oficiales del Gobierno
+de la Ciudad (Defensa Civil GCBA, SAME); eso no se pudo concretar porque no hay forma
+de descargar y verificar esos PDFs reales desde el entorno de desarrollo, y el
+contenido de un protocolo de emergencia no es algo que se pueda inventar. En su lugar
+(decisión tomada con el usuario), la app trae una guía general redactada a partir de
+lineamientos de seguridad reconocidos, más los teléfonos de emergencia nacionales
+(Bomberos, SAME, Policía, Defensa Civil), con un aviso explícito en la pantalla de que
+no reemplaza las instrucciones oficiales. Funciona sin conexión por estar bundleada con
+la app (no por la caché offline de Firestore, que sigue sin usarse acá — RNF-07 queda
+pendiente para si en el futuro se agregan protocolos subidos por el Administrador).
 
 ### HU-08 — Directorio de Proveedores ✅ implementada
 Ficha de proveedor con cinco datos: teléfono, nombre/perfil, categoría (Plomería,
@@ -183,9 +189,9 @@ para considerar más allá de las 10 HU ya definidas:
 4. **Prorrateo automático de expensas por alícuota**: el modelo `UnitInfo.aliquot` ya
    existe pero no se usa todavía para calcular cuánto le corresponde pagar a cada
    unidad; hoy el monto de expensas no está modelado por unidad.
-5. **Contactos de emergencia oficiales**: además de HU-07 (protocolos en PDF), un
-   listado corto de contactos reales (Defensa Civil GCBA, SAME, Bomberos, la línea de
-   la empresa de gas/luz) fijo dentro de la misma sección.
+5. **Contactos de emergencia oficiales**: HU-07 ya incluye Bomberos/SAME/Policía/Defensa
+   Civil fijos en la pantalla de Protocolos; falta la línea de la empresa de gas/luz
+   (varía por proveedor/zona, no se puede dejar fija para cualquier edificio de CABA).
 6. **Estado de cuenta por unidad**: historial de pagos de alquiler/expensas por unidad
    funcional, visible para el Administrador (morosidad) y para el propio inquilino (sus
    propios pagos).

@@ -201,4 +201,10 @@
         <item quantity="one">%1$d reseña</item>
         <item quantity="other">%1$d reseñas</item>
     </plurals>
+
+    <string name="protocols_menu_item">🚨 Protocolos de emergencia</string>
+    <string name="protocols_title">Protocolos de emergencia</string>
+    <string name="protocols_disclaimer">Guía general de qué hacer ante cada siniestro, pensada para funcionar sin conexión. No reemplaza las instrucciones de Defensa Civil ni de los servicios de emergencia.</string>
+    <string name="protocols_contacts_title">Teléfonos de emergencia</string>
+    <string name="protocols_call">Llamar</string>
 </resources>

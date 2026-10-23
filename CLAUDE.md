@@ -25,11 +25,15 @@ una pantalla o agregar una funcionalidad, leer:
 
 ## Estado actual (resumen — la tabla completa está en `docs/roadmap.md`)
 
-Implementadas: HU-01 (Facturas/Auditoría), HU-02 (Votaciones), HU-05 (Muro), HU-06
-(Reservas), HU-09 (Config. de edificio), HU-10 (Tickets de mantenimiento, con pago
-manual como reemplazo temporal de Mercado Pago). Pendientes: HU-03 (pago de
-alquiler/expensas), HU-04 (integración Mercado Pago), HU-07 (protocolos PDF), HU-08
-(UI de proveedores — el modelo ya existe).
+Las 10 Historias de Usuario (HU-01 a HU-10) están implementadas. Lo único pendiente es
+una mejora, no una historia nueva: HU-10 (cobro de reparaciones de mantenimiento) sigue
+con pago manual en vez de usar la integración de Mercado Pago que ya tiene HU-03/HU-04.
+Dos detalles a tener en cuenta al tocar código relacionado:
+- HU-07 (protocolos de emergencia) no terminó siendo PDFs oficiales descargados: es una
+  guía de texto redactada a partir de lineamientos generales, con el disclaimer
+  correspondiente en la pantalla (ver `docs/especificacion-funcional.md`).
+- HU-04 (Mercado Pago) sólo cubre HU-03 (alquiler/expensas); el Escenario 3 de HU-10
+  (reparaciones) es justamente esa mejora pendiente.
 
 ## Stack y convenciones (detalle en `docs/arquitectura.md`)
 
