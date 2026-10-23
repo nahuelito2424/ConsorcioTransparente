@@ -160,6 +160,21 @@ service cloud.firestore {
         allow update: if isAdmin() && belongsToBuilding(buildingId) &&
           (request.resource.data.status == "PAGADO" || request.resource.data.status == "RECHAZADO");
       }
+
+      // Web para Administradores: unidades (etiqueta + alícuota) y liquidaciones de
+      // expensas emitidas. Sin uso desde Android — ver
+      // docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md. Sólo el
+      // Administrador del propio edificio puede escribir: la liquidación mueve plata
+      // real (escribe users/{uid}.expensesAmount vía la app, no estas reglas).
+      match /units/{unitId} {
+        allow read: if belongsToBuilding(buildingId);
+        allow write: if isAdmin() && myBuildingId() == buildingId;
+      }
+
+      match /liquidaciones/{period} {
+        allow read: if belongsToBuilding(buildingId);
+        allow write: if isAdmin() && myBuildingId() == buildingId;
+      }
     }
 
     // Directorio global de proveedores (HU-08): sólo el Administrador da de alta/edita/borra.
