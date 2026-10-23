@@ -175,6 +175,7 @@
     <string name="ticket_amount_to_pay">Monto a pagar: %1$s</string>
     <string name="ticket_mark_paid">Adjuntar comprobante de pago</string>
     <string name="ticket_resolved_notice">Este ticket está resuelto y archivado para auditoría.</string>
+    <string name="ticket_paid_by_mercado_pago">Pagado por Mercado Pago.</string>
     <string name="ticket_to_quote">A cotizar</string>
 
     <string name="providers_menu_item">🛠️ Directorio de proveedores</string>

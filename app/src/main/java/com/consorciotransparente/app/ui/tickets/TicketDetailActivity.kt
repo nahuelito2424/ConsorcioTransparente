@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.browser.customtabs.CustomTabsIntent
 import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
@@ -77,6 +78,7 @@ class TicketDetailActivity : BaseActivity() {
             viewModel.confirmPurchase(buildingId, ticketId, amount, receipt)
         }
         binding.buttonMarkPaid.setOnClickListener { pickPaymentReceipt.launch("image/*") }
+        binding.buttonPayMercadoPago.setOnClickListener { viewModel.payWithMercadoPago(buildingId, ticketId) }
 
         viewModel.state.observe(this) { state ->
             binding.progressBar.visibility = if (state is Resource.Loading) View.VISIBLE else View.GONE
@@ -89,7 +91,20 @@ class TicketDetailActivity : BaseActivity() {
         viewModel.actionState.observe(this) { state ->
             if (state is Resource.Error) showError(state.message)
         }
+        viewModel.mercadoPagoUrl.observe(this) { state ->
+            binding.buttonPayMercadoPago.isEnabled = state !is Resource.Loading
+            when (state) {
+                is Resource.Success -> if (state.data.isNotBlank()) {
+                    CustomTabsIntent.Builder().build().launchUrl(this, Uri.parse(state.data))
+                }
+                is Resource.Error -> showError(state.message)
+                else -> Unit
+            }
+        }
+    }
 
+    override fun onResume() {
+        super.onResume()
         viewModel.load(buildingId, ticketId)
     }
 
@@ -123,7 +138,9 @@ class TicketDetailActivity : BaseActivity() {
         binding.purchaseSection.visibility = View.GONE
         binding.imagePurchaseReceipt.visibility = View.GONE
         binding.paymentSection.visibility = View.GONE
+        binding.buttonPayMercadoPago.visibility = View.GONE
         binding.resolvedSection.visibility = View.GONE
+        binding.textPaidByMercadoPago.visibility = View.GONE
 
         val isReporter = ticket.reportedByUid == data.uid
 
@@ -144,6 +161,7 @@ class TicketDetailActivity : BaseActivity() {
                     Glide.with(this).load(ticket.purchaseReceiptUrl).centerCrop().into(binding.imagePurchaseReceipt)
                 }
                 binding.paymentSection.visibility = if (data.canManage || isReporter) View.VISIBLE else View.GONE
+                binding.buttonPayMercadoPago.visibility = if (isReporter) View.VISIBLE else View.GONE
                 binding.textAmountToPay.text = getString(R.string.ticket_amount_to_pay, currencyFormat.format(ticket.budgetAmount))
             }
             TicketStatus.RESUELTO.name -> {
@@ -154,7 +172,11 @@ class TicketDetailActivity : BaseActivity() {
                     Glide.with(this).load(ticket.purchaseReceiptUrl).centerCrop().into(binding.imagePurchaseReceipt)
                 }
                 binding.resolvedSection.visibility = View.VISIBLE
-                if (ticket.paymentReceiptUrl.isNotBlank()) {
+                if (ticket.mercadoPagoPaymentId.isNotBlank()) {
+                    binding.textPaidByMercadoPago.visibility = View.VISIBLE
+                    binding.imagePaymentReceipt.visibility = View.GONE
+                } else if (ticket.paymentReceiptUrl.isNotBlank()) {
+                    binding.imagePaymentReceipt.visibility = View.VISIBLE
                     Glide.with(this).load(ticket.paymentReceiptUrl).centerCrop().into(binding.imagePaymentReceipt)
                 }
             }

@@ -26,6 +26,9 @@ class TicketDetailViewModel(
     private val _actionState = MutableLiveData<Resource<Unit>>()
     val actionState: LiveData<Resource<Unit>> = _actionState
 
+    private val _mercadoPagoUrl = MutableLiveData<Resource<String>>()
+    val mercadoPagoUrl: LiveData<Resource<String>> = _mercadoPagoUrl
+
     fun load(buildingId: String, ticketId: String) {
         _state.value = Resource.Loading
         viewModelScope.launch {
@@ -75,6 +78,19 @@ class TicketDetailViewModel(
                 load(buildingId, ticketId)
             } catch (e: Exception) {
                 _actionState.value = Resource.Error(e.message ?: "No se pudo confirmar el pago.")
+            }
+        }
+    }
+
+    fun payWithMercadoPago(buildingId: String, ticketId: String) {
+        _mercadoPagoUrl.value = Resource.Loading
+        viewModelScope.launch {
+            try {
+                val url = ticketRepo.createTicketMercadoPagoPreference(buildingId, ticketId)
+                _mercadoPagoUrl.value = Resource.Success(url)
+                load(buildingId, ticketId)
+            } catch (e: Exception) {
+                _mercadoPagoUrl.value = Resource.Error(e.message ?: "No se pudo iniciar el pago con Mercado Pago.")
             }
         }
     }
