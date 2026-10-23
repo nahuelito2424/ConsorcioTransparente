@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./auth/LoginPage";
 import { RequireAdmin } from "./auth/RequireAdmin";
+import { UnidadesPage } from "./pages/UnidadesPage";
 
 function App() {
   return (
@@ -19,7 +20,7 @@ function App() {
           path="/unidades"
           element={
             <RequireAdmin>
-              <div>Unidades (Tarea 5)</div>
+              <UnidadesPage />
             </RequireAdmin>
           }
         />
