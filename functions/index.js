@@ -286,9 +286,16 @@ exports.createTicketMercadoPagoPreference = onCall(
 
     // Sólo quien reportó el ticket puede pagarlo (decisión de producto: el
     // Admin/Encargado sigue usando el pago manual, ver TicketRepository.kt) — nunca se
-    // confía en qué botón muestra la UI, se valida de nuevo acá.
+    // confía en qué botón muestra la UI, se valida de nuevo acá. Chequea también el rol:
+    // un Encargado/Administrador que reportó su propio ticket no debe poder pagarlo por
+    // Mercado Pago (Review Focus del plan), no sólo no ver el botón.
     if (ticket.reportedByUid !== request.auth.uid) {
       throw new HttpsError("permission-denied", "Sólo quien reportó el ticket puede pagarlo.");
+    }
+    const userSnap = await getFirestore().collection("users").doc(request.auth.uid).get();
+    const userRole = userSnap.exists ? userSnap.data().role : "";
+    if (userRole === "ADMINISTRADOR" || userRole === "ENCARGADO") {
+      throw new HttpsError("permission-denied", "El Encargado/Administrador paga con el comprobante manual.");
     }
     if (ticket.status !== "A_COBRAR") {
       throw new HttpsError("failed-precondition", "Este ticket no está listo para cobrar.");
@@ -447,7 +454,18 @@ async function resolveTicketPayment(externalReference, mpPayment) {
   }
 
   const ticket = ticketSnap.data();
-  if (ticket.status === "RESUELTO") return;
+  if (ticket.status === "RESUELTO") {
+    // Reintento idempotente del mismo pago (p.ej. Mercado Pago reenvía el webhook):
+    // silencioso. Un pago aprobado DISTINTO en un ticket ya resuelto es un cobro
+    // duplicado real (el Admin lo marcó pagado a mano mientras el inquilino estaba en
+    // el checkout, o el inquilino pagó dos preferencias) — hay que poder detectarlo.
+    if (ticket.mercadoPagoPaymentId !== String(mpPayment.id)) {
+      console.warn(
+        `Webhook de Mercado Pago: pago aprobado distinto para un ticket ya RESUELTO (posible cobro duplicado): ${buildingId}/${ticketId}, mercadoPagoPaymentId=${mpPayment.id}`
+      );
+    }
+    return;
+  }
   if (ticket.status !== "A_COBRAR") {
     console.warn(`Webhook de Mercado Pago para un ticket que no está A_COBRAR: ${buildingId}/${ticketId}`);
     return;

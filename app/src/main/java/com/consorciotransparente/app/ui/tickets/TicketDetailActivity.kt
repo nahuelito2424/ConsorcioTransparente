@@ -161,7 +161,10 @@ class TicketDetailActivity : BaseActivity() {
                     Glide.with(this).load(ticket.purchaseReceiptUrl).centerCrop().into(binding.imagePurchaseReceipt)
                 }
                 binding.paymentSection.visibility = if (data.canManage || isReporter) View.VISIBLE else View.GONE
-                binding.buttonPayMercadoPago.visibility = if (isReporter) View.VISIBLE else View.GONE
+                // Nunca al staff, ni siquiera si reportó este ticket ellos mismos: Mercado
+                // Pago es para que el vecino pague su propia reparación, no una opción del
+                // Encargado/Administrador (ver TicketRepository.kt).
+                binding.buttonPayMercadoPago.visibility = if (isReporter && !data.canManage) View.VISIBLE else View.GONE
                 binding.textAmountToPay.text = getString(R.string.ticket_amount_to_pay, currencyFormat.format(ticket.budgetAmount))
             }
             TicketStatus.RESUELTO.name -> {

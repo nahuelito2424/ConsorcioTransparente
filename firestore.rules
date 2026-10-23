@@ -106,9 +106,22 @@ service cloud.firestore {
       match /tickets/{ticketId} {
         allow read: if belongsToBuilding(buildingId);
         allow create: if belongsToBuilding(buildingId) && request.resource.data.reportedByUid == request.auth.uid;
+        // El reportero sólo puede escribir exactamente lo que markPaid (pago manual,
+        // TicketRepository.kt) escribe: no puede tocar budgetAmount ni poner status
+        // RESUELTO sin un paymentReceiptUrl — si no, podría bajarse el monto a cobrar o
+        // marcarse el ticket pagado sin comprobante (hallazgo de la revisión final del
+        // plan de Mercado Pago para tickets). La confirmación por Mercado Pago no pasa
+        // por acá: la escribe mercadoPagoWebhook vía Admin SDK, que no pasa por reglas.
         allow update: if belongsToBuilding(buildingId) && (
           isEncargadoOrAdmin() ||
-          (resource.data.reportedByUid == request.auth.uid && resource.data.status == "A_COBRAR")
+          (
+            resource.data.reportedByUid == request.auth.uid &&
+            resource.data.status == "A_COBRAR" &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paymentReceiptUrl', 'status']) &&
+            request.resource.data.status == "RESUELTO" &&
+            request.resource.data.paymentReceiptUrl is string &&
+            request.resource.data.paymentReceiptUrl != ""
+          )
         );
       }
 
