@@ -12,22 +12,36 @@
 | HU-01 | Auditoría Documental Obligatoria | ✅ Implementada | Facturas |
 | HU-02 | Votaciones Vinculantes | ✅ Implementada | Votar |
 | HU-03 | Pago de Alquiler y/o Expensas | ✅ Implementada (transferencia + Mercado Pago) | Más → Pagar / Vecinos / Panel de cobros |
-| HU-04 | Integración con pasarela de pago (Mercado Pago) | ✅ Implementada (sólo HU-03; HU-10 Escenario 3 sigue con pago manual) | Más → Pagar |
+| HU-04 | Integración con pasarela de pago (Mercado Pago) | ✅ Implementada (HU-03 y HU-10 Escenario 3) | Más → Pagar / Tickets |
 | HU-05 | Muro con moderación previa | ✅ Implementada | Muro |
 | HU-06 | Reserva de Espacios Comunes | ✅ Implementada | Más → Reservas |
 | HU-07 | Protocolos de emergencia | ✅ Implementada (guía propia, no PDFs oficiales) | Más → Protocolos de emergencia |
 | HU-08 | Directorio de Proveedores | ✅ Implementada | Más → Directorio de proveedores |
 | HU-09 | Configuración de Cobros y Vencimientos | ✅ Implementada | Más → Configuración del edificio |
-| HU-10 | Gestión de Incidentes de Mantenimiento | ✅ Implementada (cobro de reparaciones con pago manual; todavía no usa Mercado Pago) | Más → Tickets |
+| HU-10 | Gestión de Incidentes de Mantenimiento | ✅ Implementada (pago manual + Mercado Pago) | Más → Tickets |
 
 ## Próximos pasos (orden sugerido)
 
-Las 10 Historias de Usuario del TP ya están implementadas. Lo que queda es una mejora,
-no una historia nueva:
+Las 10 Historias de Usuario del TP ya están implementadas, incluida la mejora que
+había quedado pendiente (Mercado Pago para reparaciones). No queda ningún ítem
+priorizado — lo que sigue es el backlog de abajo y lo que el usuario deje para el
+final (canal WhatsApp/PWA, una integración de IA gratuita).
 
-1. **Reemplazar el pago manual de HU-10** (`markPaid` en `TicketRepository.kt`) por el
-   cobro real de reparaciones vía Mercado Pago, reusando la misma integración de HU-04
-   (Cloud Function + webhook) ya hecha para HU-03.
+✅ **HU-04 — Mercado Pago para reparaciones (HU-10 Escenario 3)** resuelta:
+`createTicketMercadoPagoPreference` (callable nueva) genera la preferencia para quien
+reportó el ticket; `mercadoPagoWebhook` (ya existía para HU-03) ahora rutea por el
+prefijo de `external_reference` entre `resolveRentPayment` y la `resolveTicketPayment`
+nueva. A diferencia del flujo de alquiler/expensas, acá no hace falta escribir ningún
+estado especulativo al generar la preferencia (el ticket ya existe en `A_COBRAR`), así
+que cerrar el checkout sin pagar y reintentar es seguro sin la lógica de transacción
+que hizo falta para HU-03. El Admin/Encargado sigue con el pago manual de siempre
+(`markPaid`) — no se le agregó el botón de Mercado Pago, sólo al inquilino que
+reportó el ticket. Probado a mano en el emulador (mock): Encargado confirma la
+compra (pasa a A_COBRAR), no ve el botón de Mercado Pago; el inquilino que reportó sí
+lo ve, lo usa, y el ticket pasa a "Resuelto" mostrando "Pagado por Mercado Pago." Las
+Cloud Functions, como en HU-04 original, sólo se validaron con `node --check` +
+`require` local — sin proyecto de Firebase real ni credenciales de Mercado Pago en
+este entorno. Ver `docs/superpowers/plans/2026-10-22-mercado-pago-tickets.md`.
 
 ✅ **HU-07 — Protocolos de emergencia** resuelta: `ProtocolosActivity` (listado) +
 `ProtocolDetailActivity` (pasos), con contenido fijo en `EmergencyProtocols.kt`

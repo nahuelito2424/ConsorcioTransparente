@@ -123,7 +123,7 @@ forma análoga, scopeada por `buildingId`.
 ## 5. Cloud Functions (`functions/index.js`)
 
 Firebase Functions Gen 2 (Node.js). Dos programadas (`onSchedule`), dos disparadas por
-Firestore (`onDocumentCreated`/`onDocumentUpdated`), una callable (`onCall`) y una HTTP
+Firestore (`onDocumentCreated`/`onDocumentUpdated`), dos callable (`onCall`) y una HTTP
 pública (`onRequest`):
 
 - `closeExpiredVotes` — corre cada 15 minutos, cierra votaciones vencidas
@@ -138,14 +138,25 @@ pública (`onRequest`):
 - `onTicketStatusChanged` — notifica al tópico `user_{uid}` (el inquilino que lo
   reportó) cuando cambia el `status` de su ticket.
 - `createMercadoPagoPreference` (HU-04, callable) — el cliente Android la invoca para
-  pagar con Mercado Pago. Calcula el monto server-side (nunca confía en un monto
-  mandado por el cliente), crea el `Payment` (`method: MERCADO_PAGO`,
-  `status: A_VERIFICAR`) y devuelve la URL de Checkout Pro.
-- `mercadoPagoWebhook` (HU-04, HTTP pública) — recibe la confirmación de pago de
+  pagar alquiler/expensas con Mercado Pago. Calcula el monto server-side (nunca confía
+  en un monto mandado por el cliente), crea el `Payment` (`method: MERCADO_PAGO`,
+  `status: A_VERIFICAR`) y devuelve la URL de Checkout Pro. `external_reference =
+  "{buildingId}_{uid}_{period}"`.
+- `createTicketMercadoPagoPreference` (HU-10 Escenario 3, callable) — mismo propósito
+  que la anterior pero para que el inquilino que reportó un ticket pague el costo de
+  la reparación; sólo él puede invocarla para ese ticket (`reportedByUid ==
+  request.auth.uid`), y sólo si está en `A_COBRAR`. A diferencia de
+  `createMercadoPagoPreference`, no escribe nada en Firestore al generar la
+  preferencia — el `Ticket` ya existe, así que no hay estado especulativo que crear ni
+  limpiar si se cierra el checkout sin pagar. `external_reference =
+  "ticket_{buildingId}_{ticketId}"` (el prefijo `ticket_` es lo que usa el webhook para
+  rutear).
+- `mercadoPagoWebhook` (HU-04/HU-10, HTTP pública) — recibe la confirmación de pago de
   Mercado Pago, valida su firma (`WebhookSignatureValidator` del SDK `mercadopago`) y
-  marca el `Payment` correspondiente `PAGADO`. Es la primera función HTTP pública del
-  proyecto; requiere los secrets `MERCADO_PAGO_ACCESS_TOKEN` y
-  `MERCADO_PAGO_WEBHOOK_SECRET` (ver README).
+  rutea por el prefijo de `external_reference` hacia `resolveRentPayment` (marca el
+  `Payment` `PAGADO`) o `resolveTicketPayment` (marca el `Ticket` `RESUELTO`). Es la
+  primera función HTTP pública del proyecto; requiere los secrets
+  `MERCADO_PAGO_ACCESS_TOKEN` y `MERCADO_PAGO_WEBHOOK_SECRET` (ver README).
 
 Los clientes Android se suscriben a los tópicos de notificación en
 `MainActivity.onResume` (ver `NotificationRepository`), según buildingId/rol/uid del

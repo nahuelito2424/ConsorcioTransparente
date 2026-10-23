@@ -66,17 +66,19 @@ genera la pasarela de pago al finalizar. El pago puede ser de uno de los dos con
 o de los dos juntos, según cómo esté configurado el edificio. Depende de HU-04 para el
 cobro real.
 
-### HU-04 — Integración con Pasarela de Pago (Mercado Pago) ✅ implementada (sólo HU-03)
+### HU-04 — Integración con Pasarela de Pago (Mercado Pago) ✅ implementada
 El inquilino puede pagar alquiler/expensas con Mercado Pago (botón "Pagar con Mercado
-Pago" en la pantalla Pagar, HU-03): una Cloud Function genera la preferencia de
-Checkout Pro con el monto calculado server-side, y otra recibe el webhook que confirma
-el pago sin intervención del Administrador. El "comprobante" es un registro dentro de
-la app (fecha, monto, método) — no un PDF descargable; HU-07 terminó siendo una guía de
+Pago" en la pantalla Pagar, HU-03), y también el cobro de reparaciones de
+mantenimiento del Escenario 3 de HU-10 (botón en la ficha del ticket, sólo visible para
+quien lo reportó): dos Cloud Functions callable generan la preferencia de Checkout Pro
+con el monto calculado server-side (una por cada recurso — pago de alquiler/expensas o
+ticket), y un único webhook compartido recibe la confirmación y rutea según el
+`external_reference` de cada preferencia. El "comprobante" es un registro dentro de la
+app (fecha, monto, método) — no un PDF descargable; HU-07 terminó siendo una guía de
 texto, no infraestructura de generación de PDFs, así que esto queda como backlog sin
 una historia que lo cubra todavía (ver "Sugerencias para versiones futuras"). El
-Escenario 3 de HU-10 (cobro de reparaciones de mantenimiento) **todavía no** usa esta
-integración: sigue con la carga manual de un comprobante de pago (documentado como
-punto de reemplazo único en `TicketRepository.kt`).
+Admin/Encargado sigue teniendo el pago manual como alternativa en ambos flujos, para
+los casos donde el pago no lo hace el propio inquilino por Mercado Pago.
 
 ### HU-05 — Muro con moderación previa ✅ implementada
 Cualquier vecino puede proponer una publicación (texto + imagen opcional), pero nace en
@@ -124,15 +126,18 @@ Ciclo completo de un ticket de reparación:
 
 1. **Reportado** — el inquilino describe el problema, con foto opcional (no
    obligatoria), eligiendo una categoría (Plomería, Electricidad, Gas, Albañilería,
-   Otro). El Encargado/Administrador recibe notificación del nuevo ticket (pendiente,
-   ver `roadmap.md`).
+   Otro). El Encargado/Administrador recibe notificación del nuevo ticket
+   (`onTicketCreated`, tópico `building_{buildingId}_staff`).
 2. **En Presupuesto** — el Encargado/Administrador revisa el problema con el inquilino
    y carga un monto, o lo deja "a cotizar" si todavía no hay precio.
 3. **A Cobrar** — se sube el comprobante de compra de materiales (ferretería u otro
-   proveedor). El cobro real por Mercado Pago es el Escenario 3 de esta historia
-   (= HU-04); mientras tanto, se salda subiendo un comprobante de pago manual, que
-   puede cargar tanto el Encargado/Administrador como el propio inquilino.
-4. **Resuelto** — queda archivado con el comprobante de pago adjunto.
+   proveedor). El Escenario 3 de esta historia ("generar un cobro a través de Mercado
+   Pago", = HU-04) se salda de dos formas: el inquilino que reportó el ticket paga con
+   Mercado Pago, o el Encargado/Administrador sube un comprobante de pago manual —
+   pensado para reparaciones de áreas comunes que no le corresponden a un vecino
+   puntual, no como reemplazo del flujo del inquilino.
+4. **Resuelto** — queda archivado con el comprobante de pago adjunto (o, si se pagó por
+   Mercado Pago, con el id de ese pago en vez de una imagen).
 
 ## 4. Reglas de negocio transversales
 
