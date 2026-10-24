@@ -7,6 +7,7 @@ import { useBuildingResidents } from "../hooks/useBuildingResidents";
 import { calcularLiquidacion } from "../lib/liquidacion";
 import { toPeriod } from "../lib/period";
 import { StatusStamp } from "../components/StatusStamp";
+import { PeriodPicker } from "../components/PeriodPicker";
 import type { Liquidacion, LiquidacionBreakdownRow, UserProfile } from "../types";
 
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" });
@@ -126,12 +127,9 @@ export function LiquidacionPage() {
       </p>
 
       <label className="block text-xs uppercase tracking-wide text-pending mb-1">Período</label>
-      <input
-        type="month"
-        value={period}
-        onChange={(e) => setPeriod(e.target.value)}
-        className="border border-border-soft rounded px-3 py-2 mb-6"
-      />
+      <div className="mb-6">
+        <PeriodPicker value={period} onChange={setPeriod} />
+      </div>
 
       <div className="relative bg-white border border-border-soft rounded-lg p-6 mb-8 max-w-2xl">
         {justEmitted && (

@@ -2,6 +2,7 @@ import { useRef, useState, type DragEvent, type FormEvent } from "react";
 import { useAuth } from "../auth/useAuth";
 import { useExpenses } from "../hooks/useExpenses";
 import { toPeriod } from "../lib/period";
+import { Select } from "../components/Select";
 import type { ExpenseCategory } from "../types";
 
 const categories: ExpenseCategory[] = [
@@ -14,6 +15,7 @@ const categories: ExpenseCategory[] = [
   "LIMPIEZA",
   "OTRO",
 ];
+const categoryOptions = categories.map((c) => ({ value: c, label: c }));
 
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" });
 
@@ -148,17 +150,14 @@ export function GastosPage() {
           <label className="block text-xs uppercase tracking-wide text-pending mb-1">
             Categoría
           </label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
-            className="w-full border border-border-soft rounded px-3 py-2 mb-3"
-          >
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+          <div className="mb-3">
+            <Select
+              value={category}
+              onChange={(v) => setCategory(v as ExpenseCategory)}
+              options={categoryOptions}
+              className="w-full"
+            />
+          </div>
 
           <label className="block text-xs uppercase tracking-wide text-pending mb-1">
             Proveedor (opcional)

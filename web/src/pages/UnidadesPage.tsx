@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../auth/useAuth";
 import { useUnits } from "../hooks/useUnits";
 import { useBuildingResidents } from "../hooks/useBuildingResidents";
+import { Select, type SelectOption } from "../components/Select";
 import type { UnitInfo } from "../types";
 
 // 0 ≤ alícuota ≤ 100 — ver CLAUDE.md: ninguna regla de negocio con consecuencias
@@ -12,12 +13,12 @@ function isValidAliquot(n: number): boolean {
 
 function UnitRow({
   unit,
-  residents,
+  tenantOptions,
   onUpdate,
   onDelete,
 }: {
   unit: UnitInfo;
-  residents: ReturnType<typeof useBuildingResidents>;
+  tenantOptions: SelectOption[];
   onUpdate: (unitId: string, data: Partial<Omit<UnitInfo, "id">>) => void;
   onDelete: (unitId: string) => void;
 }) {
@@ -54,18 +55,11 @@ function UnitRow({
         %{aliquotError && <p className="text-warn text-xs">0 a 100</p>}
       </td>
       <td className="py-2 pr-4">
-        <select
+        <Select
           value={unit.tenantUid}
-          onChange={(e) => onUpdate(unit.id, { tenantUid: e.target.value })}
-          className="border border-border-soft rounded px-2 py-1"
-        >
-          <option value="">Sin asignar</option>
-          {residents.map((r) => (
-            <option key={r.uid} value={r.uid}>
-              {r.fullName || r.email}
-            </option>
-          ))}
-        </select>
+          onChange={(tenantUid) => onUpdate(unit.id, { tenantUid })}
+          options={tenantOptions}
+        />
       </td>
       <td className="py-2">
         <button onClick={() => onDelete(unit.id)} className="text-warn text-sm">
@@ -89,6 +83,10 @@ export function UnidadesPage() {
   const [actionError, setActionError] = useState<string | null>(null);
 
   const totalAliquot = units.reduce((sum, u) => sum + u.aliquot, 0);
+  const tenantOptions: SelectOption[] = [
+    { value: "", label: "Sin asignar" },
+    ...residents.map((r) => ({ value: r.uid, label: r.fullName || r.email })),
+  ];
 
   async function handleUpdate(unitId: string, data: Partial<Omit<UnitInfo, "id">>) {
     setActionError(null);
@@ -157,7 +155,7 @@ export function UnidadesPage() {
             <UnitRow
               key={unit.id}
               unit={unit}
-              residents={residents}
+              tenantOptions={tenantOptions}
               onUpdate={handleUpdate}
               onDelete={handleDelete}
             />
@@ -182,18 +180,7 @@ export function UnidadesPage() {
               %
             </td>
             <td className="py-2 pr-4">
-              <select
-                value={newTenantUid}
-                onChange={(e) => setNewTenantUid(e.target.value)}
-                className="border border-border-soft rounded px-2 py-1"
-              >
-                <option value="">Sin asignar</option>
-                {residents.map((r) => (
-                  <option key={r.uid} value={r.uid}>
-                    {r.fullName || r.email}
-                  </option>
-                ))}
-              </select>
+              <Select value={newTenantUid} onChange={setNewTenantUid} options={tenantOptions} />
             </td>
             <td className="py-2">
               <button onClick={handleAdd} className="bg-terracota text-white rounded px-3 py-1 text-sm">
