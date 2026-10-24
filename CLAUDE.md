@@ -6,12 +6,14 @@ no un reemplazo de esos documentos.
 
 ## Qué es este proyecto
 
-**Consorcio Transparente** es el MVP nativo Android (Kotlin + Firebase) de una tesis
-universitaria (TP de Planificación de Seminario Final). Es una app para la gestión de
-propiedades horizontales (edificios/consorcios) en **CABA, Argentina**: pago de
-alquiler/expensas, votaciones vinculantes, muro con moderación, reserva de espacios
-comunes, gestión de incidentes de mantenimiento, directorio de proveedores y protocolos
-de emergencia. Tres roles: Administrador, Encargado (opcional) y Inquilino.
+**Consorcio Transparente** es el MVP de una tesis universitaria (TP de Planificación de
+Seminario Final): una app para la gestión de propiedades horizontales
+(edificios/consorcios) en **CABA, Argentina**: pago de alquiler/expensas, votaciones
+vinculantes, muro con moderación, reserva de espacios comunes, gestión de incidentes de
+mantenimiento, directorio de proveedores y protocolos de emergencia. Tres roles:
+Administrador, Encargado (opcional) y Inquilino. Dos plataformas, mismo backend de
+Firebase: la app Android (Kotlin, `app/`, los tres roles) y, desde esta v1, una web
+sólo para Administradores (React, `web/`) — ver "Web (Administradores)" más abajo.
 
 El trabajo está organizado en 10 Historias de Usuario (HU-01 a HU-10). Antes de tocar
 una pantalla o agregar una funcionalidad, leer:
@@ -25,15 +27,18 @@ una pantalla o agregar una funcionalidad, leer:
 
 ## Estado actual (resumen — la tabla completa está en `docs/roadmap.md`)
 
-Las 10 Historias de Usuario (HU-01 a HU-10) están implementadas. Lo único pendiente es
-una mejora, no una historia nueva: HU-10 (cobro de reparaciones de mantenimiento) sigue
-con pago manual en vez de usar la integración de Mercado Pago que ya tiene HU-03/HU-04.
+Las 10 Historias de Usuario (HU-01 a HU-10) de la app Android están implementadas,
+incluida la mejora de Mercado Pago para reparaciones. Sobre eso se agregó la v1 de la
+web para Administradores (liquidación automática de expensas por alícuota — ver abajo).
 Dos detalles a tener en cuenta al tocar código relacionado:
 - HU-07 (protocolos de emergencia) no terminó siendo PDFs oficiales descargados: es una
   guía de texto redactada a partir de lineamientos generales, con el disclaimer
   correspondiente en la pantalla (ver `docs/especificacion-funcional.md`).
-- HU-04 (Mercado Pago) sólo cubre HU-03 (alquiler/expensas); el Escenario 3 de HU-10
-  (reparaciones) es justamente esa mejora pendiente.
+- El monto de expensas de cada inquilino (`users/{uid}.expensesAmount`) ahora puede
+  venir de dos lugares no coordinados entre sí: tipeado a mano en `VecinosActivity`
+  (Android) o calculado y emitido desde `/liquidacion` (web). `VecinosActivity` avisa
+  cuándo un monto viene de una liquidación, pero no impide pisarlo a mano — ver
+  "Web (Administradores)".
 
 ## Stack y convenciones (detalle en `docs/arquitectura.md`)
 
@@ -73,6 +78,25 @@ Dos detalles a tener en cuenta al tocar código relacionado:
   o cambiás una validación importante en una pantalla, revisá si `firestore.rules` (o
   `storage.rules`) necesita el mismo cambio.
 
+## Web (Administradores)
+
+`web/` — React 19 + TypeScript + Vite + Tailwind CSS v4 (sin librería de componentes:
+estaban haciendo que todo este tipo de producto se vea igual), `react-router-dom`,
+Firebase JS SDK contra el **mismo proyecto de Firebase** que la app Android. Sólo rol
+`ADMINISTRADOR` — cualquier otro rol se desloguea al instante (ver
+`src/auth/useAuth.ts`). v1 = una sola cosa: liquidación automática de expensas por
+alícuota (`buildings/{id}/units`, hasta ahora sin uso), reemplazando la carga manual de
+`VecinosActivity`. Al emitir, escribe `users/{uid}.expensesAmount` — el mismo campo que
+ya lee todo el flujo de pagos de Android, así que esa parte de Android no se tocó.
+Detalle completo: `docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md`.
+
+Para desarrollar sin un proyecto de Firebase real: Firebase Local Emulator Suite
+(`firebase emulators:start --project demo-consorcio-transparente` desde la raíz,
+`cd web && npm run seed` para datos de prueba) — ver `web/README.md`. A diferencia de
+Android, acá sí hay tests automatizados: `web/src/lib/liquidacion.test.ts` (cálculo
+puro, Vitest) y `web/tests/firestore-rules.test.ts` (reglas de Firestore nuevas,
+`@firebase/rules-unit-testing` contra el emulador real).
+
 ## Antes de compilar
 
 `app/google-services.json` en el repo es una plantilla con valores falsos. Sin
@@ -90,7 +114,9 @@ necesita. Pasos completos para el proyecto real en
 máquina (AGP 8.11 necesita Java 17+); si el build falla por versión de Java en otra
 PC, ajustar o borrar esa línea.
 
-No hay tests automatizados todavía (carpetas `test`/`androidTest` vacías del template).
+No hay tests automatizados en la app Android (carpetas `test`/`androidTest` vacías del
+template) — la verificación es compilar + probar a mano en el emulador. La web sí tiene
+tests (ver "Web (Administradores)" arriba).
 
 ## Cómo trabajar en este repo
 

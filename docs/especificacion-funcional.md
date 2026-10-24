@@ -58,13 +58,15 @@ documento de respuesta, no solo por la UI. Al cerrar (automáticamente, vía Clo
 Function programada cada 15 minutos), se tabulan los resultados y se dispara una
 notificación push.
 
-### HU-03 — Pago de Alquiler y/o Expensas 🕗 pendiente
+### HU-03 — Pago de Alquiler y/o Expensas ✅ implementada
 El inquilino recibe una notificación cuando se aproxima el vencimiento configurado por
 el Administrador (fecha y anticipación resueltos en HU-09), puede pagar alquiler,
-expensas, o ambos —según lo que cobre ese edificio— y descargar el comprobante que
-genera la pasarela de pago al finalizar. El pago puede ser de uno de los dos conceptos
-o de los dos juntos, según cómo esté configurado el edificio. Depende de HU-04 para el
-cobro real.
+expensas, o ambos —según lo que cobre ese edificio—, por transferencia (con comprobante
+que aprueba/rechaza el Administrador) o por Mercado Pago (HU-04). El monto de cada
+inquilino (`users/{uid}.rentAmount`/`.expensesAmount`) lo asigna el Administrador: a
+mano en `VecinosActivity` (celular, ambos conceptos), o, sólo para expensas, calculado
+automáticamente por alícuota desde la web (`/liquidacion` — ver "Prorrateo automático
+de expensas por alícuota" más abajo, que ya no es sólo una idea a futuro).
 
 ### HU-04 — Integración con Pasarela de Pago (Mercado Pago) ✅ implementada
 El inquilino puede pagar alquiler/expensas con Mercado Pago (botón "Pagar con Mercado
@@ -191,9 +193,12 @@ para considerar más allá de las 10 HU ya definidas:
 3. **Libro de actas digital**: historial de votaciones cerradas con sus resultados y
    fecha, exportable — un registro de decisiones del consorcio con valor probatorio
    informal.
-4. **Prorrateo automático de expensas por alícuota**: el modelo `UnitInfo.aliquot` ya
-   existe pero no se usa todavía para calcular cuánto le corresponde pagar a cada
-   unidad; hoy el monto de expensas no está modelado por unidad.
+4. ~~**Prorrateo automático de expensas por alícuota**~~ — ✅ implementado, en la web
+   para Administradores (`/liquidacion`), no en la app: el Admin carga las unidades con
+   su alícuota (`buildings/{id}/units`, el modelo existía desde HU-03 pero no lo usaba
+   nadie) y la web calcula y emite el monto de expensas de cada inquilino a partir de
+   los gastos verificados del mes. Ver `docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md`
+   y la sección 8 de `arquitectura.md`.
 5. **Contactos de emergencia oficiales**: HU-07 ya incluye Bomberos/SAME/Policía/Defensa
    Civil fijos en la pantalla de Protocolos; falta la línea de la empresa de gas/luz
    (varía por proveedor/zona, no se puede dejar fija para cualquier edificio de CABA).

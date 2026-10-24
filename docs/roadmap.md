@@ -20,11 +20,30 @@
 | HU-09 | Configuración de Cobros y Vencimientos | ✅ Implementada | Más → Configuración del edificio |
 | HU-10 | Gestión de Incidentes de Mantenimiento | ✅ Implementada (pago manual + Mercado Pago) | Más → Tickets |
 
+## Segunda plataforma: web para Administradores (`web/`)
+
+No es una HU numerada del TP original (esa numeración es sólo de la app Android) —
+es la segunda plataforma que el planteo original mencionaba junto con Android, y que
+había quedado explícitamente fuera de alcance hasta terminar las 10 HU.
+
+| Alcance | Estado | Pantalla |
+|---|---|---|
+| v1 — Liquidación de expensas por alícuota | ✅ Implementada | `/`, `/unidades`, `/gastos`, `/liquidacion` |
+
+Detalle completo en
+[`docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md`](./superpowers/specs/2026-10-23-web-admin-liquidacion-design.md)
+y la sección 8 de [`arquitectura.md`](./arquitectura.md#8-web-para-administradores-web).
+Deliberadamente fuera de esta v1 (ver "No incluye" del diseño): Encargado/Inquilino en
+la web, gestión de alquiler, aprobar/rechazar comprobantes desde la web, exportar a
+PDF/Excel, cualquier pantalla que no sea expensas (tickets, muro, votaciones, etc.).
+
 ## Próximos pasos (orden sugerido)
 
-Las 10 Historias de Usuario del TP ya están implementadas, incluida la mejora que
-había quedado pendiente (Mercado Pago para reparaciones). No queda ningún ítem
-priorizado — lo que sigue es el backlog de abajo y lo que el usuario deje para el
+Las 10 Historias de Usuario del TP ya están implementadas (incluida la mejora que
+había quedado pendiente, Mercado Pago para reparaciones), y también la v1 de la
+segunda plataforma (web para Administradores, liquidación de expensas). No queda
+ningún ítem priorizado — lo que sigue es el backlog de abajo, una eventual v2 de la
+web (Encargado/Inquilino, exportar, aprobar cobros), y lo que el usuario deje para el
 final (canal WhatsApp/PWA, una integración de IA gratuita).
 
 ✅ **HU-04 — Mercado Pago para reparaciones (HU-10 Escenario 3)** resuelta:

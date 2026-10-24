@@ -76,7 +76,8 @@ bloque de métricas de siempre (`normalModeContent`) y 3 botones grandes
 ```
 users/{uid}                                   perfil (rol, buildingId, unitId)
 buildings/{buildingId}                         config del edificio (HU-09)
-buildings/{buildingId}/units/{unitId}          unidad funcional (alícuota, owner/tenant uid)
+buildings/{buildingId}/units/{unitId}          unidad funcional (alícuota, owner/tenant uid) — web Admin, sección 8
+buildings/{buildingId}/liquidaciones/{period}  liquidación de expensas emitida — web Admin, sección 8
 buildings/{buildingId}/expenses/{expenseId}    gastos, HU-01
 buildings/{buildingId}/votes/{voteId}          votaciones, HU-02
 buildings/{buildingId}/votes/{voteId}/responses/{voterUid}   un voto por usuario (id = uid)
@@ -187,3 +188,49 @@ reglas e índices con el Firebase CLI.
   cada uno recibe sus dependencias de Firebase con valor por defecto en el constructor.
 - **`Resource<T>`** es el único envoltorio de estado async — no introducir uno nuevo
   (ni Flow/StateFlow) sin que lo pida el usuario explícitamente.
+
+## 8. Web para Administradores (`web/`)
+
+Segunda plataforma del TP (mencionada en el planteo original junto con Android), sobre
+el mismo proyecto de Firebase — comparte Auth/Firestore/Storage con la app, sin backend
+propio. Diseño completo:
+[`docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md`](./superpowers/specs/2026-10-23-web-admin-liquidacion-design.md).
+
+- **Stack**: React 19 + TypeScript + Vite, Tailwind CSS v4 (plugin oficial de Vite,
+  `@theme` en CSS — no `tailwind.config.js`, esa es la API de v3), `react-router-dom`,
+  Firebase JS SDK. Sin librería de componentes (Material/Bootstrap/etc.) a propósito:
+  son las que hacen que este tipo de producto se vea siempre igual.
+- **Sin capa Repository/Mock**: a diferencia de Android (3 roles, pensado para
+  convivir con un flavor sin red), acá hay un solo rol y un solo flujo de datos — cada
+  pantalla usa un hook (`useUnits`, `useExpenses`, etc. en `web/src/hooks/`) que habla
+  directo al SDK de Firebase. Portar el patrón de Android sería ingeniería de más.
+- **Sólo rol `ADMINISTRADOR`**: `useAuth()` (`web/src/auth/`) desloguea de inmediato a
+  cualquier otro perfil. Encargado/Inquilino quedan para una etapa futura.
+- **Alcance v1**: liquidación de expensas por alícuota. Activa `buildings/{id}/units`
+  (el modelo existía desde HU-03 pero no lo usaba nadie) y agrega
+  `buildings/{id}/liquidaciones/{period}` (historial, snapshot inmutable por período —
+  re-emitir el mismo período sobrescribe, sin versiones). El cálculo en sí
+  (`web/src/lib/liquidacion.ts`) es una función pura: `amount = total × alícuota / 100`,
+  redondeado a 2 decimales.
+- **Coordinación con Android, sin tocarlo**: al "Emitir", la web escribe
+  `users/{uid}.expensesAmount` — el mismo campo que ya lee
+  `createMercadoPagoPreference`/`uploadReceipt` del lado Android (ver sección 5). Cero
+  cambios en el modelo de pagos de Android. Único cambio Android de esta v1:
+  `VecinosActivity` muestra un aviso de sólo lectura cuando un monto viene de una
+  liquidación (`BuildingRepository.getLatestLiquidacionTenants`), sin bloquear la
+  edición manual — las dos vías siguen escribiendo el mismo campo, sin coordinarse
+  entre sí más que con ese aviso.
+- **`firestore.rules`**: `units` y `liquidaciones` siguen el mismo patrón que el resto
+  (`allow read: if belongsToBuilding(buildingId)`, `allow write: if isAdmin() &&
+  myBuildingId() == buildingId`) — nada nuevo conceptualmente, reusa las funciones ya
+  definidas al tope del archivo.
+- **Desarrollo sin proyecto de Firebase real**: Firebase Local Emulator Suite
+  (Auth+Firestore+Storage) con un script de semilla
+  (`web/scripts/seed-emulator.ts`, `firebase-admin`) — ver `web/README.md`. Requiere
+  Java en el PATH para los emuladores (en esta máquina, ninguno de los `java` del PATH
+  por defecto funciona; usar el JBR de Android Studio,
+  `C:\Program Files\Android\Android Studio\jbr\bin`).
+- **Tests**: a diferencia de Android, acá sí hay — `web/src/lib/liquidacion.test.ts`
+  (Vitest, función pura) y `web/tests/firestore-rules.test.ts`
+  (`@firebase/rules-unit-testing` contra el emulador real, no sólo lectura del archivo
+  de reglas).
