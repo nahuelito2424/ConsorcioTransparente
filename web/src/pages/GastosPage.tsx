@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type DragEvent, type FormEvent } from "react";
 import { useAuth } from "../auth/useAuth";
 import { useExpenses } from "../hooks/useExpenses";
 import { toPeriod } from "../lib/period";
@@ -16,6 +16,58 @@ const categories: ExpenseCategory[] = [
 ];
 
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" });
+
+function Dropzone({ file, onChange }: { file: File | null; onChange: (file: File | null) => void }) {
+  const [dragging, setDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function handleDrop(e: DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setDragging(false);
+    const dropped = e.dataTransfer.files?.[0];
+    if (dropped && dropped.type.startsWith("image/")) onChange(dropped);
+  }
+
+  return (
+    <div
+      onClick={() => inputRef.current?.click()}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragging(true);
+      }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={handleDrop}
+      className={`cursor-pointer rounded border-2 border-dashed px-4 py-6 text-center text-sm transition-colors ${
+        dragging ? "border-terracota bg-terracota/5" : "border-border-dashed"
+      }`}
+    >
+      {file ? (
+        <p className="text-stone-700">
+          📎 {file.name}{" "}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange(null);
+            }}
+            className="text-warn underline"
+          >
+            quitar
+          </button>
+        </p>
+      ) : (
+        <p className="text-pending">Arrastrá una imagen acá, o hacé clic para elegirla</p>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+        className="hidden"
+      />
+    </div>
+  );
+}
 
 export function GastosPage() {
   const { user } = useAuth();
@@ -129,12 +181,9 @@ export function GastosPage() {
           <label className="block text-xs uppercase tracking-wide text-pending mb-1">
             Comprobante (imagen, opcional — sin comprobante queda BLOQUEADO)
           </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="w-full mb-4 text-sm"
-          />
+          <div className="mb-4">
+            <Dropzone file={file} onChange={setFile} />
+          </div>
 
           {error && <p className="text-warn text-sm mb-4">{error}</p>}
 

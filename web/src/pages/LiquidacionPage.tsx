@@ -76,6 +76,11 @@ export function LiquidacionPage() {
   const [emitting, setEmitting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // "visible" arranca true (el sello entra con stamp-slam) y pasa a false antes de
+  // que se desmonte justEmitted, para que salga con un fundido en vez de desaparecer
+  // de golpe.
+  const [justEmitted, setJustEmitted] = useState(false);
+  const [stampVisible, setStampVisible] = useState(false);
 
   const totalExpenses = expenses
     .filter((e) => e.status === "VERIFICADO" && e.createdAt && toPeriod(e.createdAt) === period)
@@ -102,6 +107,10 @@ export function LiquidacionPage() {
     try {
       await emitirLiquidacion(period, totalExpenses, breakdown, user.uid);
       setConfirming(false);
+      setJustEmitted(true);
+      setStampVisible(true);
+      window.setTimeout(() => setStampVisible(false), 1600);
+      window.setTimeout(() => setJustEmitted(false), 2100);
     } catch {
       setError("No se pudo emitir la liquidación. Probá de nuevo.");
     } finally {
@@ -124,7 +133,18 @@ export function LiquidacionPage() {
         className="border border-border-soft rounded px-3 py-2 mb-6"
       />
 
-      <div className="bg-white border border-border-soft rounded-lg p-6 mb-8 max-w-2xl">
+      <div className="relative bg-white border border-border-soft rounded-lg p-6 mb-8 max-w-2xl">
+        {justEmitted && (
+          <div
+            className={`absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-cream/90 ${
+              stampVisible ? "" : "stamp-fade-out"
+            }`}
+          >
+            <div className="stamp-slam border-4 border-ok text-ok font-mono font-bold text-3xl uppercase px-8 py-4 rounded">
+              Emitido
+            </div>
+          </div>
+        )}
         <p className="font-serif text-2xl mb-1">{currency.format(totalExpenses)}</p>
         <p className="text-xs uppercase tracking-wide text-pending mb-4">
           Total gastos verificados — {period}
