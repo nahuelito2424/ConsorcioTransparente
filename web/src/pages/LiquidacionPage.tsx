@@ -8,6 +8,7 @@ import { calcularLiquidacion } from "../lib/liquidacion";
 import { toPeriod } from "../lib/period";
 import { StatusStamp } from "../components/StatusStamp";
 import { PeriodPicker } from "../components/PeriodPicker";
+import { Checkbox } from "../components/Checkbox";
 import type { Liquidacion, LiquidacionBreakdownRow, UserProfile } from "../types";
 
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" });
@@ -76,6 +77,7 @@ export function LiquidacionPage() {
   const [selectedHistorico, setSelectedHistorico] = useState<Liquidacion | null>(null);
   const [emitting, setEmitting] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [reviewed, setReviewed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // "visible" arranca true (el sello entra con stamp-slam) y pasa a false antes de
   // que se desmonte justEmitted, para que salga con un fundido en vez de desaparecer
@@ -176,7 +178,10 @@ export function LiquidacionPage() {
 
         {!confirming ? (
           <button
-            onClick={() => setConfirming(true)}
+            onClick={() => {
+              setReviewed(false);
+              setConfirming(true);
+            }}
             disabled={units.length === 0}
             className="mt-6 bg-terracota text-white rounded px-4 py-2 text-sm disabled:opacity-50"
           >
@@ -188,15 +193,26 @@ export function LiquidacionPage() {
               Esto va a actualizar el monto de expensas de {assignedTenants.size}{" "}
               {assignedTenants.size === 1 ? "inquilino" : "inquilinos"}. ¿Confirmar?
             </p>
+            <div className="mb-4">
+              <Checkbox
+                id="reviewed-liquidacion"
+                checked={reviewed}
+                onChange={setReviewed}
+                label="Revisé los montos de esta liquidación"
+              />
+            </div>
             <button
               onClick={handleConfirmEmitir}
-              disabled={emitting}
+              disabled={emitting || !reviewed}
               className="bg-terracota text-white rounded px-4 py-2 text-sm mr-2 disabled:opacity-50"
             >
               {emitting ? "Emitiendo…" : "Sí, emitir"}
             </button>
             <button
-              onClick={() => setConfirming(false)}
+              onClick={() => {
+                setConfirming(false);
+                setReviewed(false);
+              }}
               className="border border-border-soft rounded px-4 py-2 text-sm"
             >
               Cancelar
