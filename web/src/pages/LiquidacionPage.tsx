@@ -3,18 +3,34 @@ import { useAuth } from "../auth/useAuth";
 import { useUnits } from "../hooks/useUnits";
 import { useExpenses } from "../hooks/useExpenses";
 import { useLiquidaciones } from "../hooks/useLiquidaciones";
+import { useBuildingResidents } from "../hooks/useBuildingResidents";
 import { calcularLiquidacion } from "../lib/liquidacion";
+import { toPeriod } from "../lib/period";
 import { StatusStamp } from "../components/StatusStamp";
-import type { Liquidacion, LiquidacionBreakdownRow } from "../types";
+import type { Liquidacion, LiquidacionBreakdownRow, UserProfile } from "../types";
 
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" });
+const dateTime = new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyle: "short" });
 
-function BreakdownTable({ breakdown }: { breakdown: LiquidacionBreakdownRow[] }) {
+function BreakdownTable({
+  breakdown,
+  residents,
+}: {
+  breakdown: LiquidacionBreakdownRow[];
+  residents: UserProfile[];
+}) {
+  const total = breakdown.reduce((sum, row) => sum + row.amount, 0);
+
+  function residentName(uid: string) {
+    return residents.find((r) => r.uid === uid)?.fullName || residents.find((r) => r.uid === uid)?.email || uid;
+  }
+
   return (
     <table className="w-full text-sm">
       <thead>
         <tr className="text-left text-xs uppercase tracking-wide text-pending">
           <th className="pb-2 pr-4">Unidad</th>
+          <th className="pb-2 pr-4">Inquilino</th>
           <th className="pb-2 pr-4">Alícuota</th>
           <th className="pb-2">Monto</th>
         </tr>
@@ -23,6 +39,7 @@ function BreakdownTable({ breakdown }: { breakdown: LiquidacionBreakdownRow[] })
         {breakdown.map((row) => (
           <tr key={row.unitId} className="border-t border-dashed border-border-soft">
             <td className="py-2 pr-4">{row.unitLabel}</td>
+            <td className="py-2 pr-4">{row.tenantUid ? residentName(row.tenantUid) : "—"}</td>
             <td className="py-2 pr-4">{row.aliquot}%</td>
             <td className="py-2">
               {row.tenantUid ? (
@@ -34,6 +51,14 @@ function BreakdownTable({ breakdown }: { breakdown: LiquidacionBreakdownRow[] })
           </tr>
         ))}
       </tbody>
+      <tfoot>
+        <tr className="border-t border-border-soft font-semibold">
+          <td className="py-2 pr-4" colSpan={3}>
+            Total repartido
+          </td>
+          <td className="py-2">{currency.format(total)}</td>
+        </tr>
+      </tfoot>
     </table>
   );
 }
@@ -44,26 +69,41 @@ export function LiquidacionPage() {
   const { units } = useUnits(buildingId);
   const { expenses } = useExpenses(buildingId);
   const { liquidaciones, emitirLiquidacion } = useLiquidaciones(buildingId);
+  const residents = useBuildingResidents(buildingId);
 
-  const [period, setPeriod] = useState(new Date().toISOString().slice(0, 7));
+  const [period, setPeriod] = useState(toPeriod(new Date()));
   const [selectedHistorico, setSelectedHistorico] = useState<Liquidacion | null>(null);
   const [emitting, setEmitting] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const totalExpenses = expenses
-    .filter((e) => e.status === "VERIFICADO" && e.createdAt?.toISOString().slice(0, 7) === period)
+    .filter((e) => e.status === "VERIFICADO" && e.createdAt && toPeriod(e.createdAt) === period)
     .reduce((sum, e) => sum + e.amount, 0);
 
   const breakdown = calcularLiquidacion(units, totalExpenses);
-  const assignedCount = breakdown.filter((r) => r.tenantUid).length;
+  const assignedTenants = new Set(breakdown.filter((r) => r.tenantUid).map((r) => r.tenantUid));
   const alreadyEmitted = liquidaciones.some((l) => l.period === period);
+
+  const totalAliquot = units.reduce((sum, u) => sum + u.aliquot, 0);
+  const aliquotWarning = units.length > 0 && Math.abs(totalAliquot - 100) > 0.01;
+
+  // liquidaciones viene ordenado period desc (ver useLiquidaciones) — el primero es el
+  // período más reciente ya emitido. Emitir uno anterior a ése pisa igual el monto
+  // VIGENTE de cada inquilino (expensesAmount es un solo campo, sin período), aunque
+  // ya no sea el gasto más reciente — avisar antes de dejar confirmar.
+  const latestEmittedPeriod = liquidaciones[0]?.period ?? null;
+  const isPastPeriod = latestEmittedPeriod !== null && period < latestEmittedPeriod;
 
   async function handleConfirmEmitir() {
     if (!user) return;
     setEmitting(true);
+    setError(null);
     try {
       await emitirLiquidacion(period, totalExpenses, breakdown, user.uid);
       setConfirming(false);
+    } catch {
+      setError("No se pudo emitir la liquidación. Probá de nuevo.");
     } finally {
       setEmitting(false);
     }
@@ -95,13 +135,26 @@ export function LiquidacionPage() {
             No hay gastos verificados este período — todos los montos van a quedar en $0.
           </p>
         )}
+        {aliquotWarning && (
+          <p className="text-warn text-sm mb-4">
+            Las alícuotas suman {totalAliquot}%, no 100% — revisá Unidades antes de emitir.
+          </p>
+        )}
+        {isPastPeriod && (
+          <p className="text-warn text-sm mb-4">
+            Ya emitiste {latestEmittedPeriod}, más reciente que {period}. Emitir igual va a
+            actualizar el monto vigente de cada inquilino con el de este período más viejo.
+          </p>
+        )}
         {alreadyEmitted && (
           <p className="text-warn text-sm mb-4">
             Ya emitiste una liquidación para {period}. Emitir de nuevo sobrescribe esa emisión.
           </p>
         )}
 
-        <BreakdownTable breakdown={breakdown} />
+        <BreakdownTable breakdown={breakdown} residents={residents} />
+
+        {error && <p className="text-warn text-sm mt-4">{error}</p>}
 
         {!confirming ? (
           <button
@@ -114,8 +167,8 @@ export function LiquidacionPage() {
         ) : (
           <div className="mt-6 border border-warn rounded p-4">
             <p className="text-sm mb-3">
-              Esto va a actualizar el monto de expensas de {assignedCount}{" "}
-              {assignedCount === 1 ? "inquilino" : "inquilinos"}. ¿Confirmar?
+              Esto va a actualizar el monto de expensas de {assignedTenants.size}{" "}
+              {assignedTenants.size === 1 ? "inquilino" : "inquilinos"}. ¿Confirmar?
             </p>
             <button
               onClick={handleConfirmEmitir}
@@ -153,13 +206,20 @@ export function LiquidacionPage() {
 
       {selectedHistorico && (
         <div className="bg-white border border-border-soft rounded-lg p-6 max-w-2xl">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-start mb-1">
             <h3 className="font-serif text-xl">{selectedHistorico.period}</h3>
             <button onClick={() => setSelectedHistorico(null)} className="text-sm text-pending">
               Cerrar
             </button>
           </div>
-          <BreakdownTable breakdown={selectedHistorico.breakdown} />
+          <p className="text-xs text-pending mb-4 font-mono">
+            Emitido {selectedHistorico.emittedAt ? dateTime.format(selectedHistorico.emittedAt) : "—"}
+            {" por "}
+            {selectedHistorico.emittedByUid === user?.uid
+              ? user.fullName
+              : selectedHistorico.emittedByUid}
+          </p>
+          <BreakdownTable breakdown={selectedHistorico.breakdown} residents={residents} />
         </div>
       )}
     </div>

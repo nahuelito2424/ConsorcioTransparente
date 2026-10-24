@@ -28,20 +28,30 @@ export function useAuth(): UseAuthResult {
         return;
       }
 
-      const snap = await getDoc(doc(db, "users", firebaseUser.uid));
-      const profile = snap.data() as UserProfile | undefined;
+      try {
+        const snap = await getDoc(doc(db, "users", firebaseUser.uid));
+        const profile = snap.data() as UserProfile | undefined;
 
-      if (!profile || profile.role !== "ADMINISTRADOR") {
-        setError("Esta web es sólo para Administradores.");
+        if (!profile || profile.role !== "ADMINISTRADOR") {
+          setError("Esta web es sólo para Administradores.");
+          await signOut(auth);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        setError(null);
+        setUser({ ...profile, uid: firebaseUser.uid });
+        setLoading(false);
+      } catch {
+        // Si falla la lectura del perfil (sin red, permisos, etc.) no hay que dejar
+        // "Cargando…" para siempre con una sesión de Auth a medias — cerrar sesión y
+        // avisar, igual que el caso de rol inválido.
+        setError("No se pudo verificar tu perfil. Probá de nuevo.");
         await signOut(auth);
         setUser(null);
         setLoading(false);
-        return;
       }
-
-      setError(null);
-      setUser({ ...profile, uid: firebaseUser.uid });
-      setLoading(false);
     });
 
     return unsubscribe;

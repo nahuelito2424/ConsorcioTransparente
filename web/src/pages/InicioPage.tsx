@@ -6,13 +6,14 @@ import { useTicketsACobrarCount } from "../hooks/useTickets";
 import { useBuildingResidents } from "../hooks/useBuildingResidents";
 import { KpiCard } from "../components/KpiCard";
 import { StatusStamp } from "../components/StatusStamp";
+import { toPeriod } from "../lib/period";
 
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
-const currentPeriod = new Date().toISOString().slice(0, 7);
 
 export function InicioPage() {
   const { user } = useAuth();
   const buildingId = user?.buildingId ?? "";
+  const currentPeriod = toPeriod(new Date());
   const { units } = useUnits(buildingId);
   const { expenses } = useExpenses(buildingId);
   const payments = usePayments(buildingId, currentPeriod);
@@ -27,7 +28,7 @@ export function InicioPage() {
   const morosos = assignedUnits.length - paidCount;
 
   const gastosDelMes = expenses
-    .filter((e) => e.status === "VERIFICADO" && e.createdAt?.toISOString().slice(0, 7) === currentPeriod)
+    .filter((e) => e.status === "VERIFICADO" && e.createdAt && toPeriod(e.createdAt) === currentPeriod)
     .reduce((sum, e) => sum + e.amount, 0);
 
   function residentName(uid: string) {

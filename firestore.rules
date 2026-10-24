@@ -168,7 +168,14 @@ service cloud.firestore {
       // real (escribe users/{uid}.expensesAmount vía la app, no estas reglas).
       match /units/{unitId} {
         allow read: if belongsToBuilding(buildingId);
-        allow write: if isAdmin() && myBuildingId() == buildingId;
+        // aliquot es un % que entra directo en el cálculo de liquidación — fuera de
+        // 0-100 no tiene sentido y podría dejar a un inquilino con expensesAmount
+        // negativo (hallazgo de la revisión final: esto no estaba validado ni en la
+        // UI ni acá).
+        allow create, update: if isAdmin() && myBuildingId() == buildingId &&
+          request.resource.data.aliquot is number &&
+          request.resource.data.aliquot >= 0 && request.resource.data.aliquot <= 100;
+        allow delete: if isAdmin() && myBuildingId() == buildingId;
       }
 
       match /liquidaciones/{period} {

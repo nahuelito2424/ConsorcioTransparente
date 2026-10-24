@@ -36,16 +36,24 @@ class FirebaseBuildingRepository(
         db.collection("buildings").document(buildingId).set(building.copy(id = buildingId)).await()
     }
 
-    override suspend fun getLatestLiquidacionTenants(buildingId: String): Map<String, String> {
+    override suspend fun getLatestLiquidacionTenants(buildingId: String): Map<String, LiquidacionTenantInfo> {
         if (buildingId.isBlank()) return emptyMap()
-        val snapshot = db.collection("buildings").document(buildingId)
-            .collection("liquidaciones")
-            .orderBy("period", Query.Direction.DESCENDING)
-            .limit(1)
-            .get().await()
-        val liquidacion = snapshot.documents.firstOrNull()?.toObject(Liquidacion::class.java) ?: return emptyMap()
-        return liquidacion.breakdown
-            .filter { it.tenantUid.isNotBlank() }
-            .associate { it.tenantUid to liquidacion.period }
+        return try {
+            val snapshot = db.collection("buildings").document(buildingId)
+                .collection("liquidaciones")
+                .orderBy("emittedAt", Query.Direction.DESCENDING)
+                .limit(1)
+                .get().await()
+            val liquidacion = snapshot.documents.firstOrNull()?.toObject(Liquidacion::class.java)
+                ?: return emptyMap()
+            liquidacion.breakdown
+                .filter { it.tenantUid.isNotBlank() }
+                .associate { it.tenantUid to LiquidacionTenantInfo(liquidacion.period, it.amount) }
+        } catch (e: Exception) {
+            // Aviso best-effort (ver comentario de la interfaz) — si falla (reglas
+            // de Firestore desactualizadas, sin red, etc.) no tiene que tirar abajo
+            // toda la pantalla de Vecinos por un dato secundario.
+            emptyMap()
+        }
     }
 }

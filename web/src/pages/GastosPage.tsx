@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../auth/useAuth";
 import { useExpenses } from "../hooks/useExpenses";
+import { toPeriod } from "../lib/period";
 import type { ExpenseCategory } from "../types";
 
 const categories: ExpenseCategory[] = [
@@ -14,14 +15,13 @@ const categories: ExpenseCategory[] = [
   "OTRO",
 ];
 
-const currentPeriod = new Date().toISOString().slice(0, 7); // "yyyy-MM"
-
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" });
 
 export function GastosPage() {
   const { user } = useAuth();
   const buildingId = user?.buildingId ?? "";
   const { expenses, createExpense } = useExpenses(buildingId);
+  const currentPeriod = toPeriod(new Date());
 
   const [showForm, setShowForm] = useState(false);
   const [description, setDescription] = useState("");
@@ -30,9 +30,10 @@ export function GastosPage() {
   const [amount, setAmount] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const expensesThisMonth = expenses.filter(
-    (e) => e.createdAt && e.createdAt.toISOString().slice(0, 7) === currentPeriod
+    (e) => e.createdAt && toPeriod(e.createdAt) === currentPeriod
   );
 
   async function handleSubmit(e: FormEvent) {
@@ -40,6 +41,7 @@ export function GastosPage() {
     const n = Number(amount);
     if (!description.trim() || Number.isNaN(n) || n <= 0 || !user) return;
     setSubmitting(true);
+    setError(null);
     try {
       await createExpense({
         description: description.trim(),
@@ -55,6 +57,8 @@ export function GastosPage() {
       setAmount("");
       setFile(null);
       setShowForm(false);
+    } catch {
+      setError("No se pudo guardar el gasto. Probá de nuevo.");
     } finally {
       setSubmitting(false);
     }
@@ -131,6 +135,8 @@ export function GastosPage() {
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             className="w-full mb-4 text-sm"
           />
+
+          {error && <p className="text-warn text-sm mb-4">{error}</p>}
 
           <button
             type="submit"

@@ -23,11 +23,17 @@ interface BuildingRepository {
     suspend fun updateBuilding(buildingId: String, building: Building)
 
     /**
-     * De la liquidación de expensas más reciente (la escribe la web para
-     * Administradores, ver Liquidacion.kt), qué inquilino (uid) quedó en qué período
-     * — para que VecinosActivity pueda avisar que un monto no lo tipeó el
-     * Administrador a mano, sino que vino de ahí. Mapa vacío si todavía no se emitió
-     * ninguna liquidación.
+     * De la liquidación de expensas más reciente **por orden de emisión real**
+     * (`emittedAt`, no el nombre del período — se puede emitir un mes anterior después
+     * de uno posterior, por ejemplo para corregirlo), qué inquilino (uid) quedó con
+     * qué monto en qué período — para que VecinosActivity pueda avisar que un monto no
+     * lo tipeó el Administrador a mano, sino que vino de ahí. El `amount` es necesario
+     * para no mostrar el aviso si el Administrador ya pisó ese monto a mano después:
+     * en ese caso `user.expensesAmount` ya no coincide con el de la liquidación. Mapa
+     * vacío si todavía no se emitió ninguna, o si la lectura falla (es un aviso
+     * best-effort, no debe romper la pantalla de Vecinos).
      */
-    suspend fun getLatestLiquidacionTenants(buildingId: String): Map<String, String>
+    suspend fun getLatestLiquidacionTenants(buildingId: String): Map<String, LiquidacionTenantInfo>
 }
+
+data class LiquidacionTenantInfo(val period: String, val amount: Double)

@@ -46,11 +46,16 @@ class VecinosViewModel(
                 val residents = residentRepo.listResidents(buildingId)
                 val liquidacionTenants = buildingRepo.getLatestLiquidacionTenants(buildingId)
                 val rows = residents.map {
+                    // Sólo avisar si el monto ACTUAL del vecino sigue siendo el que
+                    // calculó esa liquidación — si el Administrador lo pisó a mano
+                    // después, mostrar el aviso sería mentir sobre de dónde salió.
+                    val liquidacion = liquidacionTenants[it.uid]
+                    val period = liquidacion?.takeIf { info -> info.amount == it.expensesAmount }?.period
                     VecinoRow(
                         it,
                         building?.chargesRent ?: false,
                         building?.chargesExpenses ?: false,
-                        liquidacionTenants[it.uid]
+                        period
                     )
                 }
                 _state.value = Resource.Success(rows)
