@@ -10,13 +10,24 @@ import type { UnitInfo } from "../types";
 export function useUnits(buildingId: string) {
   const [units, setUnits] = useState<UnitInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!buildingId) return;
-    const unsubscribe = onSnapshot(collection(db, "buildings", buildingId, "units"), (snap) => {
-      setUnits(snap.docs.map((d) => ({ ...(d.data() as UnitInfo), id: d.id })));
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      collection(db, "buildings", buildingId, "units"),
+      (snap) => {
+        setUnits(snap.docs.map((d) => ({ ...(d.data() as UnitInfo), id: d.id })));
+        setError(null);
+        setLoading(false);
+      },
+      () => {
+        // Sin esto, un error del listener (permisos, red) deja la pantalla en
+        // "Cargando…" para siempre — ver mismo cuidado en useAuth.ts.
+        setError("No se pudieron cargar las unidades. Recargá la página.");
+        setLoading(false);
+      }
+    );
     return unsubscribe;
   }, [buildingId]);
 
@@ -33,5 +44,5 @@ export function useUnits(buildingId: string) {
     await deleteDoc(doc(db, "buildings", buildingId, "units", unitId));
   }
 
-  return { units, loading, createUnit, updateUnit, deleteUnit };
+  return { units, loading, error, createUnit, updateUnit, deleteUnit };
 }

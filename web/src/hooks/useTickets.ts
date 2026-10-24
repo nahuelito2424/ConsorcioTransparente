@@ -6,6 +6,7 @@ import { db } from "../firebase";
 export function useTicketsACobrarCount(buildingId: string) {
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!buildingId) return;
@@ -13,12 +14,20 @@ export function useTicketsACobrarCount(buildingId: string) {
       collection(db, "buildings", buildingId, "tickets"),
       where("status", "==", "A_COBRAR")
     );
-    const unsubscribe = onSnapshot(q, (snap) => {
-      setCount(snap.size);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        setCount(snap.size);
+        setError(null);
+        setLoading(false);
+      },
+      () => {
+        setError("No se pudo cargar los tickets. Recargá la página.");
+        setLoading(false);
+      }
+    );
     return unsubscribe;
   }, [buildingId]);
 
-  return { count, loading };
+  return { count, loading, error };
 }

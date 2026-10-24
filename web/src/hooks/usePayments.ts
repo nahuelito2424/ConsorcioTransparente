@@ -7,6 +7,7 @@ import type { Payment } from "../types";
 export function usePayments(buildingId: string, period: string) {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!buildingId) return;
@@ -14,12 +15,20 @@ export function usePayments(buildingId: string, period: string) {
       collection(db, "buildings", buildingId, "payments"),
       where("period", "==", period)
     );
-    const unsubscribe = onSnapshot(q, (snap) => {
-      setPayments(snap.docs.map((d) => ({ ...(d.data() as Payment), id: d.id })));
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        setPayments(snap.docs.map((d) => ({ ...(d.data() as Payment), id: d.id })));
+        setError(null);
+        setLoading(false);
+      },
+      () => {
+        setError("No se pudieron cargar los pagos. Recargá la página.");
+        setLoading(false);
+      }
+    );
     return unsubscribe;
   }, [buildingId, period]);
 
-  return { payments, loading };
+  return { payments, loading, error };
 }

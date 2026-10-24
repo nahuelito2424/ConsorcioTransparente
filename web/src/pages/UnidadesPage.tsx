@@ -73,7 +73,7 @@ function UnitRow({
 export function UnidadesPage() {
   const { user } = useAuth();
   const buildingId = user?.buildingId ?? "";
-  const { units, loading, createUnit, updateUnit, deleteUnit } = useUnits(buildingId);
+  const { units, loading, error: loadError, createUnit, updateUnit, deleteUnit } = useUnits(buildingId);
   const residents = useBuildingResidents(buildingId);
 
   const [newLabel, setNewLabel] = useState("");
@@ -139,6 +139,7 @@ export function UnidadesPage() {
           Las alícuotas suman {totalAliquot}% — revisá si falta cargar alguna unidad.
         </p>
       )}
+      {loadError && <p className="text-warn text-sm mb-4">{loadError}</p>}
       {actionError && <p className="text-warn text-sm mb-4">{actionError}</p>}
 
       <table className="w-full text-sm mb-2">

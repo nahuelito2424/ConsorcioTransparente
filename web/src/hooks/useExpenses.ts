@@ -20,23 +20,32 @@ interface CreateExpenseParams {
 export function useExpenses(buildingId: string) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!buildingId) return;
     const q = query(collection(db, "buildings", buildingId, "expenses"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snap) => {
-      setExpenses(
-        snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            ...(data as Omit<Expense, "id" | "createdAt">),
-            id: d.id,
-            createdAt: data.createdAt?.toDate() ?? null,
-          };
-        })
-      );
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        setExpenses(
+          snap.docs.map((d) => {
+            const data = d.data();
+            return {
+              ...(data as Omit<Expense, "id" | "createdAt">),
+              id: d.id,
+              createdAt: data.createdAt?.toDate() ?? null,
+            };
+          })
+        );
+        setError(null);
+        setLoading(false);
+      },
+      () => {
+        setError("No se pudieron cargar los gastos. Recargá la página.");
+        setLoading(false);
+      }
+    );
     return unsubscribe;
   }, [buildingId]);
 
@@ -63,5 +72,5 @@ export function useExpenses(buildingId: string) {
     });
   }
 
-  return { expenses, loading, createExpense };
+  return { expenses, loading, error, createExpense };
 }

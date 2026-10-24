@@ -27,12 +27,14 @@ export function InicioPage() {
   const { user } = useAuth();
   const buildingId = user?.buildingId ?? "";
   const currentPeriod = toPeriod(new Date());
-  const { units, loading: unitsLoading } = useUnits(buildingId);
-  const { expenses, loading: expensesLoading } = useExpenses(buildingId);
-  const { payments, loading: paymentsLoading } = usePayments(buildingId, currentPeriod);
-  const { count: ticketsACobrar, loading: ticketsLoading } = useTicketsACobrarCount(buildingId);
+  const { units, loading: unitsLoading, error: unitsError } = useUnits(buildingId);
+  const { expenses, loading: expensesLoading, error: expensesError } = useExpenses(buildingId);
+  const { payments, loading: paymentsLoading, error: paymentsError } = usePayments(buildingId, currentPeriod);
+  const { count: ticketsACobrar, loading: ticketsLoading, error: ticketsError } =
+    useTicketsACobrarCount(buildingId);
   const residents = useBuildingResidents(buildingId);
   const loading = unitsLoading || expensesLoading || paymentsLoading || ticketsLoading;
+  const error = unitsError || expensesError || paymentsError || ticketsError;
   const [filter, setFilter] = useState<Filter>("TODOS");
 
   const assignedUnits = units.filter((u) => u.tenantUid);
@@ -63,6 +65,8 @@ export function InicioPage() {
 
       {loading ? (
         <p className="text-sm text-pending">Cargando…</p>
+      ) : error ? (
+        <p className="text-warn text-sm">{error}</p>
       ) : (
         <>
           <div className="grid grid-cols-4 gap-8 mb-10">

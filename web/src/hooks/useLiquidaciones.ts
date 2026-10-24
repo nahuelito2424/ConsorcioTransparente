@@ -22,6 +22,7 @@ import type { Liquidacion, LiquidacionBreakdownRow } from "../types";
 export function useLiquidaciones(buildingId: string) {
   const [liquidaciones, setLiquidaciones] = useState<Liquidacion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!buildingId) return;
@@ -29,18 +30,26 @@ export function useLiquidaciones(buildingId: string) {
       collection(db, "buildings", buildingId, "liquidaciones"),
       orderBy("period", "desc")
     );
-    const unsubscribe = onSnapshot(q, (snap) => {
-      setLiquidaciones(
-        snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            ...(data as Omit<Liquidacion, "emittedAt">),
-            emittedAt: data.emittedAt?.toDate() ?? null,
-          };
-        })
-      );
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        setLiquidaciones(
+          snap.docs.map((d) => {
+            const data = d.data();
+            return {
+              ...(data as Omit<Liquidacion, "emittedAt">),
+              emittedAt: data.emittedAt?.toDate() ?? null,
+            };
+          })
+        );
+        setError(null);
+        setLoading(false);
+      },
+      () => {
+        setError("No se pudo cargar el historial de liquidaciones. Recargá la página.");
+        setLoading(false);
+      }
+    );
     return unsubscribe;
   }, [buildingId]);
 
@@ -98,5 +107,5 @@ export function useLiquidaciones(buildingId: string) {
     await batch.commit();
   }
 
-  return { liquidaciones, loading, emitirLiquidacion };
+  return { liquidaciones, loading, error, emitirLiquidacion };
 }

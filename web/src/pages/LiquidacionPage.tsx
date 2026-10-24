@@ -68,10 +68,16 @@ function BreakdownTable({
 export function LiquidacionPage() {
   const { user } = useAuth();
   const buildingId = user?.buildingId ?? "";
-  const { units, loading: unitsLoading } = useUnits(buildingId);
-  const { expenses, loading: expensesLoading } = useExpenses(buildingId);
-  const { liquidaciones, loading: liquidacionesLoading, emitirLiquidacion } = useLiquidaciones(buildingId);
+  const { units, loading: unitsLoading, error: unitsError } = useUnits(buildingId);
+  const { expenses, loading: expensesLoading, error: expensesError } = useExpenses(buildingId);
+  const {
+    liquidaciones,
+    loading: liquidacionesLoading,
+    error: liquidacionesError,
+    emitirLiquidacion,
+  } = useLiquidaciones(buildingId);
   const loading = unitsLoading || expensesLoading || liquidacionesLoading;
+  const loadError = unitsError || expensesError || liquidacionesError;
   const residents = useBuildingResidents(buildingId);
 
   const [period, setPeriod] = useState(toPeriod(new Date()));
@@ -136,6 +142,8 @@ export function LiquidacionPage() {
 
       {loading ? (
         <p className="text-sm text-pending">Cargando…</p>
+      ) : loadError ? (
+        <p className="text-warn text-sm">{loadError}</p>
       ) : (
         <>
       <div className="relative bg-white border border-border-soft rounded-lg p-6 mb-8 max-w-2xl">

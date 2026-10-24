@@ -74,7 +74,7 @@ function Dropzone({ file, onChange }: { file: File | null; onChange: (file: File
 export function GastosPage() {
   const { user } = useAuth();
   const buildingId = user?.buildingId ?? "";
-  const { expenses, loading, createExpense } = useExpenses(buildingId);
+  const { expenses, loading, error: loadError, createExpense } = useExpenses(buildingId);
   const currentPeriod = toPeriod(new Date());
 
   const [showForm, setShowForm] = useState(false);
@@ -195,6 +195,8 @@ export function GastosPage() {
           </button>
         </form>
       )}
+
+      {loadError && <p className="text-warn text-sm mb-4">{loadError}</p>}
 
       <table className="w-full text-sm">
         <thead>
