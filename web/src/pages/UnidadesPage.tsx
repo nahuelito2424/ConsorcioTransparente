@@ -73,7 +73,7 @@ function UnitRow({
 export function UnidadesPage() {
   const { user } = useAuth();
   const buildingId = user?.buildingId ?? "";
-  const { units, createUnit, updateUnit, deleteUnit } = useUnits(buildingId);
+  const { units, loading, createUnit, updateUnit, deleteUnit } = useUnits(buildingId);
   const residents = useBuildingResidents(buildingId);
 
   const [newLabel, setNewLabel] = useState("");
@@ -151,6 +151,13 @@ export function UnidadesPage() {
           </tr>
         </thead>
         <tbody>
+          {loading && (
+            <tr>
+              <td colSpan={4} className="py-2 text-pending text-sm">
+                Cargando…
+              </td>
+            </tr>
+          )}
           {units.map((unit) => (
             <UnitRow
               key={unit.id}

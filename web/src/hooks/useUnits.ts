@@ -9,11 +9,13 @@ import type { UnitInfo } from "../types";
  */
 export function useUnits(buildingId: string) {
   const [units, setUnits] = useState<UnitInfo[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!buildingId) return;
     const unsubscribe = onSnapshot(collection(db, "buildings", buildingId, "units"), (snap) => {
       setUnits(snap.docs.map((d) => ({ ...(d.data() as UnitInfo), id: d.id })));
+      setLoading(false);
     });
     return unsubscribe;
   }, [buildingId]);
@@ -31,5 +33,5 @@ export function useUnits(buildingId: string) {
     await deleteDoc(doc(db, "buildings", buildingId, "units", unitId));
   }
 
-  return { units, createUnit, updateUnit, deleteUnit };
+  return { units, loading, createUnit, updateUnit, deleteUnit };
 }

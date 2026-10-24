@@ -74,7 +74,7 @@ function Dropzone({ file, onChange }: { file: File | null; onChange: (file: File
 export function GastosPage() {
   const { user } = useAuth();
   const buildingId = user?.buildingId ?? "";
-  const { expenses, createExpense } = useExpenses(buildingId);
+  const { expenses, loading, createExpense } = useExpenses(buildingId);
   const currentPeriod = toPeriod(new Date());
 
   const [showForm, setShowForm] = useState(false);
@@ -225,7 +225,14 @@ export function GastosPage() {
               </td>
             </tr>
           ))}
-          {expensesThisMonth.length === 0 && (
+          {loading && (
+            <tr>
+              <td colSpan={4} className="py-4 text-pending text-sm">
+                Cargando…
+              </td>
+            </tr>
+          )}
+          {!loading && expensesThisMonth.length === 0 && (
             <tr>
               <td colSpan={4} className="py-4 text-pending text-sm">
                 Todavía no hay gastos cargados este mes.

@@ -68,9 +68,10 @@ function BreakdownTable({
 export function LiquidacionPage() {
   const { user } = useAuth();
   const buildingId = user?.buildingId ?? "";
-  const { units } = useUnits(buildingId);
-  const { expenses } = useExpenses(buildingId);
-  const { liquidaciones, emitirLiquidacion } = useLiquidaciones(buildingId);
+  const { units, loading: unitsLoading } = useUnits(buildingId);
+  const { expenses, loading: expensesLoading } = useExpenses(buildingId);
+  const { liquidaciones, loading: liquidacionesLoading, emitirLiquidacion } = useLiquidaciones(buildingId);
+  const loading = unitsLoading || expensesLoading || liquidacionesLoading;
   const residents = useBuildingResidents(buildingId);
 
   const [period, setPeriod] = useState(toPeriod(new Date()));
@@ -133,6 +134,10 @@ export function LiquidacionPage() {
         <PeriodPicker value={period} onChange={setPeriod} />
       </div>
 
+      {loading ? (
+        <p className="text-sm text-pending">Cargando…</p>
+      ) : (
+        <>
       <div className="relative bg-white border border-border-soft rounded-lg p-6 mb-8 max-w-2xl">
         {justEmitted && (
           <div
@@ -255,6 +260,8 @@ export function LiquidacionPage() {
           </p>
           <BreakdownTable breakdown={selectedHistorico.breakdown} residents={residents} />
         </div>
+      )}
+        </>
       )}
     </div>
   );

@@ -21,6 +21,7 @@ import type { Liquidacion, LiquidacionBreakdownRow } from "../types";
  */
 export function useLiquidaciones(buildingId: string) {
   const [liquidaciones, setLiquidaciones] = useState<Liquidacion[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!buildingId) return;
@@ -38,6 +39,7 @@ export function useLiquidaciones(buildingId: string) {
           };
         })
       );
+      setLoading(false);
     });
     return unsubscribe;
   }, [buildingId]);
@@ -96,5 +98,5 @@ export function useLiquidaciones(buildingId: string) {
     await batch.commit();
   }
 
-  return { liquidaciones, emitirLiquidacion };
+  return { liquidaciones, loading, emitirLiquidacion };
 }

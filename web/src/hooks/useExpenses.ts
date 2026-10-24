@@ -19,6 +19,7 @@ interface CreateExpenseParams {
  */
 export function useExpenses(buildingId: string) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!buildingId) return;
@@ -34,6 +35,7 @@ export function useExpenses(buildingId: string) {
           };
         })
       );
+      setLoading(false);
     });
     return unsubscribe;
   }, [buildingId]);
@@ -61,5 +63,5 @@ export function useExpenses(buildingId: string) {
     });
   }
 
-  return { expenses, createExpense };
+  return { expenses, loading, createExpense };
 }
