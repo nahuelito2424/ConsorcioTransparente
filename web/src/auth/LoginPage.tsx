@@ -39,10 +39,11 @@ export function LoginPage() {
         <h1 className="font-serif text-2xl text-center mb-1">Consorcio Transparente</h1>
         <p className="text-center text-sm text-pending mb-6">Acceso para Administradores</p>
 
-        <label className="block text-xs uppercase tracking-wide text-pending mb-1">
+        <label htmlFor="login-email" className="block text-xs uppercase tracking-wide text-pending mb-1">
           Correo electrónico
         </label>
         <input
+          id="login-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -50,10 +51,11 @@ export function LoginPage() {
           required
         />
 
-        <label className="block text-xs uppercase tracking-wide text-pending mb-1">
+        <label htmlFor="login-password" className="block text-xs uppercase tracking-wide text-pending mb-1">
           Contraseña
         </label>
         <input
+          id="login-password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

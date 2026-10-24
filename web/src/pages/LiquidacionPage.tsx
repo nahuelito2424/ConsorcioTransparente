@@ -135,9 +135,11 @@ export function LiquidacionPage() {
         Reparte los gastos verificados del período entre las unidades, según su alícuota.
       </p>
 
-      <label className="block text-xs uppercase tracking-wide text-pending mb-1">Período</label>
+      <label id="liquidacion-periodo" className="block text-xs uppercase tracking-wide text-pending mb-1">
+        Período
+      </label>
       <div className="mb-6">
-        <PeriodPicker value={period} onChange={setPeriod} />
+        <PeriodPicker value={period} onChange={setPeriod} labelledBy="liquidacion-periodo" />
       </div>
 
       {loading ? (

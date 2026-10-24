@@ -18,15 +18,21 @@ export function shiftPeriod(period: string, delta: number): string {
 export function PeriodPicker({
   value,
   onChange,
+  labelledBy,
 }: {
   value: string;
   onChange: (period: string) => void;
+  labelledBy?: string;
 }) {
   const [year, month] = value.split("-").map(Number);
   const label = monthLabel.format(new Date(year, month - 1, 1));
 
   return (
-    <div className="inline-flex items-center border border-border-soft rounded overflow-hidden bg-white">
+    <div
+      role="group"
+      aria-labelledby={labelledBy}
+      className="inline-flex items-center border border-border-soft rounded overflow-hidden bg-white"
+    >
       <button
         type="button"
         onClick={() => onChange(shiftPeriod(value, -1))}

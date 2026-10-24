@@ -22,12 +22,14 @@ export function Select({
   options,
   placeholder = "Elegir…",
   className = "",
+  id,
 }: {
   value: string;
   onChange: (value: string) => void;
   options: SelectOption[];
   placeholder?: string;
   className?: string;
+  id?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(0);
@@ -118,6 +120,7 @@ export function Select({
     <div ref={rootRef} className={`relative inline-block ${className}`}>
       <button
         ref={buttonRef}
+        id={id}
         type="button"
         role="combobox"
         aria-haspopup="listbox"

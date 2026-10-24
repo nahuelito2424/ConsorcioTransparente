@@ -19,7 +19,15 @@ const categoryOptions = categories.map((c) => ({ value: c, label: c }));
 
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" });
 
-function Dropzone({ file, onChange }: { file: File | null; onChange: (file: File | null) => void }) {
+function Dropzone({
+  file,
+  onChange,
+  id,
+}: {
+  file: File | null;
+  onChange: (file: File | null) => void;
+  id?: string;
+}) {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -62,6 +70,7 @@ function Dropzone({ file, onChange }: { file: File | null; onChange: (file: File
       )}
       <input
         ref={inputRef}
+        id={id}
         type="file"
         accept="image/*"
         onChange={(e) => onChange(e.target.files?.[0] ?? null)}
@@ -137,21 +146,23 @@ export function GastosPage() {
           onSubmit={handleSubmit}
           className="bg-white border border-border-soft rounded-lg p-6 mb-6 max-w-md"
         >
-          <label className="block text-xs uppercase tracking-wide text-pending mb-1">
+          <label htmlFor="gasto-descripcion" className="block text-xs uppercase tracking-wide text-pending mb-1">
             Descripción
           </label>
           <input
+            id="gasto-descripcion"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full border border-border-soft rounded px-3 py-2 mb-3"
             required
           />
 
-          <label className="block text-xs uppercase tracking-wide text-pending mb-1">
+          <label htmlFor="gasto-categoria" className="block text-xs uppercase tracking-wide text-pending mb-1">
             Categoría
           </label>
           <div className="mb-3">
             <Select
+              id="gasto-categoria"
               value={category}
               onChange={(v) => setCategory(v as ExpenseCategory)}
               options={categoryOptions}
@@ -159,17 +170,21 @@ export function GastosPage() {
             />
           </div>
 
-          <label className="block text-xs uppercase tracking-wide text-pending mb-1">
+          <label htmlFor="gasto-proveedor" className="block text-xs uppercase tracking-wide text-pending mb-1">
             Proveedor (opcional)
           </label>
           <input
+            id="gasto-proveedor"
             value={providerName}
             onChange={(e) => setProviderName(e.target.value)}
             className="w-full border border-border-soft rounded px-3 py-2 mb-3"
           />
 
-          <label className="block text-xs uppercase tracking-wide text-pending mb-1">Monto</label>
+          <label htmlFor="gasto-monto" className="block text-xs uppercase tracking-wide text-pending mb-1">
+            Monto
+          </label>
           <input
+            id="gasto-monto"
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
@@ -177,11 +192,11 @@ export function GastosPage() {
             required
           />
 
-          <label className="block text-xs uppercase tracking-wide text-pending mb-1">
+          <label htmlFor="gasto-comprobante" className="block text-xs uppercase tracking-wide text-pending mb-1">
             Comprobante (imagen, opcional — sin comprobante queda BLOQUEADO)
           </label>
           <div className="mb-4">
-            <Dropzone file={file} onChange={setFile} />
+            <Dropzone id="gasto-comprobante" file={file} onChange={setFile} />
           </div>
 
           {error && <p className="text-warn text-sm mb-4">{error}</p>}
