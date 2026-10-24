@@ -15,12 +15,18 @@ function UnitRow({
   unit,
   tenantOptions,
   onUpdate,
-  onDelete,
+  confirmingDelete,
+  onRequestDelete,
+  onCancelDelete,
+  onConfirmDelete,
 }: {
   unit: UnitInfo;
   tenantOptions: SelectOption[];
   onUpdate: (unitId: string, data: Partial<Omit<UnitInfo, "id">>) => void;
-  onDelete: (unitId: string) => void;
+  confirmingDelete: boolean;
+  onRequestDelete: () => void;
+  onCancelDelete: () => void;
+  onConfirmDelete: () => void;
 }) {
   const [label, setLabel] = useState(unit.label);
   const [aliquot, setAliquot] = useState(String(unit.aliquot));
@@ -62,9 +68,21 @@ function UnitRow({
         />
       </td>
       <td className="py-2">
-        <button onClick={() => onDelete(unit.id)} className="text-warn text-sm">
-          Borrar
-        </button>
+        {confirmingDelete ? (
+          <span className="whitespace-nowrap text-sm">
+            ¿Seguro?{" "}
+            <button onClick={onConfirmDelete} className="text-warn font-semibold underline">
+              Sí, borrar
+            </button>{" "}
+            <button onClick={onCancelDelete} className="text-pending underline">
+              Cancelar
+            </button>
+          </span>
+        ) : (
+          <button onClick={onRequestDelete} className="text-warn text-sm">
+            Borrar
+          </button>
+        )}
       </td>
     </tr>
   );
@@ -80,7 +98,9 @@ export function UnidadesPage() {
   const [newAliquot, setNewAliquot] = useState("");
   const [newTenantUid, setNewTenantUid] = useState("");
   const [addError, setAddError] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
 
   const totalAliquot = units.reduce((sum, u) => sum + u.aliquot, 0);
   const tenantOptions: SelectOption[] = [
@@ -99,6 +119,7 @@ export function UnidadesPage() {
 
   async function handleDelete(unitId: string) {
     setActionError(null);
+    setConfirmingDeleteId(null);
     try {
       await deleteUnit(unitId);
     } catch {
@@ -117,6 +138,7 @@ export function UnidadesPage() {
       return;
     }
     setAddError(null);
+    setAdding(true);
     try {
       await createUnit({ label: newLabel.trim(), aliquot: n, tenantUid: newTenantUid, ownerUid: "" });
       setNewLabel("");
@@ -124,6 +146,8 @@ export function UnidadesPage() {
       setNewTenantUid("");
     } catch {
       setAddError("No se pudo agregar la unidad. Probá de nuevo.");
+    } finally {
+      setAdding(false);
     }
   }
 
@@ -165,7 +189,10 @@ export function UnidadesPage() {
               unit={unit}
               tenantOptions={tenantOptions}
               onUpdate={handleUpdate}
-              onDelete={handleDelete}
+              confirmingDelete={confirmingDeleteId === unit.id}
+              onRequestDelete={() => setConfirmingDeleteId(unit.id)}
+              onCancelDelete={() => setConfirmingDeleteId(null)}
+              onConfirmDelete={() => handleDelete(unit.id)}
             />
           ))}
           <tr className="border-t border-dashed border-border-soft">
@@ -191,8 +218,12 @@ export function UnidadesPage() {
               <Select value={newTenantUid} onChange={setNewTenantUid} options={tenantOptions} />
             </td>
             <td className="py-2">
-              <button onClick={handleAdd} className="bg-terracota text-white rounded px-3 py-1 text-sm">
-                Agregar
+              <button
+                onClick={handleAdd}
+                disabled={adding}
+                className="bg-terracota text-white rounded px-3 py-1 text-sm disabled:opacity-50"
+              >
+                {adding ? "Agregando…" : "Agregar"}
               </button>
             </td>
           </tr>
