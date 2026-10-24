@@ -1,10 +1,16 @@
+import { lazy } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./auth/LoginPage";
 import { RequireAdmin } from "./auth/RequireAdmin";
-import { UnidadesPage } from "./pages/UnidadesPage";
-import { GastosPage } from "./pages/GastosPage";
-import { LiquidacionPage } from "./pages/LiquidacionPage";
-import { InicioPage } from "./pages/InicioPage";
+
+// Una por ruta autenticada: el código de cada pantalla sólo se descarga la primera
+// vez que se navega a ella, no en la carga inicial (que hoy es sólo /login).
+const InicioPage = lazy(() => import("./pages/InicioPage").then((m) => ({ default: m.InicioPage })));
+const UnidadesPage = lazy(() => import("./pages/UnidadesPage").then((m) => ({ default: m.UnidadesPage })));
+const GastosPage = lazy(() => import("./pages/GastosPage").then((m) => ({ default: m.GastosPage })));
+const LiquidacionPage = lazy(() =>
+  import("./pages/LiquidacionPage").then((m) => ({ default: m.LiquidacionPage }))
+);
 
 function App() {
   return (

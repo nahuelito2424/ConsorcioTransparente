@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "./useAuth";
 import { Layout } from "../components/Layout";
@@ -18,5 +18,9 @@ export function RequireAdmin({ children }: { children: ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
-  return <Layout user={user}>{children}</Layout>;
+  return (
+    <Layout user={user}>
+      <Suspense fallback={<p className="text-sm text-pending">Cargando…</p>}>{children}</Suspense>
+    </Layout>
+  );
 }
