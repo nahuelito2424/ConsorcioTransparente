@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuth } from "../auth/useAuth";
 import { useUnits } from "../hooks/useUnits";
 import { useExpenses } from "../hooks/useExpenses";
@@ -6,9 +7,21 @@ import { useTicketsACobrarCount } from "../hooks/useTickets";
 import { useBuildingResidents } from "../hooks/useBuildingResidents";
 import { KpiCard } from "../components/KpiCard";
 import { StatusStamp } from "../components/StatusStamp";
+import { RadioGroup } from "../components/RadioGroup";
 import { toPeriod } from "../lib/period";
+import { paymentFilterStatus, type PaymentFilterStatus } from "../lib/paymentFilter";
 
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+
+type Filter = "TODOS" | PaymentFilterStatus;
+
+const filterOptions: { value: Filter; label: string }[] = [
+  { value: "TODOS", label: "Todos" },
+  { value: "PAGADO", label: "Pagado" },
+  { value: "A_VERIFICAR", label: "A verificar" },
+  { value: "RECHAZADO", label: "Rechazado" },
+  { value: "SIN_PAGO", label: "Pendiente" },
+];
 
 export function InicioPage() {
   const { user } = useAuth();
@@ -20,6 +33,7 @@ export function InicioPage() {
   const { count: ticketsACobrar, loading: ticketsLoading } = useTicketsACobrarCount(buildingId);
   const residents = useBuildingResidents(buildingId);
   const loading = unitsLoading || expensesLoading || paymentsLoading || ticketsLoading;
+  const [filter, setFilter] = useState<Filter>("TODOS");
 
   const assignedUnits = units.filter((u) => u.tenantUid);
   const paidCount = assignedUnits.filter((u) =>
@@ -35,6 +49,12 @@ export function InicioPage() {
   function residentName(uid: string) {
     return residents.find((r) => r.uid === uid)?.fullName ?? uid;
   }
+
+  const filteredUnits = assignedUnits.filter((unit) => {
+    if (filter === "TODOS") return true;
+    const payment = payments.find((p) => p.uid === unit.tenantUid);
+    return paymentFilterStatus(payment) === filter;
+  });
 
   return (
     <div>
@@ -53,6 +73,11 @@ export function InicioPage() {
           </div>
 
           <h2 className="font-serif text-lg mb-3">Estado de pagos — {currentPeriod}</h2>
+
+          <div className="mb-4">
+            <RadioGroup name="payment-filter" value={filter} onChange={setFilter} options={filterOptions} />
+          </div>
+
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-pending">
@@ -62,7 +87,7 @@ export function InicioPage() {
               </tr>
             </thead>
             <tbody>
-              {assignedUnits.map((unit) => {
+              {filteredUnits.map((unit) => {
                 const payment = payments.find((p) => p.uid === unit.tenantUid);
                 return (
                   <tr key={unit.id} className="border-t border-dashed border-border-soft">
@@ -85,6 +110,13 @@ export function InicioPage() {
                 <tr>
                   <td colSpan={3} className="py-4 text-pending text-sm">
                     Todavía no hay unidades con inquilino asignado — cargalas en Unidades.
+                  </td>
+                </tr>
+              )}
+              {assignedUnits.length > 0 && filteredUnits.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="py-4 text-pending text-sm">
+                    Ninguna unidad coincide con este filtro.
                   </td>
                 </tr>
               )}
