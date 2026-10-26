@@ -86,6 +86,15 @@ class RendicionCuentasActivity : BaseActivity() {
     private fun load(newPeriod: String) {
         period = newPeriod
         expandedCategories = emptySet() // no tiene sentido arrastrar una categoría abierta de otro mes
+        // Si no se limpia acá, mientras carga el mes nuevo quedan en pantalla —y
+        // habilitados para exportar a PDF— el total, el aviso y las filas del mes
+        // viejo debajo de la etiqueta del mes nuevo.
+        lastState = null
+        binding.buttonDescargarPdf.isEnabled = false
+        binding.textTotal.text = ""
+        binding.textBloqueadoWarning.visibility = View.GONE
+        binding.textEmptyState.visibility = View.GONE
+        adapter.submitList(emptyList())
         val (year, month) = period.split("-").map { it.toInt() }
         val date = Calendar.getInstance().apply { set(year, month - 1, 1) }.time
         binding.textPeriod.text = monthLabelFormat.format(date).replaceFirstChar { it.uppercase() }
@@ -94,6 +103,7 @@ class RendicionCuentasActivity : BaseActivity() {
 
     private fun render(data: RendicionUiState) {
         lastState = data
+        binding.buttonDescargarPdf.isEnabled = true
         binding.textTotal.text = currencyFormat.format(data.totalVerificado)
 
         if (data.bloqueadoCount > 0) {
@@ -159,7 +169,7 @@ class RendicionCuentasActivity : BaseActivity() {
 
     private fun descargarPdf() {
         val state = lastState ?: return
-        val file = generarPdf(this, state.buildingName, period, state)
+        val file = generarPdf(this, state)
         val uri = FileProvider.getUriForFile(this, "com.consorciotransparente.app.fileprovider", file)
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "application/pdf"

@@ -42,7 +42,14 @@ class RendicionCuentasViewModel(
 
     private val periodFormat = SimpleDateFormat("yyyy-MM", Locale.US)
 
+    // Si el usuario navega de mes rápido, dos `load()` pueden quedar en vuelo a la vez
+    // y la respuesta más vieja puede llegar después de la más nueva — sin este guard,
+    // el estado final terminaría mostrando (y permitiendo descargar en PDF) un período
+    // distinto al que dice la etiqueta en pantalla.
+    private var requestedPeriod = ""
+
     fun load(period: String) {
+        requestedPeriod = period
         _state.value = Resource.Loading
         viewModelScope.launch {
             try {
@@ -65,6 +72,8 @@ class RendicionCuentasViewModel(
                     if (total > 0.0) category to total else null
                 }
 
+                if (period != requestedPeriod) return@launch // superado por una navegación más nueva
+
                 _state.value = Resource.Success(
                     RendicionUiState(
                         period = period,
@@ -77,6 +86,7 @@ class RendicionCuentasViewModel(
                     )
                 )
             } catch (e: Exception) {
+                if (period != requestedPeriod) return@launch
                 _state.value = Resource.Error(e.message ?: "No se pudo cargar la rendición de cuentas.")
             }
         }
