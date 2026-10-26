@@ -46,6 +46,23 @@ ningún ítem priorizado — lo que sigue es el backlog de abajo, una eventual v
 web (Encargado/Inquilino, exportar, aprobar cobros), y lo que el usuario deje para el
 final (canal WhatsApp/PWA, una integración de IA gratuita).
 
+✅ **Rendición de cuentas descargable** (backlog, ítem 1) resuelta: pantalla nueva
+`RendicionCuentasActivity`, de solo lectura para los tres roles, con desglose por
+categoría de los gastos `VERIFICADO` del período (mes a mes, igual que `/liquidacion`
+en la web), detalle por gasto al tocar una categoría (con vista del comprobante, mismo
+patrón que `CobrosActivity`), y un aviso aparte cuando hay gastos `BLOQUEADO` que por
+eso no entran en el total. Accesible desde "Más" y desde un link nuevo en "Pagar
+expensas". Exporta a PDF con `android.graphics.pdf.PdfDocument` nativo (sin librería
+nueva) y lo comparte vía `FileProvider` + `Intent.ACTION_SEND` — nuevo `<provider>` en
+el Manifest. De paso, la categoría de un gasto pasó de texto libre a un menú fijo en
+`AddExpenseActivity` (mismas 8 categorías que ya usa la web), para que el desglose
+agrupe bien. Ver
+`docs/superpowers/specs/2026-10-24-rendicion-cuentas-design.md` y
+`docs/superpowers/plans/2026-10-24-rendicion-cuentas.md`. Probado a mano en el
+emulador (mock): desglose, aviso de bloqueados, mes vacío, expandir/colapsar
+categoría, ver comprobante, y descargar el PDF (inspeccionado el archivo generado)
+para un mes con gastos y para uno vacío.
+
 ✅ **HU-04 — Mercado Pago para reparaciones (HU-10 Escenario 3)** resuelta:
 `createTicketMercadoPagoPreference` (callable nueva) genera la preferencia para quien
 reportó el ticket; `mercadoPagoWebhook` (ya existía para HU-03) ahora rutea por el

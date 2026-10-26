@@ -8,6 +8,7 @@ import com.consorciotransparente.app.data.model.Expense
 import com.consorciotransparente.app.data.model.ExpenseCategory
 import com.consorciotransparente.app.data.model.ExpenseStatus
 import com.consorciotransparente.app.data.repository.AuthRepository
+import com.consorciotransparente.app.data.repository.BuildingRepository
 import com.consorciotransparente.app.data.repository.ExpenseRepository
 import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.util.Resource
@@ -17,6 +18,7 @@ import java.util.Locale
 
 data class RendicionUiState(
     val period: String,
+    val buildingName: String,
     val totalVerificado: Double,
     val categoryTotals: List<Pair<ExpenseCategory, Double>>,
     val bloqueadoCount: Int,
@@ -32,7 +34,8 @@ data class RendicionUiState(
  */
 class RendicionCuentasViewModel(
     private val authRepo: AuthRepository = RepositoryProvider.auth,
-    private val expenseRepo: ExpenseRepository = RepositoryProvider.expense
+    private val expenseRepo: ExpenseRepository = RepositoryProvider.expense,
+    private val buildingRepo: BuildingRepository = RepositoryProvider.building
 ) : ViewModel() {
     private val _state = MutableLiveData<Resource<RendicionUiState>>()
     val state: LiveData<Resource<RendicionUiState>> = _state
@@ -46,6 +49,7 @@ class RendicionCuentasViewModel(
                 val user = authRepo.fetchCurrentUserProfile() ?: error("No se encontró tu perfil.")
                 if (user.buildingId.isBlank()) error("Tu usuario todavía no está asignado a un edificio.")
 
+                val buildingName = buildingRepo.getBuilding(user.buildingId)?.name.orEmpty()
                 val expensesThisPeriod = expenseRepo.listExpenses(user.buildingId).filter {
                     it.createdAt != null && periodFormat.format(it.createdAt) == period
                 }
@@ -64,6 +68,7 @@ class RendicionCuentasViewModel(
                 _state.value = Resource.Success(
                     RendicionUiState(
                         period = period,
+                        buildingName = buildingName,
                         totalVerificado = verificados.sumOf { it.amount },
                         categoryTotals = categoryTotals,
                         bloqueadoCount = bloqueados.size,

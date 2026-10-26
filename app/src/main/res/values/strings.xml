@@ -227,6 +227,9 @@
     <string name="pagar_ver_rendicion">🧾 Ver en qué se gastaron las expensas</string>
     <string name="rendicion_ver_comprobante">Ver comprobante</string>
     <string name="rendicion_sin_proveedor">Sin proveedor</string>
+    <string name="rendicion_descargar_pdf">⬇ Descargar PDF</string>
+    <string name="rendicion_compartir_pdf">Compartir rendición de cuentas</string>
+    <string name="rendicion_sin_app_pdf">No hay ninguna app instalada para compartir el PDF.</string>
     <plurals name="rendicion_bloqueado_warning">
         <item quantity="one">+ %1$d gasto pendiente de comprobante (%2$s), no incluido en este total.</item>
         <item quantity="other">+ %1$d gastos pendientes de comprobante (%2$s), no incluidos en este total.</item>

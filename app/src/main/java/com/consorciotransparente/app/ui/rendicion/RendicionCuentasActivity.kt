@@ -1,11 +1,15 @@
 package com.consorciotransparente.app.ui.rendicion
 
 import android.app.AlertDialog
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -61,6 +65,7 @@ class RendicionCuentasActivity : BaseActivity() {
         binding.buttonBack.setOnClickListener { finish() }
         binding.buttonPrevMonth.setOnClickListener { load(shiftPeriod(period, -1)) }
         binding.buttonNextMonth.setOnClickListener { load(shiftPeriod(period, 1)) }
+        binding.buttonDescargarPdf.setOnClickListener { descargarPdf() }
 
         viewModel.state.observe(this) { state ->
             binding.progressBar.visibility = if (state is Resource.Loading) View.VISIBLE else View.GONE
@@ -151,4 +156,20 @@ class RendicionCuentasActivity : BaseActivity() {
     }
 
     private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
+
+    private fun descargarPdf() {
+        val state = lastState ?: return
+        val file = generarPdf(this, state.buildingName, period, state)
+        val uri = FileProvider.getUriForFile(this, "com.consorciotransparente.app.fileprovider", file)
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/pdf"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(Intent.createChooser(intent, getString(R.string.rendicion_compartir_pdf)))
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.rendicion_sin_app_pdf, Toast.LENGTH_LONG).show()
+        }
+    }
 }

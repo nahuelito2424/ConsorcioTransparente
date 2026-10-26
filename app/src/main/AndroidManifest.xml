@@ -112,6 +112,18 @@
             android:name=".ui.rendicion.RendicionCuentasActivity"
             android:exported="false" />
 
+        <!-- Para compartir el PDF de Rendición de cuentas (Intent.ACTION_SEND): un
+             file:// directo rompe en Android 7+ (FileUriExposedException). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.consorciotransparente.app.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
 
 </manifest>

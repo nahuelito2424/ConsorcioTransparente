@@ -184,10 +184,12 @@ pregunta por el marco normativo.
 Ideas evaluadas contra el contexto de CABA y la propuesta de valor ("transparencia"),
 para considerar más allá de las 10 HU ya definidas:
 
-1. **Rendición de cuentas / balance descargable**: reporte mensual o anual en PDF con
-   gastos por categoría, generado a partir de los `Expense` ya `VERIFICADO`s — encaja
-   directamente con la obligación de rendición de cuentas de la Ley 941 y refuerza el
-   nombre del proyecto.
+1. ~~**Rendición de cuentas / balance descargable**~~ — ✅ implementado, en la app
+   Android: pantalla de solo lectura para los tres roles con el desglose mensual de
+   `Expense` `VERIFICADO` por categoría (más aviso de `BLOQUEADO`s excluidos del
+   total), detalle por gasto con su comprobante, y exportación a PDF nativo
+   (`android.graphics.pdf.PdfDocument`) compartible por fuera de la app. Ver
+   `docs/superpowers/specs/2026-10-24-rendicion-cuentas-design.md`.
 2. **Fondo de reserva**: campo en `Building` + pantalla de seguimiento de aportes y uso,
    alineado con el art. 2050 CCyC.
 3. **Libro de actas digital**: historial de votaciones cerradas con sus resultados y
