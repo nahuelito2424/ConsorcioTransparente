@@ -1,10 +1,16 @@
 package com.consorciotransparente.app.ui.rendicion
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.consorciotransparente.app.R
+import com.consorciotransparente.app.data.model.Expense
 import com.consorciotransparente.app.data.model.ExpenseCategory
 import com.consorciotransparente.app.databinding.ActivityRendicionCuentasBinding
 import com.consorciotransparente.app.ui.BaseActivity
@@ -27,11 +33,28 @@ class RendicionCuentasActivity : BaseActivity() {
     private val monthLabelFormat = SimpleDateFormat("MMMM yyyy", esAr)
 
     private var period = ""
+    private var expandedCategories = setOf<ExpenseCategory>()
+    private var lastState: RendicionUiState? = null
+
+    private val adapter = RendicionCuentasAdapter(
+        onToggle = { category ->
+            expandedCategories = if (category in expandedCategories) {
+                expandedCategories - category
+            } else {
+                expandedCategories + category
+            }
+            lastState?.let { submitRows(it) }
+        },
+        onVerComprobante = { expense -> showReceiptDialog(expense) }
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRendicionCuentasBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.recyclerCategorias.layoutManager = LinearLayoutManager(this)
+        binding.recyclerCategorias.adapter = adapter
 
         period = intent.getStringExtra("period") ?: currentPeriod()
 
@@ -57,6 +80,7 @@ class RendicionCuentasActivity : BaseActivity() {
 
     private fun load(newPeriod: String) {
         period = newPeriod
+        expandedCategories = emptySet() // no tiene sentido arrastrar una categoría abierta de otro mes
         val (year, month) = period.split("-").map { it.toInt() }
         val date = Calendar.getInstance().apply { set(year, month - 1, 1) }.time
         binding.textPeriod.text = monthLabelFormat.format(date).replaceFirstChar { it.uppercase() }
@@ -64,6 +88,7 @@ class RendicionCuentasActivity : BaseActivity() {
     }
 
     private fun render(data: RendicionUiState) {
+        lastState = data
         binding.textTotal.text = currencyFormat.format(data.totalVerificado)
 
         if (data.bloqueadoCount > 0) {
@@ -78,19 +103,23 @@ class RendicionCuentasActivity : BaseActivity() {
             binding.textBloqueadoWarning.visibility = View.GONE
         }
 
-        binding.categoryContainer.removeAllViews()
-        for ((category, total) in data.categoryTotals) {
-            val row = TextView(this).apply {
-                text = "${categoryLabel(category)}: ${currencyFormat.format(total)}"
-                textSize = 14f
-                setTextColor(getColor(R.color.text_primary))
-                setPadding(0, 12, 0, 12)
-            }
-            binding.categoryContainer.addView(row)
-        }
+        submitRows(data)
 
         binding.textEmptyState.visibility =
             if (data.categoryTotals.isEmpty() && data.bloqueadoCount == 0) View.VISIBLE else View.GONE
+    }
+
+    private fun submitRows(data: RendicionUiState) {
+        val rows = data.categoryTotals.flatMap { (category, total) ->
+            val expanded = category in expandedCategories
+            val categoriaRow = RendicionRow.Categoria(category, categoryLabel(category), total, expanded)
+            if (expanded) {
+                listOf(categoriaRow) + (data.expensesByCategory[category] ?: emptyList()).map { RendicionRow.Gasto(it) }
+            } else {
+                listOf(categoriaRow)
+            }
+        }
+        adapter.submitList(rows)
     }
 
     private fun categoryLabel(category: ExpenseCategory): String {
@@ -98,4 +127,28 @@ class RendicionCuentasActivity : BaseActivity() {
         val index = ExpenseCategory.entries.indexOf(category)
         return labels.getOrElse(index) { category.name }
     }
+
+    private fun showReceiptDialog(expense: Expense) {
+        val imageView = ImageView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(240))
+            adjustViewBounds = true
+            scaleType = ImageView.ScaleType.FIT_CENTER
+        }
+        Glide.with(this).load(expense.receiptUrl).into(imageView)
+
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val padding = dpToPx(16)
+            setPadding(padding, padding, padding, padding)
+            addView(imageView)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(expense.description)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
 }

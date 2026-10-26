@@ -91,12 +91,12 @@
             android:textSize="12sp"
             android:visibility="gone" />
 
-        <LinearLayout
-            android:id="@+id/categoryContainer"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerCategorias"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:orientation="vertical" />
+            android:nestedScrollingEnabled="false" />
 
         <TextView
             android:id="@+id/textEmptyState"
