@@ -224,6 +224,7 @@
     <string name="rendicion_mes_anterior">Mes anterior</string>
     <string name="rendicion_mes_siguiente">Mes siguiente</string>
     <string name="rendicion_empty">Todavía no hay gastos registrados este período.</string>
+    <string name="pagar_ver_rendicion">🧾 Ver en qué se gastaron las expensas</string>
     <string name="rendicion_ver_comprobante">Ver comprobante</string>
     <string name="rendicion_sin_proveedor">Sin proveedor</string>
     <plurals name="rendicion_bloqueado_warning">

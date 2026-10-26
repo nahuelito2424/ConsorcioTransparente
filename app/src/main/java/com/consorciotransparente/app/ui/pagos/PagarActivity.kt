@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -18,7 +19,9 @@ import com.consorciotransparente.app.data.model.PaymentMethod
 import com.consorciotransparente.app.data.model.PaymentStatus
 import com.consorciotransparente.app.databinding.ActivityPagarBinding
 import com.consorciotransparente.app.ui.BaseActivity
+import com.consorciotransparente.app.ui.rendicion.RendicionCuentasActivity
 import com.consorciotransparente.app.util.Resource
+import com.consorciotransparente.app.util.currentPeriod
 import java.text.DateFormat
 import java.text.NumberFormat
 import java.util.Locale
@@ -45,6 +48,10 @@ class PagarActivity : BaseActivity() {
         binding.buttonCopyCbu.setOnClickListener { copyToClipboard(binding.textCbu.text.toString().substringAfter(": ")) }
         binding.buttonCopyAlias.setOnClickListener { copyToClipboard(binding.textAlias.text.toString().substringAfter(": ")) }
         binding.buttonHistory.setOnClickListener { viewModel.loadHistory() }
+        binding.textVerRendicion.paintFlags = binding.textVerRendicion.paintFlags or android.graphics.Paint.UNDERLINE_TEXT_FLAG
+        binding.textVerRendicion.setOnClickListener {
+            startActivity(Intent(this, RendicionCuentasActivity::class.java).putExtra("period", currentPeriod()))
+        }
 
         viewModel.history.observe(this) { state ->
             if (state is Resource.Success) showHistory(state.data)
