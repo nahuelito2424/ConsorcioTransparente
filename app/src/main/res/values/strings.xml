@@ -29,7 +29,16 @@
     <string name="facturas_title">Facturas del mes</string>
     <string name="add_expense">Cargar gasto</string>
     <string name="add_expense_title">Nuevo gasto</string>
-    <string name="category_hint">Categoría (ej. Plomería, Ascensor)</string>
+    <string-array name="expense_categories">
+        <item>Repuestos</item>
+        <item>Mano de obra</item>
+        <item>Plomería</item>
+        <item>Electricidad</item>
+        <item>Gas</item>
+        <item>Albañilería</item>
+        <item>Limpieza</item>
+        <item>Otro</item>
+    </string-array>
     <string name="provider_hint">Proveedor / responsable</string>
     <string name="amount_hint">Monto</string>
     <string name="attach_photo">Adjuntar foto de la factura</string>

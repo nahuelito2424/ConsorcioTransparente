@@ -3,7 +3,10 @@ package com.consorciotransparente.app.ui.facturas
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
+import com.consorciotransparente.app.R
+import com.consorciotransparente.app.data.model.ExpenseCategory
 import com.consorciotransparente.app.ui.BaseActivity
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.databinding.ActivityAddExpenseBinding
@@ -17,6 +20,7 @@ class AddExpenseActivity : BaseActivity() {
         ViewModelProvider(this)[AddExpenseViewModel::class.java]
     }
     private var receiptUri: Uri? = null
+    private val categoryValues = ExpenseCategory.entries.map { it.name }
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
@@ -34,6 +38,10 @@ class AddExpenseActivity : BaseActivity() {
         binding = ActivityAddExpenseBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.spinnerCategory.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_dropdown_item, resources.getStringArray(R.array.expense_categories)
+        )
+
         binding.buttonBack.setOnClickListener { finish() }
         binding.buttonAttachPhoto.setOnClickListener { pickImage.launch("image/*") }
 
@@ -41,7 +49,7 @@ class AddExpenseActivity : BaseActivity() {
             val amount = binding.inputAmount.text?.toString()?.replace(",", ".")?.toDoubleOrNull() ?: 0.0
             viewModel.save(
                 description = binding.inputDescription.text?.toString().orEmpty(),
-                category = binding.inputCategory.text?.toString().orEmpty(),
+                category = categoryValues[binding.spinnerCategory.selectedItemPosition],
                 providerName = binding.inputProvider.text?.toString().orEmpty(),
                 amount = amount,
                 receiptImage = receiptUri
