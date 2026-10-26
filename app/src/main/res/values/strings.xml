@@ -218,4 +218,14 @@
     <string name="protocols_disclaimer">Guía general de qué hacer ante cada siniestro, pensada para funcionar sin conexión. No reemplaza las instrucciones de Defensa Civil ni de los servicios de emergencia.</string>
     <string name="protocols_contacts_title">Teléfonos de emergencia</string>
     <string name="protocols_call">Llamar</string>
+
+    <string name="rendicion_menu_item">📊 Rendición de cuentas</string>
+    <string name="rendicion_title">Rendición de cuentas</string>
+    <string name="rendicion_mes_anterior">Mes anterior</string>
+    <string name="rendicion_mes_siguiente">Mes siguiente</string>
+    <string name="rendicion_empty">Todavía no hay gastos registrados este período.</string>
+    <plurals name="rendicion_bloqueado_warning">
+        <item quantity="one">+ %1$d gasto pendiente de comprobante (%2$s), no incluido en este total.</item>
+        <item quantity="other">+ %1$d gastos pendientes de comprobante (%2$s), no incluidos en este total.</item>
+    </plurals>
 </resources>

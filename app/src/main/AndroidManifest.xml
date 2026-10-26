@@ -108,6 +108,10 @@
             android:name=".ui.protocolos.ProtocolDetailActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.rendicion.RendicionCuentasActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

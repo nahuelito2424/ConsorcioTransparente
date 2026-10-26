@@ -16,6 +16,7 @@ import com.consorciotransparente.app.ui.pagos.CobrosActivity
 import com.consorciotransparente.app.ui.pagos.PagarActivity
 import com.consorciotransparente.app.ui.protocolos.ProtocolosActivity
 import com.consorciotransparente.app.ui.proveedores.ProveedoresActivity
+import com.consorciotransparente.app.ui.rendicion.RendicionCuentasActivity
 import com.consorciotransparente.app.ui.reservas.ReservasActivity
 import com.consorciotransparente.app.ui.tickets.TicketsActivity
 import com.consorciotransparente.app.ui.vecinos.VecinosActivity
@@ -65,6 +66,9 @@ class MasFragment : Fragment() {
         }
         binding.itemProtocolos.setOnClickListener {
             startActivity(Intent(requireContext(), ProtocolosActivity::class.java))
+        }
+        binding.itemRendicion.setOnClickListener {
+            startActivity(Intent(requireContext(), RendicionCuentasActivity::class.java))
         }
 
         // Se fija el estado actual antes de escuchar cambios, para no disparar el
