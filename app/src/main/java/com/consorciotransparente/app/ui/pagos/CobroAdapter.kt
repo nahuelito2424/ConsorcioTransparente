@@ -11,7 +11,8 @@ import com.consorciotransparente.app.data.model.PaymentStatus
 import com.consorciotransparente.app.databinding.ItemCobroBinding
 
 class CobroAdapter(
-    private val onRowClick: (CobroRow) -> Unit
+    private val onRowClick: (CobroRow) -> Unit,
+    private val onVerHistorial: (CobroRow) -> Unit
 ) : ListAdapter<CobroRow, CobroAdapter.ViewHolder>(DIFF) {
 
     companion object {
@@ -55,5 +56,8 @@ class CobroAdapter(
 
         binding.root.isClickable = isPendingTransfer
         binding.root.setOnClickListener { if (isPendingTransfer) onRowClick(row) }
+
+        binding.textVerHistorial.paintFlags = binding.textVerHistorial.paintFlags or android.graphics.Paint.UNDERLINE_TEXT_FLAG
+        binding.textVerHistorial.setOnClickListener { onVerHistorial(row) }
     }
 }

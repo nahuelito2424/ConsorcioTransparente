@@ -1,6 +1,7 @@
 package com.consorciotransparente.app.ui.pagos
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -31,7 +32,16 @@ class CobrosActivity : BaseActivity() {
 
         binding.buttonBack.setOnClickListener { finish() }
 
-        val adapter = CobroAdapter { row -> showReceiptDialog(row) }
+        val adapter = CobroAdapter(
+            onRowClick = { row -> showReceiptDialog(row) },
+            onVerHistorial = { row ->
+                startActivity(
+                    Intent(this, HistorialPagosActivity::class.java)
+                        .putExtra("uid", row.user.uid)
+                        .putExtra("userName", row.user.fullName)
+                )
+            }
+        )
         binding.recyclerCobros.layoutManager = LinearLayoutManager(this)
         binding.recyclerCobros.adapter = adapter
 

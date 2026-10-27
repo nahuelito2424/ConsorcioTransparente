@@ -144,6 +144,7 @@
     <string name="cobros_reject_reason_hint">Motivo del rechazo</string>
     <string name="cobros_dialog_amount">Comprobante por %1$s</string>
     <string name="cobros_dialog_amount_mismatch">Comprobante por %1$s (el monto asignado hoy es %2$s)</string>
+    <string name="cobros_ver_historial">Ver historial</string>
     <string name="building_charges_rent">Cobra alquiler</string>
     <string name="building_charges_expenses">Cobra expensas</string>
     <string name="building_rent_due_day">Día de vencimiento del alquiler (1-28)</string>
