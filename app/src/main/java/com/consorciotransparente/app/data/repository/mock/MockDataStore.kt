@@ -5,6 +5,8 @@ import com.consorciotransparente.app.data.model.Expense
 import com.consorciotransparente.app.data.model.ExpenseCategory
 import com.consorciotransparente.app.data.model.ExpenseStatus
 import com.consorciotransparente.app.data.model.Payment
+import com.consorciotransparente.app.data.model.PaymentMethod
+import com.consorciotransparente.app.data.model.PaymentStatus
 import com.consorciotransparente.app.data.model.Post
 import com.consorciotransparente.app.data.model.PostStatus
 import com.consorciotransparente.app.data.model.Provider
@@ -16,6 +18,8 @@ import com.consorciotransparente.app.data.model.TicketStatus
 import com.consorciotransparente.app.data.model.User
 import com.consorciotransparente.app.data.model.VoteResponse
 import com.consorciotransparente.app.data.model.VoteTopic
+import com.consorciotransparente.app.util.currentPeriod
+import com.consorciotransparente.app.util.shiftPeriod
 import java.util.Date
 import java.util.UUID
 
@@ -143,7 +147,33 @@ object MockDataStore {
         )
     )
 
-    val payments = mutableListOf<Payment>()
+    val payments = mutableListOf(
+        Payment(
+            id = "${inquilinoUser.uid}_${shiftPeriod(currentPeriod(), -1)}",
+            uid = inquilinoUser.uid,
+            period = shiftPeriod(currentPeriod(), -1),
+            amount = 50000.0,
+            method = PaymentMethod.TRANSFERENCIA.name,
+            status = PaymentStatus.PAGADO.name,
+            receiptUrl = "mock://receipt-historial-pagado",
+            createdAt = Date(),
+            verifiedAt = Date(),
+            verifiedByUid = adminUser.uid
+        ),
+        Payment(
+            id = "${inquilinoUser.uid}_${shiftPeriod(currentPeriod(), -3)}",
+            uid = inquilinoUser.uid,
+            period = shiftPeriod(currentPeriod(), -3),
+            amount = 48000.0,
+            method = PaymentMethod.TRANSFERENCIA.name,
+            status = PaymentStatus.RECHAZADO.name,
+            receiptUrl = "mock://receipt-historial-rechazado",
+            rejectionReason = "El monto no coincide con lo asignado",
+            // rejectPayment() nunca setea verifiedAt (sólo approvePayment lo hace) — sin
+            // esto, la fila de este pago no tendría ninguna fecha para mostrar.
+            createdAt = Date()
+        )
+    )
 
     val providers = mutableListOf(
         Provider(id = "provider-1", name = "Plomería del Sur", category = "Plomería", phone = "11-4444-5555"),
