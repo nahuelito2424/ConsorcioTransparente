@@ -204,9 +204,12 @@ para considerar más allá de las 10 HU ya definidas:
 5. **Contactos de emergencia oficiales**: HU-07 ya incluye Bomberos/SAME/Policía/Defensa
    Civil fijos en la pantalla de Protocolos; falta la línea de la empresa de gas/luz
    (varía por proveedor/zona, no se puede dejar fija para cualquier edificio de CABA).
-6. **Estado de cuenta por unidad**: historial de pagos de alquiler/expensas por unidad
-   funcional, visible para el Administrador (morosidad) y para el propio inquilino (sus
-   propios pagos).
+6. ~~**Estado de cuenta por unidad**~~ — ✅ implementado, por inquilino (no por unidad
+   funcional, que Android no modela como entidad propia — eso es sólo de la web):
+   pantalla `HistorialPagosActivity` con los últimos 12 meses, reutilizada desde
+   "Pagar" (el propio inquilino) y desde un link nuevo en cada fila del Panel de
+   cobros (cualquier vecino, para el Administrador/Encargado). Ver
+   `docs/superpowers/specs/2026-10-26-historial-pagos-design.md`.
 7. **Notificación de nuevo ticket / cambio de estado** (ya anotado como pendiente en
    `roadmap.md`): hoy hay que entrar a la app para enterarse.
 8. **Verificación de email / segundo factor** para el rol Administrador, dado que

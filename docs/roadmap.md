@@ -63,6 +63,22 @@ emulador (mock): desglose, aviso de bloqueados, mes vacío, expandir/colapsar
 categoría, ver comprobante, y descargar el PDF (inspeccionado el archivo generado)
 para un mes con gastos y para uno vacío.
 
+✅ **Estado de cuenta por unidad** (backlog, ítem 6) resuelta, por inquilino en vez de
+por unidad funcional (Android no modela la unidad como entidad propia, a diferencia de
+`buildings/{id}/units` en la web): pantalla única `HistorialPagosActivity`,
+parametrizada por `uid`, con los últimos 12 meses — los períodos sin `Payment` se
+muestran como "Sin pago registrado" en gris neutro (no rojo, para no insinuar
+morosidad sin confirmar), y "Ver comprobante" queda disponible aun para pagos ya
+resueltos (Pagado/Rechazado). Reemplaza el diálogo viejo de historial en "Pagar"
+(ahora muestra el propio historial del inquilino) y agrega un link "Ver historial" en
+cada fila del Panel de cobros (cualquier vecino, para Administrador/Encargado) — sin
+cambios en `PaymentRepository`, `firestore.rules` ni `storage.rules`, que ya
+alcanzaban. Ver `docs/superpowers/specs/2026-10-26-historial-pagos-design.md` y
+`docs/superpowers/plans/2026-10-26-historial-pagos.md`. Probado a mano en el emulador
+(mock): historial propio desde "Pagar" con un mes pagado (comprobante), uno rechazado
+(motivo) y meses sin pago intercalados; y el mismo historial desde el Panel de cobros
+para un vecino, con el link sin interferir en el flujo de aprobar/rechazar.
+
 ✅ **HU-04 — Mercado Pago para reparaciones (HU-10 Escenario 3)** resuelta:
 `createTicketMercadoPagoPreference` (callable nueva) genera la preferencia para quien
 reportó el ticket; `mercadoPagoWebhook` (ya existía para HU-03) ahora rutea por el
