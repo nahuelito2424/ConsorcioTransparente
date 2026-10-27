@@ -234,4 +234,14 @@
         <item quantity="one">+ %1$d gasto pendiente de comprobante (%2$s), no incluido en este total.</item>
         <item quantity="other">+ %1$d gastos pendientes de comprobante (%2$s), no incluidos en este total.</item>
     </plurals>
+
+    <string name="historial_title_self">Mi historial de pagos</string>
+    <string name="historial_title_other">Historial de pagos — %1$s</string>
+    <string name="historial_status_paid">Pagado</string>
+    <string name="historial_status_reviewing">A verificar</string>
+    <string name="historial_status_rejected">Rechazado</string>
+    <string name="historial_status_missing">Sin pago registrado</string>
+    <string name="historial_motivo_rechazo">Motivo: %1$s</string>
+    <string name="historial_fecha_pagado">Pagado el %1$s</string>
+    <string name="historial_fecha_cargado">Cargado el %1$s</string>
 </resources>

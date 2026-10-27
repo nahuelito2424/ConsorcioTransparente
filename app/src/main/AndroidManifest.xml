@@ -89,6 +89,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.pagos.HistorialPagosActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.proveedores.ProveedoresActivity"
             android:exported="false" />
 
