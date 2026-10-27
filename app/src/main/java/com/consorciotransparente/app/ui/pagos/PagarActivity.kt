@@ -14,9 +14,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModelProvider
 import com.consorciotransparente.app.R
-import com.consorciotransparente.app.data.model.Payment
 import com.consorciotransparente.app.data.model.PaymentMethod
 import com.consorciotransparente.app.data.model.PaymentStatus
+import com.consorciotransparente.app.data.repository.RepositoryProvider
 import com.consorciotransparente.app.databinding.ActivityPagarBinding
 import com.consorciotransparente.app.ui.BaseActivity
 import com.consorciotransparente.app.ui.rendicion.RendicionCuentasActivity
@@ -47,14 +47,12 @@ class PagarActivity : BaseActivity() {
         binding.buttonPayMercadoPago.setOnClickListener { viewModel.payWithMercadoPago() }
         binding.buttonCopyCbu.setOnClickListener { copyToClipboard(binding.textCbu.text.toString().substringAfter(": ")) }
         binding.buttonCopyAlias.setOnClickListener { copyToClipboard(binding.textAlias.text.toString().substringAfter(": ")) }
-        binding.buttonHistory.setOnClickListener { viewModel.loadHistory() }
+        binding.buttonHistory.setOnClickListener {
+            startActivity(Intent(this, HistorialPagosActivity::class.java).putExtra("uid", RepositoryProvider.auth.currentUid))
+        }
         binding.textVerRendicion.paintFlags = binding.textVerRendicion.paintFlags or android.graphics.Paint.UNDERLINE_TEXT_FLAG
         binding.textVerRendicion.setOnClickListener {
             startActivity(Intent(this, RendicionCuentasActivity::class.java).putExtra("period", currentPeriod()))
-        }
-
-        viewModel.history.observe(this) { state ->
-            if (state is Resource.Success) showHistory(state.data)
         }
 
         viewModel.state.observe(this) { state ->
@@ -188,27 +186,6 @@ class PagarActivity : BaseActivity() {
     private fun methodLabel(method: String): String = when (method) {
         PaymentMethod.MERCADO_PAGO.name -> getString(R.string.pagar_method_mercado_pago)
         else -> getString(R.string.pagar_method_transferencia)
-    }
-
-    private fun statusLabel(status: String): String = when (status) {
-        PaymentStatus.PAGADO.name -> getString(R.string.pagar_status_paid)
-        PaymentStatus.A_VERIFICAR.name -> getString(R.string.pagar_status_reviewing)
-        else -> getString(R.string.pagar_status_rejected)
-    }
-
-    private fun showHistory(history: List<Payment>) {
-        val message = if (history.isEmpty()) {
-            getString(R.string.pagar_history_empty)
-        } else {
-            history.joinToString("\n") {
-                getString(R.string.pagar_history_row, it.period, currencyFormat.format(it.amount), statusLabel(it.status))
-            }
-        }
-        AlertDialog.Builder(this)
-            .setTitle(R.string.pagar_history)
-            .setMessage(message)
-            .setPositiveButton(android.R.string.ok, null)
-            .show()
     }
 
     private fun copyToClipboard(text: String) {

@@ -35,9 +35,6 @@ class PagarViewModel(
     private val _uploadState = MutableLiveData<Resource<Unit>>()
     val uploadState: LiveData<Resource<Unit>> = _uploadState
 
-    private val _history = MutableLiveData<Resource<List<Payment>>>()
-    val history: LiveData<Resource<List<Payment>>> = _history
-
     private val _mercadoPagoUrl = MutableLiveData<Resource<String>>()
     val mercadoPagoUrl: LiveData<Resource<String>> = _mercadoPagoUrl
 
@@ -100,17 +97,6 @@ class PagarViewModel(
                 load() // refresca el estado (mock: ya quedó PAGADO al volver a cargar)
             } catch (e: Exception) {
                 _mercadoPagoUrl.value = Resource.Error(e.message ?: "No se pudo iniciar el pago con Mercado Pago.")
-            }
-        }
-    }
-
-    fun loadHistory() {
-        _history.value = Resource.Loading
-        viewModelScope.launch {
-            try {
-                _history.value = Resource.Success(paymentRepo.listMyPayments(buildingId, uid).filter { it.period != period })
-            } catch (e: Exception) {
-                _history.value = Resource.Error(e.message ?: "No se pudo cargar el historial.")
             }
         }
     }

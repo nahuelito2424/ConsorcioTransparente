@@ -130,12 +130,7 @@
     <string name="pagar_paid_on">Pagado el %1$s por %2$s. Método: %3$s.</string>
     <string name="pagar_method_transferencia">Transferencia</string>
     <string name="pagar_method_mercado_pago">Mercado Pago</string>
-    <string name="pagar_status_paid">Pagado</string>
-    <string name="pagar_status_reviewing">En revisión</string>
-    <string name="pagar_status_rejected">Rechazado</string>
     <string name="pagar_history">Ver historial de meses anteriores</string>
-    <string name="pagar_history_empty">Todavía no tenés pagos de meses anteriores.</string>
-    <string name="pagar_history_row">%1$s — %2$s — %3$s</string>
 
     <string name="cobros_menu_item">📋 Panel de cobros</string>
     <string name="cobros_title">Cobros de este mes</string>
