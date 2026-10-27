@@ -103,6 +103,7 @@ val payments = mutableListOf(
         method = PaymentMethod.TRANSFERENCIA.name,
         status = PaymentStatus.PAGADO.name,
         receiptUrl = "mock://receipt-historial-pagado",
+        createdAt = Date(),
         verifiedAt = Date(),
         verifiedByUid = adminUser.uid
     ),
@@ -114,7 +115,10 @@ val payments = mutableListOf(
         method = PaymentMethod.TRANSFERENCIA.name,
         status = PaymentStatus.RECHAZADO.name,
         receiptUrl = "mock://receipt-historial-rechazado",
-        rejectionReason = "El monto no coincide con lo asignado"
+        rejectionReason = "El monto no coincide con lo asignado",
+        // rejectPayment() nunca setea verifiedAt (sólo approvePayment lo hace) — sin
+        // esto, la fila de este pago no tendría ninguna fecha para mostrar.
+        createdAt = Date()
     )
 )
 ```
@@ -204,6 +208,8 @@ git commit -m "ViewModel de Historial de pagos: 12 períodos cruzados con Paymen
 <string name="historial_status_rejected">Rechazado</string>
 <string name="historial_status_missing">Sin pago registrado</string>
 <string name="historial_motivo_rechazo">Motivo: %1$s</string>
+<string name="historial_fecha_pagado">Pagado el %1$s</string>
+<string name="historial_fecha_cargado">Cargado el %1$s</string>
 ```
 
 - [ ] **Step 2: `item_historial_pago.xml`**
@@ -212,15 +218,19 @@ git commit -m "ViewModel de Historial de pagos: 12 períodos cruzados con Paymen
 `item_rendicion_gasto.xml` (`bg_card`, `layout_marginBottom="8dp"`, `padding="14dp"`).
 Fila superior horizontal: `textPeriod` (peso 1, el mes en español, p. ej. "Octubre
 2026") + `textStatus` (tag pill, igual patrón que `item_cobro.xml`). Debajo:
-`textAmountMethod` (monto + método, sólo visible si hay `Payment`), `textMotivo`
-(sólo visible si `RECHAZADO` y `rejectionReason` no está vacío), `buttonVerComprobante`
-(`Button` estilo `OutlinedButton`, sólo visible si hay `Payment` con `receiptUrl` no
-vacío).
+`textAmountMethod` (monto + método, sólo visible si hay `Payment`), `textDate` (la
+fecha, sólo visible si hay `Payment` y existe `verifiedAt` o `createdAt` — ver Step 4),
+`textMotivo` (sólo visible si `RECHAZADO` y `rejectionReason` no está vacío),
+`buttonVerComprobante` (`Button` estilo `OutlinedButton`, texto
+`@string/rendicion_ver_comprobante` — ya existe, se reusa tal cual, ver Interfaces—,
+sólo visible si hay `Payment` con `receiptUrl` no vacío).
 
 - [ ] **Step 3: `activity_historial_pagos.xml`**
 
 `ScrollView` → `LinearLayout`, mismo patrón que `activity_rendicion_cuentas.xml`:
-`buttonBack` + `textTitle` + `RecyclerView` (`id="recyclerHistorial"`,
+`buttonBack` + un `TextView` con `id="textTitle"` (a diferencia del título de
+`activity_rendicion_cuentas.xml`, que es texto fijo sin id — acá sí cambia en
+tiempo de ejecución, ver Step 5) + `RecyclerView` (`id="recyclerHistorial"`,
 `nestedScrollingEnabled="false"`) + `ProgressBar` + `textError`. Sin período ni
 botones de navegación (acá el rango ya es fijo, los 12 meses).
 
@@ -231,21 +241,33 @@ con `fun submitList(newItems: List<HistorialRow>)` (patrón `notifyDataSetChange
 ver Global Constraints). `onBindViewHolder`: el mes en español con
 `SimpleDateFormat("MMMM yyyy", esAr)` sobre el `period` parseado (mismo cálculo que
 `RendicionCuentasActivity.load()`, con `.replaceFirstChar { it.uppercase() }`). Si
-`row.payment == null`: `textStatus` = "Sin pago registrado" con
-`@color/surface_secondary`/`@color/text_secondary`; ocultar monto/motivo/botón. Si no:
-estado según `row.payment.status` (`PAGADO`→verde, `A_VERIFICAR`→amarillo,
-`RECHAZADO`→rojo, mismos colores que `CobroAdapter`); `textAmountMethod` con el monto
-formateado + el método (`PaymentMethod.MERCADO_PAGO.name` → "Mercado Pago", si no →
-"Transferencia" — mismo texto que `PagarActivity.methodLabel()`, duplicado inline acá,
-no se extrae un helper compartido por dos líneas); `textMotivo` visible sólo si
+`row.payment == null`: `textStatus` = `R.string.historial_status_missing` con
+`@color/surface_secondary`/`@color/text_secondary`; ocultar monto/fecha/motivo/botón.
+Si no: `textStatus` según `row.payment.status` —
+`R.string.historial_status_paid`/`historial_status_reviewing`/`historial_status_rejected`
+respectivamente— con color `PAGADO`→verde, `A_VERIFICAR`→amarillo, `RECHAZADO`→rojo
+(mismos `R.color.tag_*_bg`/`tag_*_fg` que ya usa `CobroAdapter`); `textAmountMethod` con el monto
+formateado + el método, reusando los strings que ya existen
+(`R.string.pagar_method_mercado_pago`/`R.string.pagar_method_transferencia` según
+`payment.method`, no texto nuevo hardcodeado); fecha en `textDate` — si
+`status == PAGADO.name && verifiedAt != null`, `getString(R.string.historial_fecha_pagado, dateFormat.format(verifiedAt))`;
+si no y `createdAt != null`, `getString(R.string.historial_fecha_cargado, dateFormat.format(createdAt))`
+(`rejectPayment()` nunca setea `verifiedAt`, ver Task 1 — por eso un `RECHAZADO` muestra
+"Cargado el...", no "Pagado el..."); si ninguno de los dos existe, ocultar `textDate`
+(no debería pasar con los datos reales ni con el seed de Task 1, pero no hay que
+asumirlo). `dateFormat` = `DateFormat.getDateInstance(DateFormat.MEDIUM, esAr)`, mismo
+patrón que ya usa `PagarActivity.render()`. `textMotivo` visible sólo si
 `status == RECHAZADO.name && rejectionReason.isNotBlank()`; `buttonVerComprobante`
 visible sólo si `receiptUrl.isNotBlank()` (cubre el caso Mercado Pago del Review
 Focus, que no tiene comprobante propio) y su click llama `onVerComprobante(row.payment)`.
 
 - [ ] **Step 5: Implementar `HistorialPagosActivity`**
 
-Lee `uid = intent.getStringExtra("uid")!!` y `userName =
-intent.getStringExtra("userName").orEmpty()` en `onCreate`. Título:
+Lee `uid = intent.getStringExtra("uid").orEmpty()` y `userName =
+intent.getStringExtra("userName").orEmpty()` en `onCreate` — mismo patrón defensivo
+(`.orEmpty()`, nunca `!!`) que ya usan `ProviderDetailActivity`/`TicketDetailActivity`/
+`VoteDetailActivity` para extras que en la práctica siempre vienen, pero sin romper la
+pantalla si alguna vez no vinieran. Título:
 `binding.textTitle.text = if (uid == RepositoryProvider.auth.currentUid) getString(R.string.historial_title_self) else getString(R.string.historial_title_other, userName)`.
 Configura el `RecyclerView` con `LinearLayoutManager` y el adapter de Task 4, pasando
 `onVerComprobante` = un diálogo con `ImageView` + Glide + `AlertDialog`, mismo cuerpo
@@ -289,16 +311,17 @@ git commit -m "Pantalla Historial de pagos: 12 meses, estado y comprobante por f
 Reemplazar `binding.buttonHistory.setOnClickListener { viewModel.loadHistory() }` por:
 ```kotlin
 binding.buttonHistory.setOnClickListener {
-    startActivity(Intent(this, HistorialPagosActivity::class.java).putExtra("uid", authRepo.currentUid))
+    startActivity(Intent(this, HistorialPagosActivity::class.java).putExtra("uid", RepositoryProvider.auth.currentUid))
 }
 ```
 `PagarActivity` no tiene hoy una referencia directa a `AuthRepository` — usar
-`com.consorciotransparente.app.data.repository.RepositoryProvider.auth.currentUid`
-importado como `RepositoryProvider`, mismo patrón que el resto de las Activities que
-no pasan por su ViewModel para esto. No hace falta `userName` (es el propio usuario,
-cae en la rama "Mi historial de pagos" de la Task 3). Borrar el observer de
-`viewModel.history` y el método privado `showHistory()` y `statusLabel()` (quedan sin
-uso). Agregar el import de `HistorialPagosActivity`.
+`RepositoryProvider.auth.currentUid`, mismo patrón que `MasFragment` (que ya llama a
+`RepositoryProvider.auth` directo sin pasar por su propio ViewModel). Agregar el
+import `com.consorciotransparente.app.data.repository.RepositoryProvider` — no hace
+falta importar `HistorialPagosActivity`, vive en el mismo paquete (`ui.pagos`). No
+hace falta `userName` (es el propio usuario, cae en la rama "Mi historial de pagos"
+de la Task 3). Borrar el observer de `viewModel.history` y el método privado
+`showHistory()` y `statusLabel()` (quedan sin uso).
 
 - [ ] **Step 2: `PagarViewModel.kt` — borrar el código muerto**
 
@@ -391,7 +414,8 @@ val adapter = CobroAdapter(
     }
 )
 ```
-Agregar los imports de `android.content.Intent` y `HistorialPagosActivity`.
+Agregar el import `android.content.Intent` — no hace falta importar
+`HistorialPagosActivity`, vive en el mismo paquete (`ui.pagos`).
 
 - [ ] **Step 5: Compilar**
 
