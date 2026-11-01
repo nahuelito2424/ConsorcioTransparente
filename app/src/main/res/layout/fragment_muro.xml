@@ -34,7 +34,7 @@
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:visibility="gone"
-                tools:text="🕓 2 publicaciones esperando tu aprobación"
+                tools:text="2 publicaciones esperando tu aprobación"
                 tools:visibility="visible" />
 
             <TextView

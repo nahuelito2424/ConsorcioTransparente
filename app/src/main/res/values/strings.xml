@@ -68,7 +68,7 @@
     <string name="muro_title">Muro</string>
     <string name="muro_empty">Todavía no hay publicaciones aprobadas en el muro.</string>
     <string name="muro_new_post">Publicar</string>
-    <string name="muro_moderation_banner">🕓 %1$d publicación(es) esperando tu aprobación</string>
+    <string name="muro_moderation_banner">%1$d publicación(es) esperando tu aprobación</string>
     <string name="post_title_hint">Título</string>
     <string name="post_body_hint">Texto de la publicación</string>
     <string name="post_attach_image">Adjuntar imagen (opcional)</string>
@@ -221,7 +221,7 @@
     <string name="rendicion_mes_anterior">Mes anterior</string>
     <string name="rendicion_mes_siguiente">Mes siguiente</string>
     <string name="rendicion_empty">Todavía no hay gastos registrados este período.</string>
-    <string name="pagar_ver_rendicion">🧾 Ver en qué se gastaron las expensas</string>
+    <string name="pagar_ver_rendicion">Ver en qué se gastaron las expensas</string>
     <string name="rendicion_ver_comprobante">Ver comprobante</string>
     <string name="rendicion_sin_proveedor">Sin proveedor</string>
     <string name="rendicion_descargar_pdf">⬇ Descargar PDF</string>
