@@ -102,7 +102,7 @@
     <string name="building_invite_code">Código para invitar vecinos: %1$s</string>
     <string name="building_copy_invite_code">Copiar código</string>
 
-    <string name="vecinos_menu_item">👥 Vecinos</string>
+    <string name="vecinos_menu_item">Vecinos</string>
     <string name="vecinos_title">Vecinos y montos</string>
     <string name="vecinos_empty">Todavía no hay inquilinos asignados a este edificio.</string>
     <string name="vecinos_rent_hint">Monto de alquiler</string>
@@ -111,7 +111,7 @@
     <string name="vecinos_saved">Monto actualizado.</string>
     <string name="vecinos_liquidacion_hint">Calculado por liquidación de %1$s.</string>
 
-    <string name="pagar_menu_item">💳 Pagar alquiler/expensas</string>
+    <string name="pagar_menu_item">Pagar alquiler/expensas</string>
     <string name="pagar_title">Pagar este mes</string>
     <string name="pagar_no_amount">Todavía no tenés un monto asignado. Consultá a tu Administrador.</string>
     <string name="pagar_concept_rent">Alquiler</string>
@@ -132,7 +132,7 @@
     <string name="pagar_method_mercado_pago">Mercado Pago</string>
     <string name="pagar_history">Ver historial de meses anteriores</string>
 
-    <string name="cobros_menu_item">📋 Panel de cobros</string>
+    <string name="cobros_menu_item">Panel de cobros</string>
     <string name="cobros_title">Cobros de este mes</string>
     <string name="cobros_empty">Todavía no hay vecinos con monto asignado.</string>
     <string name="cobros_status_paid">Pagado</string>
@@ -155,10 +155,11 @@
     <string name="building_save_new">Crear edificio</string>
     <string name="building_save_edit">Guardar cambios</string>
     <string name="building_config_error_no_concept">Elegí al menos un concepto para cobrar (alquiler y/o expensas).</string>
-    <string name="building_config_menu_item">⚙️ Configuración del edificio</string>
+    <string name="building_config_menu_item">Configuración del edificio</string>
 
-    <string name="tickets_menu_item">🔧 Tickets de mantenimiento</string>
-    <string name="simple_mode_item">🔎 Modo simple (letra más grande)</string>
+    <string name="tickets_menu_item">Tickets de mantenimiento</string>
+    <string name="reservas_menu_item">Reserva de espacios comunes (SUM, parrilla, pileta)</string>
+    <string name="simple_mode_item">Modo simple (letra más grande)</string>
     <string name="dashboard_simple_expenses">Ver mis facturas</string>
     <string name="dashboard_simple_ticket">Reclamar un problema</string>
     <string name="dashboard_simple_news">Ver avisos</string>
@@ -184,7 +185,7 @@
     <string name="ticket_paid_by_mercado_pago">Pagado por Mercado Pago.</string>
     <string name="ticket_to_quote">A cotizar</string>
 
-    <string name="providers_menu_item">🛠️ Directorio de proveedores</string>
+    <string name="providers_menu_item">Directorio de proveedores</string>
     <string name="providers_title">Directorio de proveedores</string>
     <string name="providers_empty">Todavía no hay proveedores cargados.</string>
     <string name="providers_new">+ Agregar proveedor</string>
@@ -209,13 +210,13 @@
         <item quantity="other">%1$d reseñas</item>
     </plurals>
 
-    <string name="protocols_menu_item">🚨 Protocolos de emergencia</string>
+    <string name="protocols_menu_item">Protocolos de emergencia</string>
     <string name="protocols_title">Protocolos de emergencia</string>
     <string name="protocols_disclaimer">Guía general de qué hacer ante cada siniestro, pensada para funcionar sin conexión. No reemplaza las instrucciones de Defensa Civil ni de los servicios de emergencia.</string>
     <string name="protocols_contacts_title">Teléfonos de emergencia</string>
     <string name="protocols_call">Llamar</string>
 
-    <string name="rendicion_menu_item">📊 Rendición de cuentas</string>
+    <string name="rendicion_menu_item">Rendición de cuentas</string>
     <string name="rendicion_title">Rendición de cuentas</string>
     <string name="rendicion_mes_anterior">Mes anterior</string>
     <string name="rendicion_mes_siguiente">Mes siguiente</string>

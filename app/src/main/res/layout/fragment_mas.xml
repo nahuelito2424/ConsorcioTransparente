@@ -1,172 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    android:orientation="vertical"
-    android:padding="16dp">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:text="Más"
-        android:textColor="@color/text_primary"
-        android:textSize="16sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/itemBuildingConfig"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_card"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="14dp"
-        android:text="@string/building_config_menu_item"
-        android:textColor="@color/text_primary"
-        android:textSize="13sp"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/itemTickets"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_card"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="14dp"
-        android:text="@string/tickets_menu_item"
-        android:textColor="@color/text_primary"
-        android:textSize="13sp" />
-
-    <TextView
-        android:id="@+id/itemReservas"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_card"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="14dp"
-        android:text="🏊 Reserva de espacios comunes (SUM, parrilla, pileta)"
-        android:textColor="@color/text_primary"
-        android:textSize="13sp" />
-
-    <TextView
-        android:id="@+id/itemVecinos"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_card"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="14dp"
-        android:text="@string/vecinos_menu_item"
-        android:textColor="@color/text_primary"
-        android:textSize="13sp"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/itemPagar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_card"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="14dp"
-        android:text="@string/pagar_menu_item"
-        android:textColor="@color/text_primary"
-        android:textSize="13sp" />
-
-    <TextView
-        android:id="@+id/itemCobros"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_card"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="14dp"
-        android:text="@string/cobros_menu_item"
-        android:textColor="@color/text_primary"
-        android:textSize="13sp"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/itemProveedores"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_card"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="14dp"
-        android:text="@string/providers_menu_item"
-        android:textColor="@color/text_primary"
-        android:textSize="13sp" />
-
-    <TextView
-        android:id="@+id/itemProtocolos"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_card"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="14dp"
-        android:text="@string/protocols_menu_item"
-        android:textColor="@color/text_primary"
-        android:textSize="13sp" />
-
-    <TextView
-        android:id="@+id/itemRendicion"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_card"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="14dp"
-        android:text="@string/rendicion_menu_item"
-        android:textColor="@color/text_primary"
-        android:textSize="13sp" />
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_card"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="14dp">
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/simple_mode_item"
-            android:textColor="@color/text_primary"
-            android:textSize="13sp" />
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switchSimpleMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:showText="false" />
+            android:layout_marginBottom="14dp"
+            android:text="Más"
+            android:textColor="@color/navy"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/itemBuildingConfig"
+            style="@style/MasMenuRow"
+            android:visibility="gone">
+
+            <FrameLayout style="@style/MasMenuIconBadge">
+                <ImageView style="@style/MasMenuIcon" android:src="@drawable/ic_menu_settings" />
+            </FrameLayout>
+
+            <TextView style="@style/MasMenuLabel" android:text="@string/building_config_menu_item" />
+
+            <ImageView style="@style/MasMenuChevron" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/itemTickets"
+            style="@style/MasMenuRow">
+
+            <FrameLayout style="@style/MasMenuIconBadge" android:backgroundTint="@color/tag_orange_bg">
+                <ImageView style="@style/MasMenuIcon" android:src="@drawable/ic_menu_wrench" android:tint="@color/tag_orange_fg" />
+            </FrameLayout>
+
+            <TextView style="@style/MasMenuLabel" android:text="@string/tickets_menu_item" />
+
+            <ImageView style="@style/MasMenuChevron" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/itemReservas"
+            style="@style/MasMenuRow">
+
+            <FrameLayout style="@style/MasMenuIconBadge" android:backgroundTint="@color/tag_green_bg">
+                <ImageView style="@style/MasMenuIcon" android:src="@drawable/ic_menu_calendar" android:tint="@color/tag_green_fg" />
+            </FrameLayout>
+
+            <TextView style="@style/MasMenuLabel" android:text="@string/reservas_menu_item" />
+
+            <ImageView style="@style/MasMenuChevron" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/itemVecinos"
+            style="@style/MasMenuRow"
+            android:visibility="gone">
+
+            <FrameLayout style="@style/MasMenuIconBadge">
+                <ImageView style="@style/MasMenuIcon" android:src="@drawable/ic_menu_people" />
+            </FrameLayout>
+
+            <TextView style="@style/MasMenuLabel" android:text="@string/vecinos_menu_item" />
+
+            <ImageView style="@style/MasMenuChevron" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/itemPagar"
+            style="@style/MasMenuRow">
+
+            <FrameLayout style="@style/MasMenuIconBadge" android:backgroundTint="@color/tag_green_bg">
+                <ImageView style="@style/MasMenuIcon" android:src="@drawable/ic_menu_card" android:tint="@color/tag_green_fg" />
+            </FrameLayout>
+
+            <TextView style="@style/MasMenuLabel" android:text="@string/pagar_menu_item" />
+
+            <ImageView style="@style/MasMenuChevron" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/itemCobros"
+            style="@style/MasMenuRow"
+            android:visibility="gone">
+
+            <FrameLayout style="@style/MasMenuIconBadge" android:backgroundTint="@color/tag_yellow_bg">
+                <ImageView style="@style/MasMenuIcon" android:src="@drawable/ic_menu_clipboard" android:tint="@color/tag_yellow_fg" />
+            </FrameLayout>
+
+            <TextView style="@style/MasMenuLabel" android:text="@string/cobros_menu_item" />
+
+            <ImageView style="@style/MasMenuChevron" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/itemProveedores"
+            style="@style/MasMenuRow">
+
+            <FrameLayout style="@style/MasMenuIconBadge" android:backgroundTint="@color/tag_orange_bg">
+                <ImageView style="@style/MasMenuIcon" android:src="@drawable/ic_menu_briefcase" android:tint="@color/tag_orange_fg" />
+            </FrameLayout>
+
+            <TextView style="@style/MasMenuLabel" android:text="@string/providers_menu_item" />
+
+            <ImageView style="@style/MasMenuChevron" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/itemProtocolos"
+            style="@style/MasMenuRow">
+
+            <FrameLayout style="@style/MasMenuIconBadge" android:backgroundTint="@color/tag_red_bg">
+                <ImageView style="@style/MasMenuIcon" android:src="@drawable/ic_menu_alert" android:tint="@color/tag_red_fg" />
+            </FrameLayout>
+
+            <TextView style="@style/MasMenuLabel" android:text="@string/protocols_menu_item" />
+
+            <ImageView style="@style/MasMenuChevron" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/itemRendicion"
+            style="@style/MasMenuRow">
+
+            <FrameLayout style="@style/MasMenuIconBadge">
+                <ImageView style="@style/MasMenuIcon" android:src="@drawable/ic_menu_report" />
+            </FrameLayout>
+
+            <TextView style="@style/MasMenuLabel" android:text="@string/rendicion_menu_item" />
+
+            <ImageView style="@style/MasMenuChevron" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_card"
+            android:gravity="center_vertical"
+            android:minHeight="56dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="12dp">
+
+            <FrameLayout style="@style/MasMenuIconBadge">
+                <ImageView style="@style/MasMenuIcon" android:src="@drawable/ic_menu_magnifier" />
+            </FrameLayout>
+
+            <TextView style="@style/MasMenuLabel" android:text="@string/simple_mode_item" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchSimpleMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:showText="false" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/buttonLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingVertical="10dp"
+            android:text="@string/logout"
+            android:textAllCaps="false"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
     </LinearLayout>
-
-    <Button
-        android:id="@+id/buttonLogout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/logout"
-        android:textAllCaps="false"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
-
-</LinearLayout>
+</ScrollView>

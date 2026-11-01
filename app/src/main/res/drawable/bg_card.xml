@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/surface" />
-    <corners android:radius="12dp" />
-    <stroke android:width="0.5dp" android:color="@color/border" />
-</shape>
+<!--
+  Ripple con máscara: usado como fondo de tarjetas en toda la app (clickeables o no —
+  sin un toque real el ripple nunca se dibuja, así que es inofensivo donde no hace
+  falta). Antes era una <shape> lisa: tocar una fila no daba ninguna señal visual de
+  que el toque había registrado, algo que pesa más para usuarios grandes o poco
+  familiarizados con apps. La máscara evita que el resplandor del ripple se salga de
+  las esquinas redondeadas.
+-->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/ripple_overlay">
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/white" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <solid android:color="@color/surface" />
+            <corners android:radius="12dp" />
+            <stroke android:width="0.5dp" android:color="@color/border" />
+        </shape>
+    </item>
+</ripple>

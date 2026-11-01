@@ -49,4 +49,55 @@
         <item name="android:textSize">10sp</item>
         <item name="android:textColor">?attr/colorTextSecondary</item>
     </style>
+
+    <!--
+      Fila de menú con ícono + texto + chevron (ej. "Más"): mismo patrón repetido en
+      varios items, así que el boilerplate de layout va en estilos — el contenido
+      (ícono, texto, visibility) lo sigue fijando cada fila.
+    -->
+    <style name="MasMenuRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:background">@drawable/bg_card</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingHorizontal">14dp</item>
+        <item name="android:paddingVertical">12dp</item>
+    </style>
+
+    <style name="MasMenuIconBadge">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:background">@drawable/bg_icon_badge</item>
+        <item name="android:backgroundTint">@color/tag_blue_bg</item>
+    </style>
+
+    <style name="MasMenuIcon">
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:tint">@color/navy</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+
+    <style name="MasMenuLabel">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginStart">14dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="MasMenuChevron">
+        <item name="android:layout_width">18dp</item>
+        <item name="android:layout_height">18dp</item>
+        <item name="android:src">@drawable/ic_chevron_right</item>
+        <item name="android:tint">@color/text_secondary</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
 </resources>
