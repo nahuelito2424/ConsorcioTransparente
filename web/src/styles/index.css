@@ -7,7 +7,11 @@
   --color-terracota: #a85c32;
   --color-ok: #2f6b47;
   --color-warn: #a85c32;
-  --color-pending: #8a7e6f;
+  /* #8a7e6f (el tono original) da 3.8:1 sobre --color-cream — no llega al 4.5:1
+     que pide WCAG AA para texto chico, y este color se usa como texto legible
+     (StatusStamp "Pendiente"/"A verificar", etiquetas). Este tono más oscuro
+     da ~5.4:1, dentro de la misma familia cálida. */
+  --color-pending: #6f6353;
   --color-border-dashed: #c9b990;
   --color-border-soft: #e6dcc8;
 

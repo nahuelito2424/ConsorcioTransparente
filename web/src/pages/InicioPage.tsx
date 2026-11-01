@@ -69,7 +69,7 @@ export function InicioPage() {
         <p className="text-warn text-sm">{error}</p>
       ) : (
         <>
-          <div className="grid grid-cols-4 gap-8 mb-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-10">
             <KpiCard value={`${pctCobrado}%`} label="Expensas cobradas" />
             <KpiCard value={String(morosos)} label="Unidades morosas" />
             <KpiCard value={currency.format(gastosDelMes)} label="Gastos verificados del mes" />
@@ -82,7 +82,8 @@ export function InicioPage() {
             <RadioGroup name="payment-filter" value={filter} onChange={setFilter} options={filterOptions} />
           </div>
 
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[480px]">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-pending">
                 <th className="pb-2 pr-4">Unidad</th>
@@ -126,6 +127,7 @@ export function InicioPage() {
               )}
             </tbody>
           </table>
+          </div>
         </>
       )}
     </div>
