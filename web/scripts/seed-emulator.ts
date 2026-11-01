@@ -153,6 +153,40 @@ async function seed() {
     createdAt: FieldValue.serverTimestamp(),
   });
 
+  const closesIn7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  await db.doc(`buildings/${buildingId}/votes/vote-pintura`).set({
+    id: "vote-pintura",
+    title: "¿Pintamos el palier este mes?",
+    description: "Presupuesto ya aprobado por Gastos — falta definir el color.",
+    options: ["Gris claro", "Blanco roto", "Dejarlo como está"],
+    closesAt: Timestamp.fromDate(closesIn7Days),
+    isClosed: false,
+    createdByUid: adminUid,
+    createdAt: FieldValue.serverTimestamp(),
+  });
+
+  await db.doc(`buildings/${buildingId}/posts/post-corte-agua`).set({
+    id: "post-corte-agua",
+    title: "Corte de agua programado",
+    body: "El jueves de 10 a 14hs por mantenimiento del tanque. Disculpen las molestias.",
+    imageUrl: "",
+    status: "APROBADO",
+    authorUid: adminUid,
+    authorName: "Marta Gómez (Admin)",
+    createdAt: FieldValue.serverTimestamp(),
+  });
+  // PENDIENTE a propósito: no debería aparecer en el muro de un Inquilino todavía.
+  await db.doc(`buildings/${buildingId}/posts/post-pendiente`).set({
+    id: "post-pendiente",
+    title: "Venta de bicicleta usada",
+    body: "Alguien dejó esto sin moderar todavía.",
+    imageUrl: "",
+    status: "PENDIENTE",
+    authorUid: tenant2Uid,
+    authorName: "Juan Pereyra (7C)",
+    createdAt: FieldValue.serverTimestamp(),
+  });
+
   console.log("Semilla cargada:");
   console.log(`  Edificio: ${buildingId}`);
   console.log(`  Admin: admin@test.com / test1234`);

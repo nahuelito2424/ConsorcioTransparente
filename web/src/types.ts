@@ -78,6 +78,38 @@ export interface Liquidacion {
   emittedByUid: string;
 }
 
+/** buildings/{buildingId}/votes/{voteId} — espejo de VoteTopic.kt (Android, HU-02). */
+export interface VoteTopic {
+  id: string;
+  title: string;
+  description: string;
+  options: string[];
+  closesAt: Date | null;
+  isClosed: boolean;
+  createdByUid: string;
+  createdAt: Date | null;
+}
+
+/** buildings/{buildingId}/votes/{voteId}/responses/{uid} — espejo de VoteResponse.kt. */
+export interface VoteResponse {
+  uid: string;
+  optionIndex: number;
+}
+
+export type PostStatus = "PENDIENTE" | "APROBADO" | "RECHAZADO";
+
+/** buildings/{buildingId}/posts/{postId} — espejo de Post.kt (Android, HU-05). */
+export interface Post {
+  id: string;
+  title: string;
+  body: string;
+  imageUrl: string;
+  status: PostStatus;
+  authorUid: string;
+  authorName: string;
+  createdAt: Date | null;
+}
+
 export type PaymentStatus = "A_VERIFICAR" | "PAGADO" | "RECHAZADO";
 
 /** buildings/{buildingId}/payments/{uid}_{period} — espejo de Payment.kt (Android).

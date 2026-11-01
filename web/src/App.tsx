@@ -15,6 +15,8 @@ const LiquidacionPage = lazy(() =>
 const FacturasPage = lazy(() =>
   import("./pages/inquilino/FacturasPage").then((m) => ({ default: m.FacturasPage }))
 );
+const MuroPage = lazy(() => import("./pages/inquilino/MuroPage").then((m) => ({ default: m.MuroPage })));
+const VotarPage = lazy(() => import("./pages/inquilino/VotarPage").then((m) => ({ default: m.VotarPage })));
 
 const adminRoles = ["ADMINISTRADOR", "ENCARGADO"] as const;
 
@@ -70,6 +72,22 @@ function App() {
           element={
             <RequireRole roles={["INQUILINO"]}>
               <FacturasPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/muro"
+          element={
+            <RequireRole roles={["INQUILINO"]}>
+              <MuroPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/votar"
+          element={
+            <RequireRole roles={["INQUILINO"]}>
+              <VotarPage />
             </RequireRole>
           }
         />

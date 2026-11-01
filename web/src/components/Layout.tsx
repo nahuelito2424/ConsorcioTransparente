@@ -20,7 +20,11 @@ const linksByRole: Record<Role, { to: string; label: string }[]> = {
     { to: "/gastos", label: "Gastos" },
     { to: "/liquidacion", label: "Liquidación" },
   ],
-  INQUILINO: [{ to: "/facturas", label: "Mis facturas" }],
+  INQUILINO: [
+    { to: "/facturas", label: "Mis facturas" },
+    { to: "/votar", label: "Votar" },
+    { to: "/muro", label: "Muro" },
+  ],
 };
 
 const focusRing =
