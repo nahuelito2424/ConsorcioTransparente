@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { createPortal } from "react-dom";
 
 export interface SelectOption {
   value: string;
@@ -33,6 +34,7 @@ export function Select({
 }) {
   const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(0);
+  const [position, setPosition] = useState<{ top: number; left: number; width: number } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -40,13 +42,38 @@ export function Select({
   const selected = options.find((o) => o.value === value);
   const selectedIndex = options.findIndex((o) => o.value === value);
 
+  // La lista se dibuja en un portal a document.body con position:fixed (en vez de
+  // absolute dentro de este div) para que no la recorte ningún ancestro con overflow
+  // propio — p.ej. el overflow-x-auto que envuelve las tablas de Unidades/Gastos.
+  function updatePosition() {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (rect) setPosition({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+  }
+
   useEffect(() => {
     if (!open) return;
     function handleClickOutside(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (rootRef.current?.contains(target)) return;
+      if (listRef.current?.contains(target)) return;
+      setOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    updatePosition();
+    function handleReposition() {
+      updatePosition();
+    }
+    window.addEventListener("scroll", handleReposition, true);
+    window.addEventListener("resize", handleReposition);
+    return () => {
+      window.removeEventListener("scroll", handleReposition, true);
+      window.removeEventListener("resize", handleReposition);
+    };
   }, [open]);
 
   useEffect(() => {
@@ -136,34 +163,38 @@ export function Select({
         <span className={`text-pending transition-transform ${open ? "rotate-180" : ""}`}>▾</span>
       </button>
 
-      {open && (
-        <div
-          ref={listRef}
-          id={`${baseId}-listbox`}
-          role="listbox"
-          className="absolute z-20 mt-1 min-w-full w-max max-h-64 overflow-auto bg-white border border-border-soft rounded shadow-lg"
-        >
-          {options.map((option, index) => (
-            <div
-              key={option.value}
-              id={`${baseId}-option-${index}`}
-              role="option"
-              aria-selected={option.value === value}
-              onMouseEnter={() => setHighlighted(index)}
-              onClick={() => {
-                onChange(option.value);
-                setOpen(false);
-                buttonRef.current?.focus();
-              }}
-              className={`px-3 py-2 text-sm border-t border-dashed border-border-soft first:border-t-0 cursor-pointer ${
-                index === highlighted ? "bg-cream" : ""
-              } ${option.value === value ? "font-semibold" : ""}`}
-            >
-              {option.label}
-            </div>
-          ))}
-        </div>
-      )}
+      {open &&
+        position &&
+        createPortal(
+          <div
+            ref={listRef}
+            id={`${baseId}-listbox`}
+            role="listbox"
+            style={{ position: "fixed", top: position.top, left: position.left, minWidth: position.width }}
+            className="z-50 w-max max-h-64 overflow-auto bg-white border border-border-soft rounded shadow-lg"
+          >
+            {options.map((option, index) => (
+              <div
+                key={option.value}
+                id={`${baseId}-option-${index}`}
+                role="option"
+                aria-selected={option.value === value}
+                onMouseEnter={() => setHighlighted(index)}
+                onClick={() => {
+                  onChange(option.value);
+                  setOpen(false);
+                  buttonRef.current?.focus();
+                }}
+                className={`px-3 py-2 text-sm border-t border-dashed border-border-soft first:border-t-0 cursor-pointer ${
+                  index === highlighted ? "bg-cream" : ""
+                } ${option.value === value ? "font-semibold" : ""}`}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

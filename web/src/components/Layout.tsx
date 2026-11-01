@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
@@ -20,6 +20,18 @@ export function Layout({ user, children }: { user: UserProfile; children: ReactN
   // con el botón de la barra superior, mismo contenido, sin tocar las rutas.
   const [navOpen, setNavOpen] = useState(false);
 
+  // Cerrado en mobile, el cajón quedaba desplazado fuera de pantalla con
+  // translate-x pero sus links seguían en el DOM, tabulables e invisibles
+  // (WCAG 2.4.3/2.4.7) — Escape también lo cierra, como cualquier menú/diálogo.
+  useEffect(() => {
+    if (!navOpen) return;
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") setNavOpen(false);
+    }
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [navOpen]);
+
   return (
     <div className="min-h-screen flex bg-cream">
       <header className="md:hidden fixed top-0 inset-x-0 h-14 bg-cream border-b border-dashed border-border-dashed flex items-center justify-between px-4 z-30">
@@ -27,6 +39,8 @@ export function Layout({ user, children }: { user: UserProfile; children: ReactN
         <button
           onClick={() => setNavOpen(true)}
           aria-label="Abrir menú"
+          aria-expanded={navOpen}
+          aria-controls="mobile-nav"
           className={`p-2 -mr-2 rounded hover:bg-white transition-colors ${focusRing}`}
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -44,9 +58,10 @@ export function Layout({ user, children }: { user: UserProfile; children: ReactN
       )}
 
       <aside
+        id="mobile-nav"
         className={`w-56 shrink-0 border-r border-dashed border-border-dashed flex flex-col p-6 bg-cream
-          fixed md:static inset-y-0 left-0 z-50 transition-transform duration-200 ease-out
-          ${navOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+          fixed md:static inset-y-0 left-0 z-50 transition-[transform,visibility] duration-200 ease-out
+          ${navOpen ? "translate-x-0 visible" : "-translate-x-full invisible"} md:translate-x-0 md:visible`}
       >
         <h2 className="font-serif text-lg mb-1">Consorcio Transparente</h2>
         <p className="text-xs text-pending mb-6">{user.fullName}</p>

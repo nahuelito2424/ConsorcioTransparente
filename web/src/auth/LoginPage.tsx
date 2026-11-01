@@ -47,7 +47,7 @@ export function LoginPage() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-border-soft rounded px-3 py-2 mb-4 outline-none focus:border-terracota focus:ring-2 focus:ring-terracota/20 transition-colors"
+          className="w-full border border-border-soft rounded px-3 py-2 mb-4 outline-hidden focus:border-terracota focus:ring-2 focus:ring-terracota/20 transition-colors"
           required
         />
 
@@ -59,7 +59,7 @@ export function LoginPage() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-border-soft rounded px-3 py-2 mb-4 outline-none focus:border-terracota focus:ring-2 focus:ring-terracota/20 transition-colors"
+          className="w-full border border-border-soft rounded px-3 py-2 mb-4 outline-hidden focus:border-terracota focus:ring-2 focus:ring-terracota/20 transition-colors"
           required
         />
 
@@ -70,7 +70,7 @@ export function LoginPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-terracota text-white rounded py-2 font-semibold disabled:opacity-50 hover:bg-terracota/90 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-terracota focus-visible:outline-offset-2"
+          className="w-full bg-terracota text-white rounded py-2 font-semibold disabled:opacity-50 hover:brightness-90 transition-[filter] focus-visible:outline focus-visible:outline-2 focus-visible:outline-terracota focus-visible:outline-offset-2"
         >
           {submitting ? "Ingresando…" : "Ingresar"}
         </button>
