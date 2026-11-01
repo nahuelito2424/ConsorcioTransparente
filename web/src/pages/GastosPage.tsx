@@ -213,7 +213,8 @@ export function GastosPage() {
 
       {loadError && <p className="text-warn text-sm mb-4">{loadError}</p>}
 
-      <table className="w-full text-sm">
+      <div className="overflow-x-auto">
+      <table className="w-full text-sm min-w-[560px]">
         <thead>
           <tr className="text-left text-xs uppercase tracking-wide text-pending">
             <th className="pb-2 pr-4">Descripción</th>
@@ -258,6 +259,7 @@ export function GastosPage() {
           )}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

@@ -28,7 +28,8 @@ function BreakdownTable({
   }
 
   return (
-    <table className="w-full text-sm">
+    <div className="overflow-x-auto">
+    <table className="w-full text-sm min-w-[560px]">
       <thead>
         <tr className="text-left text-xs uppercase tracking-wide text-pending">
           <th className="pb-2 pr-4">Unidad</th>
@@ -62,6 +63,7 @@ function BreakdownTable({
         </tr>
       </tfoot>
     </table>
+    </div>
   );
 }
 

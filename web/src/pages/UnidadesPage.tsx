@@ -166,7 +166,8 @@ export function UnidadesPage() {
       {loadError && <p className="text-warn text-sm mb-4">{loadError}</p>}
       {actionError && <p className="text-warn text-sm mb-4">{actionError}</p>}
 
-      <table className="w-full text-sm mb-2">
+      <div className="overflow-x-auto">
+      <table className="w-full text-sm mb-2 min-w-[640px]">
         <thead>
           <tr className="text-left text-xs uppercase tracking-wide text-pending">
             <th className="pb-2 pr-4">Unidad</th>
@@ -229,6 +230,7 @@ export function UnidadesPage() {
           </tr>
         </tbody>
       </table>
+      </div>
       {addError && <p className="text-warn text-sm">{addError}</p>}
     </div>
   );
