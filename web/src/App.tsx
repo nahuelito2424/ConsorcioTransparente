@@ -17,6 +17,18 @@ const FacturasPage = lazy(() =>
 );
 const MuroPage = lazy(() => import("./pages/inquilino/MuroPage").then((m) => ({ default: m.MuroPage })));
 const VotarPage = lazy(() => import("./pages/inquilino/VotarPage").then((m) => ({ default: m.VotarPage })));
+const TicketsPage = lazy(() =>
+  import("./pages/inquilino/TicketsPage").then((m) => ({ default: m.TicketsPage }))
+);
+const ReservasPage = lazy(() =>
+  import("./pages/inquilino/ReservasPage").then((m) => ({ default: m.ReservasPage }))
+);
+const ProveedoresPage = lazy(() =>
+  import("./pages/inquilino/ProveedoresPage").then((m) => ({ default: m.ProveedoresPage }))
+);
+const ProtocolosPage = lazy(() =>
+  import("./pages/inquilino/ProtocolosPage").then((m) => ({ default: m.ProtocolosPage }))
+);
 
 const adminRoles = ["ADMINISTRADOR", "ENCARGADO"] as const;
 
@@ -88,6 +100,38 @@ function App() {
           element={
             <RequireRole roles={["INQUILINO"]}>
               <VotarPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/tickets"
+          element={
+            <RequireRole roles={["INQUILINO"]}>
+              <TicketsPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/reservas"
+          element={
+            <RequireRole roles={["INQUILINO"]}>
+              <ReservasPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/proveedores"
+          element={
+            <RequireRole roles={["INQUILINO"]}>
+              <ProveedoresPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/protocolos"
+          element={
+            <RequireRole roles={["INQUILINO"]}>
+              <ProtocolosPage />
             </RequireRole>
           }
         />

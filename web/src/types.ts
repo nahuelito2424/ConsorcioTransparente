@@ -96,6 +96,52 @@ export interface VoteResponse {
   optionIndex: number;
 }
 
+/** providers/{providerId} — espejo de Provider.kt (Android, HU-08, directorio global). */
+export interface Provider {
+  id: string;
+  name: string;
+  category: string;
+  phone: string;
+  averageRating: number;
+  ratingCount: number;
+}
+
+/** providers/{providerId}/reviews/{reviewId} — espejo de ProviderReview.kt. */
+export interface ProviderReview {
+  id: string;
+  authorUid: string;
+  comment: string;
+  stars: number;
+  expenseId: string;
+}
+
+/** buildings/{buildingId}/reservations/{id} — espejo de Reservation.kt (Android, HU-06). */
+export interface Reservation {
+  id: string;
+  spaceName: string;
+  date: string; // yyyy-MM-dd
+  timeSlot: string;
+  reservedByUid: string;
+  reservedByName: string;
+}
+
+export type TicketStatus = "REPORTADO" | "EN_PRESUPUESTO" | "A_COBRAR" | "RESUELTO";
+
+/** buildings/{buildingId}/tickets/{ticketId} — espejo de Ticket.kt (Android, HU-10). */
+export interface Ticket {
+  id: string;
+  category: string;
+  description: string;
+  photoUrl: string;
+  status: TicketStatus;
+  budgetAmount: number;
+  purchaseReceiptUrl: string;
+  paymentReceiptUrl: string;
+  reportedByUid: string;
+  assignedToUid: string;
+  createdAt: Date | null;
+}
+
 export type PostStatus = "PENDIENTE" | "APROBADO" | "RECHAZADO";
 
 /** buildings/{buildingId}/posts/{postId} — espejo de Post.kt (Android, HU-05). */

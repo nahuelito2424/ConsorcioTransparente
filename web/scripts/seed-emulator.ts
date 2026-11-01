@@ -187,6 +187,15 @@ async function seed() {
     createdAt: FieldValue.serverTimestamp(),
   });
 
+  await db.doc("providers/provider-plomero").set({
+    id: "provider-plomero",
+    name: "Plomería Rodríguez",
+    category: "Plomería",
+    phone: "11-5555-1234",
+    averageRating: 4.5,
+    ratingCount: 2,
+  });
+
   console.log("Semilla cargada:");
   console.log(`  Edificio: ${buildingId}`);
   console.log(`  Admin: admin@test.com / test1234`);

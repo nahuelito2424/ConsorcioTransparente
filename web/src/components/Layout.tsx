@@ -24,6 +24,10 @@ const linksByRole: Record<Role, { to: string; label: string }[]> = {
     { to: "/facturas", label: "Mis facturas" },
     { to: "/votar", label: "Votar" },
     { to: "/muro", label: "Muro" },
+    { to: "/tickets", label: "Reclamar un problema" },
+    { to: "/reservas", label: "Reservar espacios" },
+    { to: "/proveedores", label: "Proveedores" },
+    { to: "/protocolos", label: "Protocolos de emergencia" },
   ],
 };
 
