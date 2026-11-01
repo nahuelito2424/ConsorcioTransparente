@@ -80,11 +80,18 @@ export interface Liquidacion {
 
 export type PaymentStatus = "A_VERIFICAR" | "PAGADO" | "RECHAZADO";
 
-/** buildings/{buildingId}/payments/{uid}_{period} — sólo lectura desde la web. */
+/** buildings/{buildingId}/payments/{uid}_{period} — espejo de Payment.kt (Android).
+ * El Administrador/Encargado sólo la lee y la verifica/rechaza; el propio Inquilino
+ * además la crea al subir su comprobante (ver useMyPayments.ts). */
 export interface Payment {
   id: string;
   uid: string;
   period: string;
+  breakdown: Record<string, number>;
   amount: number;
+  method: string;
   status: PaymentStatus;
+  receiptUrl: string;
+  rejectionReason: string;
+  createdAt: Date | null;
 }

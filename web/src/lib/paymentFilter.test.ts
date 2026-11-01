@@ -3,7 +3,18 @@ import { paymentFilterStatus } from "./paymentFilter";
 import type { Payment } from "../types";
 
 function payment(status: Payment["status"]): Payment {
-  return { id: "x", uid: "u1", period: "2026-03", amount: 1000, status };
+  return {
+    id: "x",
+    uid: "u1",
+    period: "2026-03",
+    breakdown: {},
+    amount: 1000,
+    method: "TRANSFERENCIA",
+    status,
+    receiptUrl: "",
+    rejectionReason: "",
+    createdAt: null,
+  };
 }
 
 describe("paymentFilterStatus", () => {

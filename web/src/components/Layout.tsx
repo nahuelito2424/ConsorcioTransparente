@@ -2,14 +2,26 @@ import { useEffect, useState, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
-import type { UserProfile } from "../types";
+import type { Role, UserProfile } from "../types";
 
-const links = [
-  { to: "/", label: "Inicio" },
-  { to: "/unidades", label: "Unidades" },
-  { to: "/gastos", label: "Gastos" },
-  { to: "/liquidacion", label: "Liquidación" },
-];
+// Administrador y Encargado comparten el mismo panel (paridad de permisos — ver
+// firestore.rules); Inquilino tiene su propio set de pantallas, que va a ir creciendo
+// a medida que la web alcance paridad de funciones con la app Android.
+const linksByRole: Record<Role, { to: string; label: string }[]> = {
+  ADMINISTRADOR: [
+    { to: "/", label: "Inicio" },
+    { to: "/unidades", label: "Unidades" },
+    { to: "/gastos", label: "Gastos" },
+    { to: "/liquidacion", label: "Liquidación" },
+  ],
+  ENCARGADO: [
+    { to: "/", label: "Inicio" },
+    { to: "/unidades", label: "Unidades" },
+    { to: "/gastos", label: "Gastos" },
+    { to: "/liquidacion", label: "Liquidación" },
+  ],
+  INQUILINO: [{ to: "/facturas", label: "Mis facturas" }],
+};
 
 const focusRing =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-terracota focus-visible:outline-offset-2";
@@ -67,7 +79,7 @@ export function Layout({ user, children }: { user: UserProfile; children: ReactN
         <p className="text-xs text-pending mb-6">{user.fullName}</p>
 
         <nav className="flex flex-col gap-1 flex-1">
-          {links.map((link) => (
+          {linksByRole[user.role].map((link) => (
             <NavLink
               key={link.to}
               to={link.to}

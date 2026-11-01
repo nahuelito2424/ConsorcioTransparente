@@ -78,17 +78,21 @@ Dos detalles a tener en cuenta al tocar código relacionado:
   o cambiás una validación importante en una pantalla, revisá si `firestore.rules` (o
   `storage.rules`) necesita el mismo cambio.
 
-## Web (Administradores)
+## Web
 
 `web/` — React 19 + TypeScript + Vite + Tailwind CSS v4 (sin librería de componentes:
 estaban haciendo que todo este tipo de producto se vea igual), `react-router-dom`,
-Firebase JS SDK contra el **mismo proyecto de Firebase** que la app Android. Sólo rol
-`ADMINISTRADOR` — cualquier otro rol se desloguea al instante (ver
-`src/auth/useAuth.ts`). v1 = una sola cosa: liquidación automática de expensas por
-alícuota (`buildings/{id}/units`, hasta ahora sin uso), reemplazando la carga manual de
-`VecinosActivity`. Al emitir, escribe `users/{uid}.expensesAmount` — el mismo campo que
-ya lee todo el flujo de pagos de Android, así que esa parte de Android no se tocó.
-Detalle completo: `docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md`.
+Firebase JS SDK contra el **mismo proyecto de Firebase** que la app Android. Los tres
+roles de Android pueden loguearse (`src/auth/useAuth.ts`); qué pantallas ve cada uno lo
+decide el ruteo (`src/App.tsx`, `src/auth/RequireRole.tsx`, `src/auth/homeForRole.ts`),
+no el login. Administrador y Encargado comparten el mismo panel con paridad total de
+permisos (ver `isEncargadoOrAdmin()` en `firestore.rules`, igual que en Android):
+liquidación automática de expensas por alícuota (`buildings/{id}/units`), reemplazando
+la carga manual de `VecinosActivity` — al emitir, escribe `users/{uid}.expensesAmount`,
+el mismo campo que ya lee todo el flujo de pagos de Android. El Inquilino tiene su
+propio set de pantallas que replica funciones de la app (arrancando por "Mis facturas"
+— ver pagar), pensado para llegar a paridad completa con el Inquilino de Android.
+Detalle de la v1 de liquidación: `docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md`.
 
 Para desarrollar sin un proyecto de Firebase real: Firebase Local Emulator Suite
 (`firebase emulators:start --project demo-consorcio-transparente` desde la raíz,

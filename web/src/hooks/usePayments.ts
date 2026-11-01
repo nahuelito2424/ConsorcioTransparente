@@ -18,7 +18,16 @@ export function usePayments(buildingId: string, period: string) {
     const unsubscribe = onSnapshot(
       q,
       (snap) => {
-        setPayments(snap.docs.map((d) => ({ ...(d.data() as Payment), id: d.id })));
+        setPayments(
+          snap.docs.map((d) => {
+            const data = d.data();
+            return {
+              ...(data as Omit<Payment, "id" | "createdAt">),
+              id: d.id,
+              createdAt: data.createdAt?.toDate() ?? null,
+            };
+          })
+        );
         setError(null);
         setLoading(false);
       },

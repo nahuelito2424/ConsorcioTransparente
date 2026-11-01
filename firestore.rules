@@ -40,7 +40,12 @@ service cloud.firestore {
     // asignado puede autopromoverse a ADMINISTRADOR en el mismo momento en que se le
     // asigna el buildingId de un edificio recién creado por él (ver HU-09 / BuildingRepository).
     match /users/{uid} {
-      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      // El Encargado necesita leer la lista de vecinos igual que el Administrador (la
+      // web se apoya en esto para resolver nombres en Unidades/Liquidación — ver
+      // useBuildingResidents.ts — y Android ya le da a Encargado el mismo acceso a
+      // Vecinos). No se restringe a "del mismo edificio" acá porque ya no lo estaba
+      // para isAdmin(); ampliar ese alcance es un cambio aparte, no de esta feature.
+      allow read: if isSignedIn() && (request.auth.uid == uid || isEncargadoOrAdmin());
       allow create: if isSignedIn() && request.auth.uid == uid;
       allow update: if isSignedIn() && (
         (isAdmin() && belongsToBuilding(resource.data.buildingId)) ||
@@ -161,26 +166,28 @@ service cloud.firestore {
           (request.resource.data.status == "PAGADO" || request.resource.data.status == "RECHAZADO");
       }
 
-      // Web para Administradores: unidades (etiqueta + alícuota) y liquidaciones de
-      // expensas emitidas. Sin uso desde Android — ver
-      // docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md. Sólo el
-      // Administrador del propio edificio puede escribir: la liquidación mueve plata
-      // real (escribe users/{uid}.expensesAmount vía la app, no estas reglas).
+      // Web para Administradores y Encargados: unidades (etiqueta + alícuota) y
+      // liquidaciones de expensas emitidas. Sin uso desde Android — ver
+      // docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md. El Encargado
+      // tiene la misma paridad de escritura que el Administrador acá, igual que ya
+      // tiene en Android (ver isEncargadoOrAdmin() en expenses/tickets más arriba); la
+      // liquidación mueve plata real (escribe users/{uid}.expensesAmount vía la app, no
+      // estas reglas), pero esa responsabilidad ya la comparten los dos roles.
       match /units/{unitId} {
         allow read: if belongsToBuilding(buildingId);
         // aliquot es un % que entra directo en el cálculo de liquidación — fuera de
         // 0-100 no tiene sentido y podría dejar a un inquilino con expensesAmount
         // negativo (hallazgo de la revisión final: esto no estaba validado ni en la
         // UI ni acá).
-        allow create, update: if isAdmin() && myBuildingId() == buildingId &&
+        allow create, update: if isEncargadoOrAdmin() && myBuildingId() == buildingId &&
           request.resource.data.aliquot is number &&
           request.resource.data.aliquot >= 0 && request.resource.data.aliquot <= 100;
-        allow delete: if isAdmin() && myBuildingId() == buildingId;
+        allow delete: if isEncargadoOrAdmin() && myBuildingId() == buildingId;
       }
 
       match /liquidaciones/{period} {
         allow read: if belongsToBuilding(buildingId);
-        allow write: if isAdmin() && myBuildingId() == buildingId;
+        allow write: if isEncargadoOrAdmin() && myBuildingId() == buildingId;
       }
     }
 

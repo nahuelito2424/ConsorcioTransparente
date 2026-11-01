@@ -63,10 +63,24 @@ describe("buildings/{buildingId}/units", () => {
     );
   });
 
-  test("un Encargado no puede escribir units", async () => {
+  // El Encargado tiene la misma paridad de escritura que el Administrador en la web,
+  // igual que ya tenía en Android (ver isEncargadoOrAdmin() para expenses/tickets).
+  test("un Encargado puede escribir units", async () => {
     const encargadoA = testEnv.authenticatedContext("encargado-a");
-    await assertFails(
+    await assertSucceeds(
       setDoc(doc(encargadoA.firestore(), "buildings/building-a/units/u1"), {
+        label: "4B",
+        aliquot: 50,
+        tenantUid: "",
+        ownerUid: "",
+      })
+    );
+  });
+
+  test("un Inquilino no puede escribir units", async () => {
+    const inquilinoA = testEnv.authenticatedContext("inquilino-a");
+    await assertFails(
+      setDoc(doc(inquilinoA.firestore(), "buildings/building-a/units/u1"), {
         label: "4B",
         aliquot: 50,
         tenantUid: "",
@@ -110,15 +124,28 @@ describe("buildings/{buildingId}/liquidaciones", () => {
     );
   });
 
-  test("un Encargado no puede escribir liquidaciones", async () => {
+  test("un Encargado puede emitir una liquidación", async () => {
     const encargadoA = testEnv.authenticatedContext("encargado-a");
-    await assertFails(
+    await assertSucceeds(
       setDoc(doc(encargadoA.firestore(), "buildings/building-a/liquidaciones/2026-10"), {
         period: "2026-10",
         totalExpenses: 0,
         breakdown: [],
         unassignedUnits: [],
         emittedByUid: "encargado-a",
+      })
+    );
+  });
+
+  test("un Inquilino no puede emitir una liquidación", async () => {
+    const inquilinoA = testEnv.authenticatedContext("inquilino-a");
+    await assertFails(
+      setDoc(doc(inquilinoA.firestore(), "buildings/building-a/liquidaciones/2026-10"), {
+        period: "2026-10",
+        totalExpenses: 0,
+        breakdown: [],
+        unassignedUnits: [],
+        emittedByUid: "inquilino-a",
       })
     );
   });
@@ -139,6 +166,22 @@ describe("buildings/{buildingId}/liquidaciones", () => {
         emittedByUid: "admin-b",
       })
     );
+  });
+});
+
+describe("users/{uid} — lectura de otros perfiles", () => {
+  // Bug real encontrado al darle a Encargado paridad con Administrador en la web:
+  // Unidades/Liquidación resuelven nombres de inquilinos vía una query sobre toda la
+  // colección users (useBuildingResidents.ts), y la regla vieja sólo dejaba pasar al
+  // propio uid o a isAdmin() — un Encargado se quedaba sin poder leer la lista.
+  test("un Encargado puede leer el perfil de otro usuario", async () => {
+    const encargadoA = testEnv.authenticatedContext("encargado-a");
+    await assertSucceeds(getDoc(doc(encargadoA.firestore(), "users/inquilino-a")));
+  });
+
+  test("un Inquilino no puede leer el perfil de otro usuario", async () => {
+    const inquilinoA = testEnv.authenticatedContext("inquilino-a");
+    await assertFails(getDoc(doc(inquilinoA.firestore(), "users/admin-a")));
   });
 });
 

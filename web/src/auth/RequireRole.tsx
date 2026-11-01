@@ -1,9 +1,17 @@
 import { Suspense, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "./useAuth";
+import { homeForRole } from "./homeForRole";
 import { Layout } from "../components/Layout";
+import type { Role } from "../types";
 
-export function RequireAdmin({ children }: { children: ReactNode }) {
+/**
+ * Deja pasar sólo a los roles en `roles` (los mismos tres de la app Android). Un
+ * usuario logueado con un rol fuera de la lista no se desloguea (su sesión es válida,
+ * useAuth.ts ya lo verificó) — vuelve al home, que lo manda a la pantalla que sí le
+ * corresponde según App.tsx.
+ */
+export function RequireRole({ roles, children }: { roles: Role[]; children: ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -16,6 +24,10 @@ export function RequireAdmin({ children }: { children: ReactNode }) {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!roles.includes(user.role)) {
+    return <Navigate to={homeForRole(user.role)} replace />;
   }
 
   return (

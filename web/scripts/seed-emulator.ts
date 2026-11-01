@@ -11,7 +11,7 @@ process.env.GCLOUD_PROJECT = PROJECT_ID;
 
 import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { FieldValue, getFirestore, Timestamp } from "firebase-admin/firestore";
 
 initializeApp({ projectId: PROJECT_ID });
 
@@ -58,10 +58,13 @@ async function seed() {
     expensesAmount: 0,
   });
 
+  // inquilino1 con expensesAmount > 0 (y un pago ya PAGADO el mes pasado) para poder
+  // probar Mis facturas/Pagar de punta a punta sin tener que cargar una liquidación
+  // primero; los otros dos quedan en 0, como antes.
   const tenants = [
-    { uid: tenant1Uid, fullName: "Inés Robledo (4B)", email: "inquilino1@test.com" },
-    { uid: tenant2Uid, fullName: "Juan Pereyra (7C)", email: "inquilino2@test.com" },
-    { uid: tenant3Uid, fullName: "Lucía Fariña (sin unidad)", email: "inquilino3@test.com" },
+    { uid: tenant1Uid, fullName: "Inés Robledo (4B)", email: "inquilino1@test.com", expensesAmount: 25000 },
+    { uid: tenant2Uid, fullName: "Juan Pereyra (7C)", email: "inquilino2@test.com", expensesAmount: 0 },
+    { uid: tenant3Uid, fullName: "Lucía Fariña (sin unidad)", email: "inquilino3@test.com", expensesAmount: 0 },
   ];
   for (const t of tenants) {
     await db.doc(`users/${t.uid}`).set({
@@ -73,7 +76,7 @@ async function seed() {
       unitId: "",
       phone: "",
       rentAmount: 0,
-      expensesAmount: 0,
+      expensesAmount: t.expensesAmount,
     });
   }
 
@@ -110,6 +113,24 @@ async function seed() {
     ownerUid: "",
   });
 
+  const now = new Date();
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastPeriod = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, "0")}`;
+  await db.doc(`buildings/${buildingId}/payments/${tenant1Uid}_${lastPeriod}`).set({
+    uid: tenant1Uid,
+    period: lastPeriod,
+    breakdown: { expensas: 25000 },
+    amount: 25000,
+    method: "TRANSFERENCIA",
+    status: "PAGADO",
+    receiptUrl: "https://example.com/comprobante-fake.jpg",
+    mercadoPagoPaymentId: "",
+    rejectionReason: "",
+    createdAt: Timestamp.fromDate(lastMonth),
+    verifiedAt: Timestamp.fromDate(lastMonth),
+    verifiedByUid: adminUid,
+  });
+
   // Ids explícitos (no .add()) para que correr la semilla dos veces no duplique gastos.
   await db.doc(`buildings/${buildingId}/expenses/expense-sueldo`).set({
     description: "Sueldo encargado - octubre",
@@ -135,8 +156,8 @@ async function seed() {
   console.log("Semilla cargada:");
   console.log(`  Edificio: ${buildingId}`);
   console.log(`  Admin: admin@test.com / test1234`);
-  console.log(`  Encargado: encargado@test.com / test1234 (para probar el rechazo de login)`);
-  console.log(`  Inquilinos: inquilino1@test.com, inquilino2@test.com, inquilino3@test.com / test1234`);
+  console.log(`  Encargado: encargado@test.com / test1234 (misma paridad que el Admin en la web)`);
+  console.log(`  Inquilinos: inquilino1@test.com (expensas $25.000, con pago PAGADO el mes pasado), inquilino2@test.com, inquilino3@test.com / test1234`);
   console.log(`  Unidades: 4B (alícuota 50%, con inquilino), 7C (alícuota 30%, sin inquilino)`);
   console.log(`  Gastos: 1 VERIFICADO ($50.000), 1 BLOQUEADO ($12.000)`);
 }

@@ -11,9 +11,10 @@ interface UseAuthResult {
 }
 
 /**
- * Expone el perfil del Administrador autenticado (o null). Si el usuario logueado no
- * tiene role === "ADMINISTRADOR", lo desloguea de inmediato — esta v1 es sólo para
- * Administradores (ver docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md).
+ * Expone el perfil del usuario autenticado (o null), para cualquiera de los tres roles
+ * (ADMINISTRADOR, ENCARGADO, INQUILINO — los mismos que la app Android). Si el perfil no
+ * existe o no tiene un rol válido, desloguea de inmediato: no hay un cuarto estado a
+ * medio loguear. Qué pantallas ve cada rol lo decide el ruteo (ver App.tsx), no este hook.
  */
 export function useAuth(): UseAuthResult {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -31,9 +32,10 @@ export function useAuth(): UseAuthResult {
       try {
         const snap = await getDoc(doc(db, "users", firebaseUser.uid));
         const profile = snap.data() as UserProfile | undefined;
+        const validRole = profile?.role === "ADMINISTRADOR" || profile?.role === "ENCARGADO" || profile?.role === "INQUILINO";
 
-        if (!profile || profile.role !== "ADMINISTRADOR") {
-          setError("Esta web es sólo para Administradores.");
+        if (!profile || !validRole) {
+          setError("No se pudo verificar tu perfil. Probá de nuevo.");
           await signOut(auth);
           setUser(null);
           setLoading(false);

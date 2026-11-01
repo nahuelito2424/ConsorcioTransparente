@@ -1,7 +1,8 @@
 import { lazy } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./auth/LoginPage";
-import { RequireAdmin } from "./auth/RequireAdmin";
+import { RequireRole } from "./auth/RequireRole";
+import { useAuth } from "./auth/useAuth";
 
 // Una por ruta autenticada: el código de cada pantalla sólo se descarga la primera
 // vez que se navega a ella, no en la carga inicial (que hoy es sólo /login).
@@ -11,6 +12,21 @@ const GastosPage = lazy(() => import("./pages/GastosPage").then((m) => ({ defaul
 const LiquidacionPage = lazy(() =>
   import("./pages/LiquidacionPage").then((m) => ({ default: m.LiquidacionPage }))
 );
+const FacturasPage = lazy(() =>
+  import("./pages/inquilino/FacturasPage").then((m) => ({ default: m.FacturasPage }))
+);
+
+const adminRoles = ["ADMINISTRADOR", "ENCARGADO"] as const;
+
+// "/" no tiene una sola pantalla: para Administrador/Encargado es el dashboard de
+// liquidación, para Inquilino es directamente Mis facturas (no hay todavía un hub
+// propio del Inquilino — ver FacturasPage). RequireRole ya garantiza que acá adentro
+// user no es null.
+function Home() {
+  const { user } = useAuth();
+  if (user?.role === "INQUILINO") return <Navigate to="/facturas" replace />;
+  return <InicioPage />;
+}
 
 function App() {
   return (
@@ -20,33 +36,41 @@ function App() {
         <Route
           path="/"
           element={
-            <RequireAdmin>
-              <InicioPage />
-            </RequireAdmin>
+            <RequireRole roles={[...adminRoles, "INQUILINO"]}>
+              <Home />
+            </RequireRole>
           }
         />
         <Route
           path="/unidades"
           element={
-            <RequireAdmin>
+            <RequireRole roles={[...adminRoles]}>
               <UnidadesPage />
-            </RequireAdmin>
+            </RequireRole>
           }
         />
         <Route
           path="/gastos"
           element={
-            <RequireAdmin>
+            <RequireRole roles={[...adminRoles]}>
               <GastosPage />
-            </RequireAdmin>
+            </RequireRole>
           }
         />
         <Route
           path="/liquidacion"
           element={
-            <RequireAdmin>
+            <RequireRole roles={[...adminRoles]}>
               <LiquidacionPage />
-            </RequireAdmin>
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/facturas"
+          element={
+            <RequireRole roles={["INQUILINO"]}>
+              <FacturasPage />
+            </RequireRole>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
