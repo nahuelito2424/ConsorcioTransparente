@@ -31,13 +31,13 @@ class ProtocolosActivity : BaseActivity() {
                 text = "${protocol.icon}  ${protocol.title}"
                 textSize = 14f
                 setTextColor(getColor(R.color.text_primary))
+                // bg_card ya es un ripple con máscara (ver su propio comentario) — un
+                // foreground de selectableItemBackground encima duplicaba el efecto y,
+                // al ser rectangular, se salía de las esquinas redondeadas de la tarjeta.
                 setBackgroundResource(R.drawable.bg_card)
                 setPadding(32, 32, 32, 32)
                 isClickable = true
                 isFocusable = true
-                val outValue = android.util.TypedValue()
-                theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
-                foreground = getDrawable(outValue.resourceId)
                 setOnClickListener {
                     startActivity(
                         Intent(this@ProtocolosActivity, ProtocolDetailActivity::class.java)

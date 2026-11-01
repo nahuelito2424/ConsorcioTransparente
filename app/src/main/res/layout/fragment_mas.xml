@@ -142,11 +142,14 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/rowSimpleMode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="10dp"
             android:background="@drawable/bg_card"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center_vertical"
             android:minHeight="56dp"
             android:orientation="horizontal"
@@ -157,12 +160,17 @@
                 <ImageView style="@style/MasMenuIcon" android:src="@drawable/ic_menu_magnifier" />
             </FrameLayout>
 
-            <TextView style="@style/MasMenuLabel" android:text="@string/simple_mode_item" />
+            <TextView
+                style="@style/MasMenuLabel"
+                android:labelFor="@id/switchSimpleMode"
+                android:text="@string/simple_mode_item" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switchSimpleMode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clickable="false"
+                android:focusable="false"
                 app:showText="false" />
         </LinearLayout>
 

@@ -78,6 +78,12 @@ class MasFragment : Fragment() {
             SimpleModePrefs.setEnabled(requireContext(), isChecked)
             requireActivity().recreate()
         }
+        // El switch no es clickeable por sí mismo (ver fragment_mas.xml) para que toda
+        // la fila sea un único target de toque/foco, más fácil de acertar y más claro
+        // para TalkBack que un switch chico aislado.
+        binding.rowSimpleMode.setOnClickListener {
+            binding.switchSimpleMode.toggle()
+        }
 
         binding.buttonLogout.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {

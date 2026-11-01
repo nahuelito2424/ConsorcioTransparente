@@ -54,8 +54,17 @@ class CobroAdapter(
         binding.textStatus.background.setTint(context.getColor(bg))
         binding.textStatus.setTextColor(context.getColor(fg))
 
-        binding.root.isClickable = isPendingTransfer
-        binding.root.setOnClickListener { if (isPendingTransfer) onRowClick(row) }
+        // setOnClickListener() siempre deja al view clickable=true, así que no alcanza
+        // con fijar isClickable antes y filtrar adentro del listener — con el ripple de
+        // bg_card (antes un <shape> liso, sin feedback) eso hacía que CUALQUIER fila
+        // reaccionara al toque aunque no tuviera nada para hacer. Sólo las filas con
+        // transferencia pendiente son realmente accionables.
+        if (isPendingTransfer) {
+            binding.root.setOnClickListener { onRowClick(row) }
+        } else {
+            binding.root.setOnClickListener(null)
+            binding.root.isClickable = false
+        }
 
         binding.textVerHistorial.paintFlags = binding.textVerHistorial.paintFlags or android.graphics.Paint.UNDERLINE_TEXT_FLAG
         binding.textVerHistorial.setOnClickListener { onVerHistorial(row) }
