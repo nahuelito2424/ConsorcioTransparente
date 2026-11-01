@@ -13,12 +13,14 @@ const linksByRole: Record<Role, { to: string; label: string }[]> = {
     { to: "/unidades", label: "Unidades" },
     { to: "/gastos", label: "Gastos" },
     { to: "/liquidacion", label: "Liquidación" },
+    { to: "/rendicion", label: "Rendición de cuentas" },
   ],
   ENCARGADO: [
     { to: "/", label: "Inicio" },
     { to: "/unidades", label: "Unidades" },
     { to: "/gastos", label: "Gastos" },
     { to: "/liquidacion", label: "Liquidación" },
+    { to: "/rendicion", label: "Rendición de cuentas" },
   ],
   INQUILINO: [
     { to: "/facturas", label: "Mis facturas" },
@@ -28,6 +30,7 @@ const linksByRole: Record<Role, { to: string; label: string }[]> = {
     { to: "/reservas", label: "Reservar espacios" },
     { to: "/proveedores", label: "Proveedores" },
     { to: "/protocolos", label: "Protocolos de emergencia" },
+    { to: "/rendicion", label: "Rendición de cuentas" },
   ],
 };
 

@@ -29,6 +29,9 @@ const ProveedoresPage = lazy(() =>
 const ProtocolosPage = lazy(() =>
   import("./pages/inquilino/ProtocolosPage").then((m) => ({ default: m.ProtocolosPage }))
 );
+const RendicionPage = lazy(() =>
+  import("./pages/RendicionPage").then((m) => ({ default: m.RendicionPage }))
+);
 
 const adminRoles = ["ADMINISTRADOR", "ENCARGADO"] as const;
 
@@ -132,6 +135,14 @@ function App() {
           element={
             <RequireRole roles={["INQUILINO"]}>
               <ProtocolosPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/rendicion"
+          element={
+            <RequireRole roles={[...adminRoles, "INQUILINO"]}>
+              <RendicionPage />
             </RequireRole>
           }
         />
