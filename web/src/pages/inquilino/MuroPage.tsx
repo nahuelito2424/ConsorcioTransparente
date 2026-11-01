@@ -88,11 +88,11 @@ export function MuroPage() {
             required
           />
 
-          <label className="block text-xs uppercase tracking-wide text-pending mb-1">
+          <label htmlFor="post-imagen" className="block text-xs uppercase tracking-wide text-pending mb-1">
             Imagen (opcional)
           </label>
           <div className="mb-4">
-            <Dropzone file={file} onChange={setFile} />
+            <Dropzone id="post-imagen" file={file} onChange={setFile} />
           </div>
 
           {error && <p className="text-warn text-sm mb-4">{error}</p>}

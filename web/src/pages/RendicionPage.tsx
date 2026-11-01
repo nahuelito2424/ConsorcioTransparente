@@ -37,15 +37,10 @@ export function RendicionPage() {
     <div>
       {/* Mismo contenido que RendicionPdfGenerator.kt (Android), en una página que se
           puede "Guardar como PDF" desde el diálogo de impresión del navegador — sin
-          agregar una librería de PDF nueva sólo para esto. */}
-      <style>{`
-        @media print {
-          .no-print { display: none !important; }
-          #rendicion-doc { box-shadow: none !important; border: none !important; }
-        }
-      `}</style>
-
-      <div className="no-print flex items-center justify-between mb-6 flex-wrap gap-3">
+          agregar una librería de PDF nueva sólo para esto. La barra lateral y el
+          header mobile de Layout.tsx también llevan print:hidden — sin eso, "lo que se
+          descarga" incluía el nombre del usuario y el botón de cerrar sesión. */}
+      <div className="print:hidden flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="font-serif text-2xl mb-1">Rendición de cuentas</h1>
           <p className="text-sm text-pending">Desglose de gastos verificados por categoría.</p>
@@ -66,7 +61,7 @@ export function RendicionPage() {
       ) : error ? (
         <p className="text-warn text-sm">{error}</p>
       ) : (
-        <div id="rendicion-doc" className="bg-white border border-border-soft rounded-lg p-8 max-w-2xl">
+        <div className="bg-white border border-border-soft rounded-lg p-8 max-w-2xl print:border-none print:shadow-none">
           <h2 className="font-serif text-xl mb-1">{building?.name || "Consorcio"}</h2>
           <p className="text-sm text-pending mb-6">Rendición de cuentas — {periodLabelCapitalized}</p>
 

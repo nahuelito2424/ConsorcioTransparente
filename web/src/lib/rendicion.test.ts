@@ -58,6 +58,13 @@ describe("calcularRendicion", () => {
     expect(r.bloqueadoCount).toBe(0);
   });
 
+  test("una categoría fuera del enum (dato viejo, texto libre) cae en OTRO y entra en el desglose", () => {
+    const expenses = [expense({ category: "Reparación varia" as Expense["category"], amount: 300 })];
+    const r = calcularRendicion(expenses, "2026-10");
+    expect(r.totalVerificado).toBe(300);
+    expect(r.categoryTotals).toEqual([{ category: "OTRO", total: 300, expenses }]);
+  });
+
   test("un mes sólo con BLOQUEADOs no se confunde con un mes sin gastos", () => {
     const expenses = [expense({ amount: 500, status: "BLOQUEADO" })];
     const r = calcularRendicion(expenses, "2026-10");

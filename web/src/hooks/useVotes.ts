@@ -61,6 +61,10 @@ export async function getResultCounts(buildingId: string, voteId: string, option
   return counts;
 }
 
-export async function submitVote(buildingId: string, voteId: string, uid: string, optionIndex: number) {
-  await setDoc(doc(db, "buildings", buildingId, "votes", voteId, "responses", uid), { uid, optionIndex });
+// Mismo chequeo que FirebaseVoteRepository.submitVote (Android): firestore.rules no
+// valida closesAt/isClosed en responses/{uid}.create, así que sin esto un voto podría
+// quedar registrado después del cierre de una votación vinculante.
+export async function submitVote(buildingId: string, vote: VoteTopic, uid: string, optionIndex: number) {
+  if (isVoteClosed(vote)) throw new Error("Esta votación ya cerró.");
+  await setDoc(doc(db, "buildings", buildingId, "votes", vote.id, "responses", uid), { uid, optionIndex });
 }

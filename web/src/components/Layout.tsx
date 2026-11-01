@@ -57,7 +57,7 @@ export function Layout({ user, children }: { user: UserProfile; children: ReactN
 
   return (
     <div className="min-h-screen flex bg-cream">
-      <header className="md:hidden fixed top-0 inset-x-0 h-14 bg-cream border-b border-dashed border-border-dashed flex items-center justify-between px-4 z-30">
+      <header className="print:hidden md:hidden fixed top-0 inset-x-0 h-14 bg-cream border-b border-dashed border-border-dashed flex items-center justify-between px-4 z-30">
         <span className="font-serif text-lg">Consorcio Transparente</span>
         <button
           onClick={() => setNavOpen(true)}
@@ -82,7 +82,7 @@ export function Layout({ user, children }: { user: UserProfile; children: ReactN
 
       <aside
         id="mobile-nav"
-        className={`w-56 shrink-0 border-r border-dashed border-border-dashed flex flex-col p-6 bg-cream
+        className={`print:hidden w-56 shrink-0 border-r border-dashed border-border-dashed flex flex-col p-6 bg-cream
           fixed md:static inset-y-0 left-0 z-50 transition-[transform,visibility] duration-200 ease-out
           ${navOpen ? "translate-x-0 visible" : "-translate-x-full invisible"} md:translate-x-0 md:visible`}
       >

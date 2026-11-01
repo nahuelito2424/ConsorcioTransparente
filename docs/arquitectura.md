@@ -189,7 +189,7 @@ reglas e índices con el Firebase CLI.
 - **`Resource<T>`** es el único envoltorio de estado async — no introducir uno nuevo
   (ni Flow/StateFlow) sin que lo pida el usuario explícitamente.
 
-## 8. Web para Administradores (`web/`)
+## 8. Web (`web/`)
 
 Segunda plataforma del TP (mencionada en el planteo original junto con Android), sobre
 el mismo proyecto de Firebase — comparte Auth/Firestore/Storage con la app, sin backend
@@ -200,14 +200,22 @@ propio. Diseño completo:
   `@theme` en CSS — no `tailwind.config.js`, esa es la API de v3), `react-router-dom`,
   Firebase JS SDK. Sin librería de componentes (Material/Bootstrap/etc.) a propósito:
   son las que hacen que este tipo de producto se vea siempre igual.
-- **Sin capa Repository/Mock**: a diferencia de Android (3 roles, pensado para
-  convivir con un flavor sin red), acá hay un solo rol y un solo flujo de datos — cada
-  pantalla usa un hook (`useUnits`, `useExpenses`, etc. en `web/src/hooks/`) que habla
-  directo al SDK de Firebase. Portar el patrón de Android sería ingeniería de más.
-- **Sólo rol `ADMINISTRADOR`**: `useAuth()` (`web/src/auth/`) desloguea de inmediato a
-  cualquier otro perfil. Encargado/Inquilino quedan para una etapa futura.
-- **Alcance v1**: liquidación de expensas por alícuota. Activa `buildings/{id}/units`
-  (el modelo existía desde HU-03 pero no lo usaba nadie) y agrega
+- **Sin capa Repository/Mock**: a diferencia de Android (pensado para convivir con un
+  flavor sin red), acá no hay flavor mock — cada pantalla usa un hook (`useUnits`,
+  `useExpenses`, `useMyPayments`, etc. en `web/src/hooks/`) que habla directo al SDK de
+  Firebase contra el emulador o el proyecto real. Portar el patrón de Android sería
+  ingeniería de más.
+- **Los tres roles**: `useAuth()` (`web/src/auth/`) deja pasar a `ADMINISTRADOR`,
+  `ENCARGADO` e `INQUILINO` — sólo desloguea un perfil sin rol válido. Qué pantallas ve
+  cada uno lo decide el ruteo (`App.tsx`, `auth/RequireRole.tsx`, `auth/homeForRole.ts`),
+  no el login. Administrador y Encargado comparten el mismo panel con paridad total de
+  permisos (`isEncargadoOrAdmin()` en `firestore.rules`, igual que Android ya hacía para
+  Gastos/Tickets). El Inquilino tiene su propio set de pantallas con paridad de
+  funciones con la app (Mis facturas, Votar, Muro, Tickets, Reservas, Proveedores,
+  Protocolos, Rendición de cuentas) — cada una construida leyendo el repositorio Kotlin
+  equivalente y replicando su misma colección/forma de documento/ruta de Storage.
+- **Alcance v1 (panel Admin/Encargado)**: liquidación de expensas por alícuota. Activa
+  `buildings/{id}/units` (el modelo existía desde HU-03 pero no lo usaba nadie) y agrega
   `buildings/{id}/liquidaciones/{period}` (historial, snapshot inmutable por período —
   re-emitir el mismo período sobrescribe, sin versiones). El cálculo en sí
   (`web/src/lib/liquidacion.ts`) es una función pura: `amount = total × alícuota / 100`,
@@ -221,9 +229,14 @@ propio. Diseño completo:
   edición manual — las dos vías siguen escribiendo el mismo campo, sin coordinarse
   entre sí más que con ese aviso.
 - **`firestore.rules`**: `units` y `liquidaciones` siguen el mismo patrón que el resto
-  (`allow read: if belongsToBuilding(buildingId)`, `allow write: if isAdmin() &&
-  myBuildingId() == buildingId`) — nada nuevo conceptualmente, reusa las funciones ya
-  definidas al tope del archivo.
+  (`allow read: if belongsToBuilding(buildingId)`, `allow write: if
+  isEncargadoOrAdmin() && myBuildingId() == buildingId`) — nada nuevo conceptualmente,
+  reusa las funciones ya definidas al tope del archivo. `users/{uid}` también acepta
+  `isEncargadoOrAdmin()` (antes sólo `isAdmin()`) para leer la lista de vecinos
+  (`useBuildingResidents.ts`) y para el batch de `emitirLiquidacion` que escribe
+  `expensesAmount` de cada inquilino — ambos ahora restringidos a
+  `belongsToBuilding(resource.data.buildingId)`, más estrecho que el alcance que tenía
+  antes `isAdmin()` solo.
 - **Desarrollo sin proyecto de Firebase real**: Firebase Local Emulator Suite
   (Auth+Firestore+Storage) con un script de semilla
   (`web/scripts/seed-emulator.ts`, `firebase-admin`) — ver `web/README.md`. Requiere

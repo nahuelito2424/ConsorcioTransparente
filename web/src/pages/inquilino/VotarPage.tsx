@@ -7,6 +7,7 @@ const dateTime = new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyl
 
 function VoteCard({ vote, buildingId, uid }: { vote: VoteTopic; buildingId: string; uid: string }) {
   const [myOption, setMyOption] = useState<number | null | undefined>(undefined); // undefined = cargando
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [counts, setCounts] = useState<number[] | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -15,14 +16,22 @@ function VoteCard({ vote, buildingId, uid }: { vote: VoteTopic; buildingId: stri
 
   useEffect(() => {
     let cancelled = false;
-    getMyResponse(buildingId, vote.id, uid).then((r) => {
-      if (!cancelled) setMyOption(r ? r.optionIndex : null);
-    });
+    getMyResponse(buildingId, vote.id, uid)
+      .then((r) => {
+        if (!cancelled) setMyOption(r ? r.optionIndex : null);
+      })
+      .catch(() => {
+        // Sin esto, un error acá dejaba la tarjeta en "Cargando…" para siempre.
+        if (!cancelled) setLoadError("No se pudo cargar tu voto. Recargá la página.");
+      });
     return () => {
       cancelled = true;
     };
   }, [buildingId, vote.id, uid]);
 
+  // Decidir qué mostrar depende sólo de si ya sé si votaste (o si cerró) — nunca de si
+  // counts ya llegó. Antes, mientras counts todavía era null, esta condición caía al
+  // branch de la papeleta y dejaba votar de nuevo (o votar en una ya cerrada).
   const showResults = myOption !== undefined && (myOption !== null || closed);
 
   useEffect(() => {
@@ -41,10 +50,10 @@ function VoteCard({ vote, buildingId, uid }: { vote: VoteTopic; buildingId: stri
     setSubmitting(true);
     setError(null);
     try {
-      await submitVote(buildingId, vote.id, uid, selected);
+      await submitVote(buildingId, vote, uid, selected);
       setMyOption(selected);
-    } catch {
-      setError("No se pudo registrar tu voto. Probá de nuevo.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo registrar tu voto. Probá de nuevo.");
     } finally {
       setSubmitting(false);
     }
@@ -60,8 +69,12 @@ function VoteCard({ vote, buildingId, uid }: { vote: VoteTopic; buildingId: stri
         {closed ? "Cerrada" : vote.closesAt ? `Cierra ${dateTime.format(vote.closesAt)}` : "Sin fecha de cierre"}
       </p>
 
-      {myOption === undefined ? (
+      {loadError ? (
+        <p className="text-warn text-sm">{loadError}</p>
+      ) : myOption === undefined ? (
         <p className="text-sm text-pending">Cargando…</p>
+      ) : showResults && !counts ? (
+        <p className="text-sm text-pending">Cargando resultados…</p>
       ) : showResults && counts ? (
         <ul className="space-y-1">
           {vote.options.map((opt, i) => (

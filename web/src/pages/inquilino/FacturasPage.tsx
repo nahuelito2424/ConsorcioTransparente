@@ -19,11 +19,12 @@ function stampFor(status: PaymentStatus) {
 export function FacturasPage() {
   const { user } = useAuth();
   const buildingId = user?.buildingId ?? "";
-  const { building, loading: buildingLoading } = useBuilding(buildingId);
-  const { payments, loading: paymentsLoading, error: loadError, uploadReceipt } = useMyPayments(
+  const { building, loading: buildingLoading, error: buildingError } = useBuilding(buildingId);
+  const { payments, loading: paymentsLoading, error: paymentsError, uploadReceipt } = useMyPayments(
     buildingId,
     user?.uid ?? ""
   );
+  const loadError = buildingError ?? paymentsError;
   const currentPeriod = toPeriod(new Date());
 
   const [file, setFile] = useState<File | null>(null);

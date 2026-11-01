@@ -29,22 +29,23 @@ había quedado explícitamente fuera de alcance hasta terminar las 10 HU.
 | Alcance | Estado | Pantalla |
 |---|---|---|
 | v1 — Liquidación de expensas por alícuota | ✅ Implementada | `/`, `/unidades`, `/gastos`, `/liquidacion` |
+| v2 — Paridad Encargado/Inquilino | ✅ Implementada | Encargado: mismo panel que Admin. Inquilino: `/facturas`, `/votar`, `/muro`, `/tickets`, `/reservas`, `/proveedores`, `/protocolos`, `/rendicion` |
 
-Detalle completo en
+Detalle completo de v1 en
 [`docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md`](./superpowers/specs/2026-10-23-web-admin-liquidacion-design.md)
-y la sección 8 de [`arquitectura.md`](./arquitectura.md#8-web-para-administradores-web).
-Deliberadamente fuera de esta v1 (ver "No incluye" del diseño): Encargado/Inquilino en
-la web, gestión de alquiler, aprobar/rechazar comprobantes desde la web, exportar a
-PDF/Excel, cualquier pantalla que no sea expensas (tickets, muro, votaciones, etc.).
+y la sección 8 de [`arquitectura.md`](./arquitectura.md#8-web-web).
+Deliberadamente fuera de ambas versiones: gestión de alquiler desde la web, aprobar/
+rechazar comprobantes de pago desde la web (sigue siendo sólo Android), exportar a
+PDF/Excel, pago por Mercado Pago de tickets desde la web (sólo transferencia manual),
+moderación de Muro/alta de proveedores desde la web (sigue siendo sólo Android).
 
 ## Próximos pasos (orden sugerido)
 
 Las 10 Historias de Usuario del TP ya están implementadas (incluida la mejora que
-había quedado pendiente, Mercado Pago para reparaciones), y también la v1 de la
-segunda plataforma (web para Administradores, liquidación de expensas). No queda
-ningún ítem priorizado — lo que sigue es el backlog de abajo, una eventual v2 de la
-web (Encargado/Inquilino, exportar, aprobar cobros), y lo que el usuario deje para el
-final (canal WhatsApp/PWA, una integración de IA gratuita).
+había quedado pendiente, Mercado Pago para reparaciones), y también la v1 y v2 de la
+segunda plataforma (web: liquidación de expensas, y paridad Encargado/Inquilino con la
+app). No queda ningún ítem priorizado — lo que sigue es el backlog de abajo y lo que
+el usuario deje para el final (canal WhatsApp/PWA, una integración de IA gratuita).
 
 ✅ **Rendición de cuentas descargable** (backlog, ítem 1) resuelta: pantalla nueva
 `RendicionCuentasActivity`, de solo lectura para los tres roles, con desglose por

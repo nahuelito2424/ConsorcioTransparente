@@ -6,7 +6,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, writeBatch } from "firebase/firestore";
 
 // Verifica las reglas nuevas de buildings/{id}/units y buildings/{id}/liquidaciones
 // (ver docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md) contra el
@@ -155,6 +155,23 @@ describe("buildings/{buildingId}/liquidaciones", () => {
     await assertFails(getDoc(doc(adminB.firestore(), "buildings/building-a/liquidaciones/2026-10")));
   });
 
+  // El batch real de emitirLiquidacion (useLiquidaciones.ts) escribe
+  // users/{tenantUid}.expensesAmount además de liquidaciones/{period} — un test que
+  // sólo cubre el segundo documento no prueba que emitir funcione de punta a punta.
+  test("el Encargado puede emitir una liquidación completa (batch: expensesAmount + liquidaciones)", async () => {
+    const encargadoA = testEnv.authenticatedContext("encargado-a");
+    const batch = writeBatch(encargadoA.firestore());
+    batch.update(doc(encargadoA.firestore(), "users/inquilino-a"), { expensesAmount: 12500 });
+    batch.set(doc(encargadoA.firestore(), "buildings/building-a/liquidaciones/2026-10"), {
+      period: "2026-10",
+      totalExpenses: 12500,
+      breakdown: [{ unitId: "u1", unitLabel: "4B", tenantUid: "inquilino-a", aliquot: 100, amount: 12500 }],
+      unassignedUnits: [],
+      emittedByUid: "encargado-a",
+    });
+    await assertSucceeds(batch.commit());
+  });
+
   test("un Administrador de otro edificio no puede escribir liquidaciones de este edificio", async () => {
     const adminB = testEnv.authenticatedContext("admin-b");
     await assertFails(
@@ -198,5 +215,23 @@ describe("users/{uid}.expensesAmount — la escritura real que mueve plata", () 
   test("el Administrador del edificio sí puede actualizar expensesAmount de su propio inquilino", async () => {
     const adminA = testEnv.authenticatedContext("admin-a");
     await assertSucceeds(updateDoc(doc(adminA.firestore(), "users/inquilino-a"), { expensesAmount: 25000 }));
+  });
+
+  // Bug real encontrado en la revisión final: emitirLiquidacion (useLiquidaciones.ts)
+  // hace un writeBatch que escribe expensesAmount de cada inquilino con unidad — sin
+  // este permiso, un Encargado "emitiendo" la liquidación fallaba apenas hubiera una
+  // unidad con inquilino asignado (que es el caso normal), pese a que firestore.rules
+  // sí lo dejaba escribir buildings/{id}/liquidaciones/{period}.
+  test("el Encargado del edificio puede actualizar expensesAmount de un inquilino (emitir liquidación)", async () => {
+    const encargadoA = testEnv.authenticatedContext("encargado-a");
+    await assertSucceeds(updateDoc(doc(encargadoA.firestore(), "users/inquilino-a"), { expensesAmount: 25000 }));
+  });
+
+  test("un Encargado de otro edificio no puede actualizar expensesAmount de un inquilino ajeno", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(context.firestore().doc("users/encargado-b"), { role: "ENCARGADO", buildingId: "building-b" });
+    });
+    const encargadoB = testEnv.authenticatedContext("encargado-b");
+    await assertFails(updateDoc(doc(encargadoB.firestore(), "users/inquilino-a"), { expensesAmount: 999 }));
   });
 });

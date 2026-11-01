@@ -8,15 +8,24 @@ import type { Building } from "../types";
 export function useBuilding(buildingId: string) {
   const [building, setBuilding] = useState<Building | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!buildingId) return;
-    const unsubscribe = onSnapshot(doc(db, "buildings", buildingId), (snap) => {
-      setBuilding(snap.exists() ? { ...(snap.data() as Omit<Building, "id">), id: snap.id } : null);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      doc(db, "buildings", buildingId),
+      (snap) => {
+        setBuilding(snap.exists() ? { ...(snap.data() as Omit<Building, "id">), id: snap.id } : null);
+        setError(null);
+        setLoading(false);
+      },
+      () => {
+        setError("No se pudo cargar el edificio. Recargá la página.");
+        setLoading(false);
+      }
+    );
     return unsubscribe;
   }, [buildingId]);
 
-  return { building, loading };
+  return { building, loading, error };
 }

@@ -9,6 +9,13 @@ const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "
 const categories = ["Plomería", "Electricidad", "Gas", "Albañilería", "Otro"];
 const categoryOptions = categories.map((c) => ({ value: c, label: c }));
 
+const statusBadge: Record<TicketStatus, string> = {
+  REPORTADO: "Reportado",
+  EN_PRESUPUESTO: "Presupuestado",
+  A_COBRAR: "A cobrar",
+  RESUELTO: "Resuelto",
+};
+
 const statusLabel: Record<TicketStatus, string> = {
   REPORTADO: "Reportado — esperando presupuesto",
   EN_PRESUPUESTO: "Presupuestado — esperando la compra",
@@ -39,7 +46,7 @@ function TicketCard({ ticket, onPay }: { ticket: Ticket; onPay: (id: string, fil
       <div className="flex justify-between items-start mb-1">
         <h2 className="font-serif text-lg">{ticket.category}</h2>
         <span className="text-xs font-mono font-bold uppercase px-2 py-0.5 rounded border border-pending text-pending">
-          {ticket.status}
+          {statusBadge[ticket.status]}
         </span>
       </div>
       <p className="text-sm text-stone-700 mb-2">{ticket.description}</p>
@@ -133,9 +140,11 @@ export function TicketsPage() {
             required
           />
 
-          <label className="block text-xs uppercase tracking-wide text-pending mb-1">Foto (opcional)</label>
+          <label htmlFor="ticket-foto" className="block text-xs uppercase tracking-wide text-pending mb-1">
+            Foto (opcional)
+          </label>
           <div className="mb-4">
-            <Dropzone file={photo} onChange={setPhoto} />
+            <Dropzone id="ticket-foto" file={photo} onChange={setPhoto} />
           </div>
 
           {error && <p className="text-warn text-sm mb-4">{error}</p>}

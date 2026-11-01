@@ -40,15 +40,18 @@ service cloud.firestore {
     // asignado puede autopromoverse a ADMINISTRADOR en el mismo momento en que se le
     // asigna el buildingId de un edificio recién creado por él (ver HU-09 / BuildingRepository).
     match /users/{uid} {
-      // El Encargado necesita leer la lista de vecinos igual que el Administrador (la
-      // web se apoya en esto para resolver nombres en Unidades/Liquidación — ver
-      // useBuildingResidents.ts — y Android ya le da a Encargado el mismo acceso a
-      // Vecinos). No se restringe a "del mismo edificio" acá porque ya no lo estaba
-      // para isAdmin(); ampliar ese alcance es un cambio aparte, no de esta feature.
-      allow read: if isSignedIn() && (request.auth.uid == uid || isEncargadoOrAdmin());
+      // El Encargado necesita leer y (para emitirLiquidacion, que escribe
+      // expensesAmount de cada inquilino) actualizar la lista de vecinos del propio
+      // edificio, igual que el Administrador en la web (ver useBuildingResidents.ts y
+      // useLiquidaciones.ts) — es una paridad nueva de esta feature, no algo que ya
+      // existiera en Android (ahí "Vecinos" sigue siendo sólo de Administrador,
+      // MasFragment.kt). Por eso acá sí se restringe a "del mismo edificio", a
+      // diferencia del alcance que ya tenía isAdmin() antes de este cambio.
+      allow read: if isSignedIn() && (request.auth.uid == uid ||
+        (isEncargadoOrAdmin() && belongsToBuilding(resource.data.buildingId)));
       allow create: if isSignedIn() && request.auth.uid == uid;
       allow update: if isSignedIn() && (
-        (isAdmin() && belongsToBuilding(resource.data.buildingId)) ||
+        (isEncargadoOrAdmin() && belongsToBuilding(resource.data.buildingId)) ||
         (request.auth.uid == uid && request.resource.data.role == resource.data.role &&
           request.resource.data.rentAmount == resource.data.rentAmount &&
           request.resource.data.expensesAmount == resource.data.expensesAmount) ||

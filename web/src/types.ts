@@ -23,6 +23,7 @@ export interface Building {
   address: string;
   chargesRent: boolean;
   chargesExpenses: boolean;
+  amenities: string[];
 }
 
 export type ExpenseCategory =

@@ -30,6 +30,19 @@ export function RequireRole({ roles, children }: { roles: Role[]; children: Reac
     return <Navigate to={homeForRole(user.role)} replace />;
   }
 
+  // Todas las pantallas de acá en más asumen un buildingId válido (consultan
+  // buildings/{buildingId}/...) — un usuario recién registrado en Android que
+  // todavía no fue asignado a un edificio se quedaba viendo "Cargando…" para
+  // siempre en vez de un mensaje, porque cada hook corta en seco con
+  // `if (!buildingId) return;`. Mismo mensaje que PagarViewModel.kt (Android).
+  if (!user.buildingId) {
+    return (
+      <Layout user={user}>
+        <p className="text-sm text-pending">Tu usuario todavía no está asignado a un edificio.</p>
+      </Layout>
+    );
+  }
+
   return (
     <Layout user={user}>
       <Suspense fallback={<p className="text-sm text-pending">Cargando…</p>}>{children}</Suspense>

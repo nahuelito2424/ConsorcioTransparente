@@ -32,6 +32,15 @@ export interface RendicionResult {
  * BLOQUEADO (sin comprobante) quedaron afuera del total — mismo cálculo que
  * RendicionCuentasViewModel.kt (Android). Función pura, no toca Firestore.
  */
+// Gastos cargados antes de que la categoría fuera un menú fijo pueden traer texto
+// libre que no matchea ninguna categoría — van a "Otro" en vez de desaparecer del
+// desglose (si no, el total no cierra con la suma de las categorías, justo lo que una
+// rendición de cuentas no puede tener). Mismo criterio que categoriaDe()
+// (RendicionCuentasViewModel.kt, Android).
+function categoriaDe(expense: Expense): ExpenseCategory {
+  return categoryOrder.includes(expense.category) ? expense.category : "OTRO";
+}
+
 export function calcularRendicion(expenses: Expense[], period: string): RendicionResult {
   const thisPeriod = expenses.filter((e) => e.createdAt && toPeriod(e.createdAt) === period);
   const verificados = thisPeriod.filter((e) => e.status === "VERIFICADO");
@@ -39,7 +48,7 @@ export function calcularRendicion(expenses: Expense[], period: string): Rendicio
 
   const categoryTotals = categoryOrder
     .map((category) => {
-      const inCategory = verificados.filter((e) => e.category === category);
+      const inCategory = verificados.filter((e) => categoriaDe(e) === category);
       return { category, total: inCategory.reduce((sum, e) => sum + e.amount, 0), expenses: inCategory };
     })
     .filter((c) => c.total > 0);

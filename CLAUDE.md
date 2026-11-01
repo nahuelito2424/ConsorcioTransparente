@@ -13,7 +13,7 @@ vinculantes, muro con moderación, reserva de espacios comunes, gestión de inci
 mantenimiento, directorio de proveedores y protocolos de emergencia. Tres roles:
 Administrador, Encargado (opcional) y Inquilino. Dos plataformas, mismo backend de
 Firebase: la app Android (Kotlin, `app/`, los tres roles) y, desde esta v1, una web
-sólo para Administradores (React, `web/`) — ver "Web (Administradores)" más abajo.
+(React, `web/`) que también cubre los tres roles — ver "Web" más abajo.
 
 El trabajo está organizado en 10 Historias de Usuario (HU-01 a HU-10). Antes de tocar
 una pantalla o agregar una funcionalidad, leer:
@@ -90,8 +90,13 @@ permisos (ver `isEncargadoOrAdmin()` en `firestore.rules`, igual que en Android)
 liquidación automática de expensas por alícuota (`buildings/{id}/units`), reemplazando
 la carga manual de `VecinosActivity` — al emitir, escribe `users/{uid}.expensesAmount`,
 el mismo campo que ya lee todo el flujo de pagos de Android. El Inquilino tiene su
-propio set de pantallas que replica funciones de la app (arrancando por "Mis facturas"
-— ver pagar), pensado para llegar a paridad completa con el Inquilino de Android.
+propio set de pantallas con paridad de funciones con la app: Mis facturas (pagar y ver
+historial), Votar, Muro, Reclamar un problema (tickets), Reservar espacios, Proveedores,
+Protocolos de emergencia y Rendición de cuentas (esta última visible para los tres
+roles, no sólo Inquilino — ver `src/pages/RendicionPage.tsx`). Cada pantalla nueva se
+construye leyendo el repositorio Kotlin equivalente (`data/repository/Firebase*.kt`) y
+replicando su misma colección/forma de documento/ruta de Storage, para que los dos
+clientes cumplan las mismas `firestore.rules`/`storage.rules`.
 Detalle de la v1 de liquidación: `docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md`.
 
 Para desarrollar sin un proyecto de Firebase real: Firebase Local Emulator Suite

@@ -3,7 +3,14 @@ import { useAuth } from "../../auth/useAuth";
 import { addReview, useProviderReviews, useProviders } from "../../hooks/useProviders";
 
 function Stars({ value }: { value: number }) {
-  return <span className="text-warn">{"★".repeat(Math.round(value))}{"☆".repeat(5 - Math.round(value))}</span>;
+  return (
+    <span className="text-warn" aria-label={`${value.toFixed(1)} de 5 estrellas`}>
+      <span aria-hidden="true">
+        {"★".repeat(Math.round(value))}
+        {"☆".repeat(5 - Math.round(value))}
+      </span>
+    </span>
+  );
 }
 
 export function ProveedoresPage() {
@@ -11,6 +18,10 @@ export function ProveedoresPage() {
   const { providers, loading, error } = useProviders();
   const [openId, setOpenId] = useState<string | null>(null);
   const reviews = useProviderReviews(openId);
+  // provider.averageRating/ratingCount nunca se actualizan (no hay Cloud Function que
+  // los recalcule) — igual que ProviderDetailViewModel.kt (Android), el promedio sale
+  // de las reseñas ya cargadas, no de esos campos del documento.
+  const averageStars = reviews.length === 0 ? 0 : reviews.reduce((sum, r) => sum + r.stars, 0) / reviews.length;
 
   const [comment, setComment] = useState("");
   const [stars, setStars] = useState(5);
@@ -53,13 +64,9 @@ export function ProveedoresPage() {
                   onClick={() => setOpenId(open ? null : p.id)}
                   className="w-full text-left"
                 >
-                  <div className="flex justify-between items-start">
-                    <h2 className="font-serif text-lg">{p.name}</h2>
-                    <Stars value={p.averageRating} />
-                  </div>
+                  <h2 className="font-serif text-lg">{p.name}</h2>
                   <p className="text-sm text-pending">
-                    {p.category} · {p.phone || "sin teléfono"} · {p.ratingCount}{" "}
-                    {p.ratingCount === 1 ? "reseña" : "reseñas"}
+                    {p.category} · {p.phone || "sin teléfono"}
                   </p>
                 </button>
 
@@ -68,6 +75,11 @@ export function ProveedoresPage() {
                     {reviews.length === 0 ? (
                       <p className="text-sm text-pending mb-3">Todavía no hay reseñas.</p>
                     ) : (
+                      <>
+                      <p className="text-sm mb-2">
+                        <Stars value={averageStars} /> {averageStars.toFixed(1)} ({reviews.length}{" "}
+                        {reviews.length === 1 ? "reseña" : "reseñas"})
+                      </p>
                       <ul className="space-y-2 mb-4">
                         {reviews.map((r) => (
                           <li key={r.id} className="text-sm">
@@ -75,6 +87,7 @@ export function ProveedoresPage() {
                           </li>
                         ))}
                       </ul>
+                      </>
                     )}
 
                     <div className="flex items-center gap-2 mb-2">
@@ -85,6 +98,7 @@ export function ProveedoresPage() {
                           onClick={() => setStars(n)}
                           className={n <= stars ? "text-warn" : "text-border-soft"}
                           aria-label={`${n} estrellas`}
+                          aria-pressed={n <= stars}
                         >
                           ★
                         </button>

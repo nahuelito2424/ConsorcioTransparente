@@ -58,6 +58,9 @@ export function useMyPayments(buildingId: string, uid: string) {
     const receiptUrl = await getDownloadURL(storageRef);
 
     const amount = Object.values(breakdown).reduce((sum, v) => sum + v, 0);
+    // set() completo (no merge): un reintento tras RECHAZADO tiene que limpiar
+    // rejectionReason del intento anterior, igual que el Payment() nuevo que crea
+    // uploadReceipt en Android — no alcanza con escribir sólo los campos que cambian.
     await setDoc(doc(db, "buildings", buildingId, "payments", `${uid}_${period}`), {
       uid,
       period,
@@ -66,7 +69,11 @@ export function useMyPayments(buildingId: string, uid: string) {
       method: "TRANSFERENCIA",
       status: "A_VERIFICAR",
       receiptUrl,
+      mercadoPagoPaymentId: "",
+      rejectionReason: "",
       createdAt: serverTimestamp(),
+      verifiedAt: null,
+      verifiedByUid: "",
     });
   }
 
