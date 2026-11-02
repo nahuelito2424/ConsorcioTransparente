@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getStorage, connectStorageEmulator } from "firebase/storage";
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
 // Mismo proyecto de Firebase que la app Android (Auth/Firestore/Storage
 // compartidos) — ver docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md.
@@ -20,9 +21,13 @@ export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+// us-central1 porque ahí están desplegadas las Cloud Functions existentes
+// (functions/index.js) — Android las llama con el mismo default implícito.
+export const functions = getFunctions(app);
 
 if (import.meta.env.VITE_USE_EMULATOR === "true") {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
   connectStorageEmulator(storage, "127.0.0.1", 9199);
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 }

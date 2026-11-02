@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { collection, doc, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { db, storage } from "../firebase";
+import { httpsCallable } from "firebase/functions";
+import { db, functions, storage } from "../firebase";
 import type { Ticket } from "../types";
 
 /** Sólo el conteo de tickets en A_COBRAR (HU-10) — KPI de Inicio. */
@@ -111,5 +112,17 @@ export function useMyTickets(buildingId: string, uid: string) {
     });
   }
 
-  return { tickets, loading, error, createTicket, markPaid };
+  // Mismo callable que payWithMercadoPago (Android, TicketDetailViewModel.kt): el
+  // server valida de nuevo que quien llama es el reportero y no Admin/Encargado — acá
+  // sólo se pide la URL de Checkout Pro y se abre, nada de lógica de negocio.
+  async function createMercadoPagoPreference(ticketId: string): Promise<string> {
+    const call = httpsCallable<{ buildingId: string; ticketId: string }, { initPoint: string }>(
+      functions,
+      "createTicketMercadoPagoPreference"
+    );
+    const result = await call({ buildingId, ticketId });
+    return result.data.initPoint;
+  }
+
+  return { tickets, loading, error, createTicket, markPaid, createMercadoPagoPreference };
 }

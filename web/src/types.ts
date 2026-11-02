@@ -138,6 +138,7 @@ export interface Ticket {
   budgetAmount: number;
   purchaseReceiptUrl: string;
   paymentReceiptUrl: string;
+  mercadoPagoPaymentId: string;
   reportedByUid: string;
   assignedToUid: string;
   createdAt: Date | null;

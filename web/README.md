@@ -1,12 +1,17 @@
-# Consorcio Transparente — Web (Administrador)
+# Consorcio Transparente — Web
 
-Primera versión de la plataforma web, sólo para el rol Administrador: gestión de
-unidades (alícuota), carga de gastos del mes y liquidación automática de expensas.
-Diseño completo en
-[`docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md`](../docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md).
+Plataforma web para los tres roles de la app (Administrador, Encargado, Inquilino —
+ver `src/auth/useAuth.ts` y `src/auth/RequireRole.tsx`). Administrador y Encargado
+comparten el mismo panel: gestión de unidades (alícuota), carga de gastos del mes y
+liquidación automática de expensas (diseño completo en
+[`docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md`](../docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md)).
+El Inquilino tiene su propio set de pantallas con paridad de funciones con la app:
+Mis facturas, Votar, Muro, Reclamar un problema (tickets, con pago manual o Mercado
+Pago), Reservar espacios, Proveedores, Protocolos de emergencia y Rendición de
+cuentas (visible para los tres roles).
 
 Habla contra el **mismo proyecto de Firebase** que la app Android (Auth, Firestore,
-Storage) — no tiene backend propio.
+Storage, Cloud Functions) — no tiene backend propio.
 
 ## Stack
 
@@ -27,8 +32,9 @@ firebase emulators:start --project demo-consorcio-transparente
 (El `--project` tiene que ser `demo-consorcio-transparente` — es el que usa
 `scripts/seed-emulator.ts` para sembrar datos; el emulador separa los datos por
 project id, así que uno distinto arranca vacío). Levanta Auth (puerto 9099),
-Firestore (8080), Storage (9199) y una UI en http://localhost:4000. En otra
-terminal, sembrá datos de prueba:
+Firestore (8080), Storage (9199), Functions (5001, necesita `cd functions && npm
+install` una vez antes de la primera vez que se levanta la suite) y una UI en
+http://localhost:4000. En otra terminal, sembrá datos de prueba:
 
 ```bash
 cd web
@@ -55,7 +61,7 @@ cd web
 npm install
 npm run dev        # servidor de desarrollo
 npm run build       # build de producción a web/dist
-npm test             # Vitest (cálculo de liquidación + reglas de Firestore)
+npm test             # Vitest (cálculos puros + reglas de Firestore)
 ```
 
 Los tests de reglas de Firestore (`tests/firestore-rules.test.ts`) necesitan el

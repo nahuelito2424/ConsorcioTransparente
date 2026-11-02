@@ -23,10 +23,20 @@ const statusLabel: Record<TicketStatus, string> = {
   RESUELTO: "Resuelto",
 };
 
-function TicketCard({ ticket, onPay }: { ticket: Ticket; onPay: (id: string, file: File) => Promise<void> }) {
+function TicketCard({
+  ticket,
+  onPay,
+  onPayMercadoPago,
+}: {
+  ticket: Ticket;
+  onPay: (id: string, file: File) => Promise<void>;
+  onPayMercadoPago: (id: string) => Promise<string>;
+}) {
   const [file, setFile] = useState<File | null>(null);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
+  const [mpError, setMpError] = useState<string | null>(null);
 
   async function handlePay() {
     if (!file) return;
@@ -38,6 +48,28 @@ function TicketCard({ ticket, onPay }: { ticket: Ticket; onPay: (id: string, fil
       setError("No se pudo registrar el pago. Probá de nuevo.");
     } finally {
       setPaying(false);
+    }
+  }
+
+  async function handlePayMercadoPago() {
+    setRedirecting(true);
+    setMpError(null);
+    // Abrir la pestaña ACÁ (síncrono, todavía dentro del gesto del click) y recién
+    // redirigirla cuando llegue la URL — si se llama a window.open() después del
+    // await de la Cloud Function, varios navegadores lo tratan como un pop-up no
+    // disparado por el usuario y lo bloquean en silencio. Sin "noopener": hace falta
+    // la referencia a la pestaña para poder redirigirla después (Mercado Pago es un
+    // destino de confianza, no contenido de un tercero cualquiera).
+    const tab = window.open("", "_blank");
+    try {
+      const initPoint = await onPayMercadoPago(ticket.id);
+      if (tab) tab.location.href = initPoint;
+      else window.location.href = initPoint; // el navegador ya bloqueó la pestaña en blanco
+    } catch {
+      tab?.close();
+      setMpError("No se pudo iniciar el pago con Mercado Pago. Probá de nuevo en un rato.");
+    } finally {
+      setRedirecting(false);
     }
   }
 
@@ -57,18 +89,37 @@ function TicketCard({ ticket, onPay }: { ticket: Ticket; onPay: (id: string, fil
       )}
 
       {ticket.status === "A_COBRAR" && (
-        <div className="mt-3">
-          <p className="text-xs uppercase tracking-wide text-pending mb-1">Subí el comprobante de pago</p>
-          <Dropzone file={file} onChange={setFile} />
-          {error && <p className="text-warn text-sm mt-2">{error}</p>}
-          <button
-            onClick={handlePay}
-            disabled={!file || paying}
-            className="mt-3 bg-terracota text-white rounded px-4 py-2 text-sm disabled:opacity-50"
-          >
-            {paying ? "Enviando…" : "Marcar como pagado"}
-          </button>
+        <div className="mt-3 space-y-4">
+          <div>
+            <button
+              onClick={handlePayMercadoPago}
+              disabled={redirecting}
+              className="bg-terracota text-white rounded px-4 py-2 text-sm disabled:opacity-50"
+            >
+              {redirecting ? "Abriendo Mercado Pago…" : "Pagar con Mercado Pago"}
+            </button>
+            {mpError && <p className="text-warn text-sm mt-2">{mpError}</p>}
+          </div>
+
+          <div>
+            <p className="text-xs uppercase tracking-wide text-pending mb-1">
+              O subí el comprobante de una transferencia manual
+            </p>
+            <Dropzone file={file} onChange={setFile} />
+            {error && <p className="text-warn text-sm mt-2">{error}</p>}
+            <button
+              onClick={handlePay}
+              disabled={!file || paying}
+              className="mt-3 border border-border-soft rounded px-4 py-2 text-sm disabled:opacity-50"
+            >
+              {paying ? "Enviando…" : "Marcar como pagado"}
+            </button>
+          </div>
         </div>
+      )}
+
+      {ticket.status === "RESUELTO" && ticket.mercadoPagoPaymentId && (
+        <p className="text-xs text-ok mt-2">Pagado por Mercado Pago.</p>
       )}
     </li>
   );
@@ -77,7 +128,10 @@ function TicketCard({ ticket, onPay }: { ticket: Ticket; onPay: (id: string, fil
 export function TicketsPage() {
   const { user } = useAuth();
   const buildingId = user?.buildingId ?? "";
-  const { tickets, loading, error: loadError, createTicket, markPaid } = useMyTickets(buildingId, user?.uid ?? "");
+  const { tickets, loading, error: loadError, createTicket, markPaid, createMercadoPagoPreference } = useMyTickets(
+    buildingId,
+    user?.uid ?? ""
+  );
 
   const [showForm, setShowForm] = useState(false);
   const [category, setCategory] = useState("Otro");
@@ -168,7 +222,7 @@ export function TicketsPage() {
       ) : (
         <ul className="space-y-4 max-w-xl">
           {tickets.map((t) => (
-            <TicketCard key={t.id} ticket={t} onPay={markPaid} />
+            <TicketCard key={t.id} ticket={t} onPay={markPaid} onPayMercadoPago={createMercadoPagoPreference} />
           ))}
         </ul>
       )}

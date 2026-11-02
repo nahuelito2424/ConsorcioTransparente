@@ -101,8 +101,14 @@ Detalle de la v1 de liquidación: `docs/superpowers/specs/2026-10-23-web-admin-l
 
 Para desarrollar sin un proyecto de Firebase real: Firebase Local Emulator Suite
 (`firebase emulators:start --project demo-consorcio-transparente` desde la raíz,
-`cd web && npm run seed` para datos de prueba) — ver `web/README.md`. A diferencia de
-Android, acá sí hay tests automatizados: `web/src/lib/liquidacion.test.ts` (cálculo
+`cd web && npm run seed` para datos de prueba) — ver `web/README.md`. El emulador de
+Functions (necesario desde que la web también llama a `createTicketMercadoPagoPreference`,
+igual que Android) necesita `cd functions && npm install` una vez antes de levantar la
+suite (`firebase.json` ya lo declara en el puerto 5001); sin credenciales reales de
+Mercado Pago, la llamada se resuelve igual (confirma que el callable, el auth y la
+validación de rol del lado servidor andan) pero termina en el mismo `HttpsError`
+"unavailable" que tira la función cuando no puede crear la preferencia. A diferencia
+de Android, acá sí hay tests automatizados: `web/src/lib/liquidacion.test.ts` (cálculo
 puro, Vitest) y `web/tests/firestore-rules.test.ts` (reglas de Firestore nuevas,
 `@firebase/rules-unit-testing` contra el emulador real).
 

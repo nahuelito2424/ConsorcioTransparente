@@ -34,10 +34,13 @@ había quedado explícitamente fuera de alcance hasta terminar las 10 HU.
 Detalle completo de v1 en
 [`docs/superpowers/specs/2026-10-23-web-admin-liquidacion-design.md`](./superpowers/specs/2026-10-23-web-admin-liquidacion-design.md)
 y la sección 8 de [`arquitectura.md`](./arquitectura.md#8-web-web).
-Deliberadamente fuera de ambas versiones: gestión de alquiler desde la web, aprobar/
-rechazar comprobantes de pago desde la web (sigue siendo sólo Android), exportar a
-PDF/Excel, pago por Mercado Pago de tickets desde la web (sólo transferencia manual),
-moderación de Muro/alta de proveedores desde la web (sigue siendo sólo Android).
+El pago de tickets por Mercado Pago (`/tickets`, el mismo callable
+`createTicketMercadoPagoPreference` que ya usaba Android) se agregó después de la v2,
+cerrando el único hueco que había quedado marcado como "deferido" en la revisión final
+de esa feature. Deliberadamente fuera de ambas versiones: gestión de alquiler desde la
+web, aprobar/rechazar comprobantes de pago desde la web (sigue siendo sólo Android),
+exportar a PDF/Excel, moderación de Muro/alta de proveedores desde la web (sigue
+siendo sólo Android).
 
 ## Próximos pasos (orden sugerido)
 
